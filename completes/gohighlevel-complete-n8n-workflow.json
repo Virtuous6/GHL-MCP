@@ -1,0 +1,2571 @@
+{
+  "name": "GoHighLevel Complete API Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 0 * * *"
+            }
+          ]
+        }
+      },
+      "id": "5f4e5a7b-3c1d-4a2e-9b8f-1234567890ab",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "baseUrl",
+              "value": "https://services.leadconnectorhq.com"
+            },
+            {
+              "name": "authToken",
+              "value": "YOUR_ACCESS_TOKEN"
+            },
+            {
+              "name": "locationId",
+              "value": "YOUR_LOCATION_ID"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "config-node-12345",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node.Config.json.baseUrl }}/contacts/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "firstName",
+              "value": "John"
+            },
+            {
+              "name": "lastName",
+              "value": "Doe"
+            },
+            {
+              "name": "email",
+              "value": "john.doe@example.com"
+            },
+            {
+              "name": "phone",
+              "value": "+1234567890"
+            },
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "contacts-create",
+      "name": "Contacts - Create Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        680,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/contacts/{contactId}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "contacts-get",
+      "name": "Contacts - Get Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        900,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $node.Config.json.baseUrl }}/contacts/{contactId}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "firstName",
+              "value": "Jane"
+            },
+            {
+              "name": "lastName",
+              "value": "Smith"
+            },
+            {
+              "name": "email",
+              "value": "jane.smith@example.com"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "contacts-update",
+      "name": "Contacts - Update Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1120,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "DELETE",
+        "url": "={{ $node.Config.json.baseUrl }}/contacts/{contactId}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "contacts-delete",
+      "name": "Contacts - Delete Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1340,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node.Config.json.baseUrl }}/contacts/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            },
+            {
+              "name": "query",
+              "value": "john"
+            },
+            {
+              "name": "limit",
+              "value": "10"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "contacts-search",
+      "name": "Contacts - Search Contacts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        680,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/contacts/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            },
+            {
+              "name": "limit",
+              "value": "50"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "contacts-get-all",
+      "name": "Contacts - Get All Contacts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        900,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node.Config.json.baseUrl }}/contacts/{contactId}/tags",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "tags",
+              "value": "[\"lead\", \"hot\"]"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "contacts-add-tags",
+      "name": "Contacts - Add Contact Tags",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1120,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "DELETE",
+        "url": "={{ $node.Config.json.baseUrl }}/contacts/{contactId}/tags",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "tags",
+              "value": "[\"cold\"]"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "contacts-remove-tags",
+      "name": "Contacts - Remove Contact Tags",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1340,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/conversations/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-04-15"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            },
+            {
+              "name": "assigned",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "conversations-search",
+      "name": "Conversations - Search Conversations",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        680,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/conversations/{conversationId}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-04-15"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "conversations-get",
+      "name": "Conversations - Get Conversation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        900,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node.Config.json.baseUrl }}/conversations/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-04-15"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "SMS"
+            },
+            {
+              "name": "contactId",
+              "value": "contact-id-123"
+            },
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            },
+            {
+              "name": "message",
+              "value": "Hello from n8n workflow!"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "conversations-send-message",
+      "name": "Conversations - Send Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1120,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/conversations/{conversationId}/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-04-15"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "limit",
+              "value": "20"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "conversations-get-messages",
+      "name": "Conversations - Get Messages",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1340,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/calendars/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "calendar-get-calendars",
+      "name": "Calendar - Get Calendars",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        680,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node.Config.json.baseUrl }}/calendars/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "My Calendar"
+            },
+            {
+              "name": "description",
+              "value": "Sample calendar from n8n"
+            },
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "calendar-create-calendar",
+      "name": "Calendar - Create Calendar",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        900,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node.Config.json.baseUrl }}/calendars/events/appointments",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "calendarId",
+              "value": "calendar-id-123"
+            },
+            {
+              "name": "contactId",
+              "value": "contact-id-123"
+            },
+            {
+              "name": "startTime",
+              "value": "2024-12-01T10:00:00Z"
+            },
+            {
+              "name": "endTime",
+              "value": "2024-12-01T11:00:00Z"
+            },
+            {
+              "name": "title",
+              "value": "Sales Meeting"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "calendar-create-appointment",
+      "name": "Calendar - Create Appointment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1120,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/calendars/events/appointments/{appointmentId}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "calendar-get-appointment",
+      "name": "Calendar - Get Appointment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1340,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $node.Config.json.baseUrl }}/calendars/events/appointments/{appointmentId}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "Updated Sales Meeting"
+            },
+            {
+              "name": "startTime",
+              "value": "2024-12-01T14:00:00Z"
+            },
+            {
+              "name": "endTime",
+              "value": "2024-12-01T15:00:00Z"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "calendar-update-appointment",
+      "name": "Calendar - Update Appointment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        680,
+        700
+      ]
+    },
+    {
+      "parameters": {
+        "method": "DELETE",
+        "url": "={{ $node.Config.json.baseUrl }}/calendars/events/appointments/{appointmentId}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "calendar-delete-appointment",
+      "name": "Calendar - Delete Appointment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        900,
+        700
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/opportunities/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            },
+            {
+              "name": "limit",
+              "value": "20"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "opportunities-search",
+      "name": "Opportunities - Search Opportunities",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1120,
+        700
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node.Config.json.baseUrl }}/opportunities/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "New Sales Opportunity"
+            },
+            {
+              "name": "contactId",
+              "value": "contact-id-123"
+            },
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            },
+            {
+              "name": "pipelineId",
+              "value": "pipeline-id-123"
+            },
+            {
+              "name": "stageId",
+              "value": "stage-id-123"
+            },
+            {
+              "name": "monetaryValue",
+              "value": "5000"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "opportunities-create",
+      "name": "Opportunities - Create Opportunity",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1340,
+        700
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/opportunities/{opportunityId}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "opportunities-get",
+      "name": "Opportunities - Get Opportunity",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        680,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $node.Config.json.baseUrl }}/opportunities/{opportunityId}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "Updated Opportunity"
+            },
+            {
+              "name": "monetaryValue",
+              "value": "7500"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "opportunities-update",
+      "name": "Opportunities - Update Opportunity",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        900,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/locations/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "limit",
+              "value": "10"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "locations-search",
+      "name": "Locations - Search Locations",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1120,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/locations/{locationId}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "locations-get",
+      "name": "Locations - Get Location",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1340,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node.Config.json.baseUrl }}/locations/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "New Location"
+            },
+            {
+              "name": "address",
+              "value": "123 Main St"
+            },
+            {
+              "name": "city",
+              "value": "New York"
+            },
+            {
+              "name": "state",
+              "value": "NY"
+            },
+            {
+              "name": "postalCode",
+              "value": "10001"
+            },
+            {
+              "name": "country",
+              "value": "US"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "locations-create",
+      "name": "Locations - Create Location",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        680,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/blogs/site/all",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            },
+            {
+              "name": "limit",
+              "value": "10"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "blog-get-sites",
+      "name": "Blog - Get Blog Sites",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        900,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/blogs/posts/all",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            },
+            {
+              "name": "status",
+              "value": "published"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "blog-get-posts",
+      "name": "Blog - Get Blog Posts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1120,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node.Config.json.baseUrl }}/blogs/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "New Blog Post"
+            },
+            {
+              "name": "content",
+              "value": "This is a sample blog post created via n8n workflow."
+            },
+            {
+              "name": "siteId",
+              "value": "site-id-123"
+            },
+            {
+              "name": "status",
+              "value": "draft"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "blog-create-post",
+      "name": "Blog - Create Blog Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1340,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/social-media-posting/posts/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "limit",
+              "value": "10"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "social-search-posts",
+      "name": "Social Media - Search Social Posts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        680,
+        1000
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node.Config.json.baseUrl }}/social-media-posting/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "accountIds",
+              "value": "[\"account-1\", \"account-2\"]"
+            },
+            {
+              "name": "content",
+              "value": "Check out our latest update! #marketing #automation"
+            },
+            {
+              "name": "scheduleDate",
+              "value": "2024-12-01T12:00:00Z"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "social-create-post",
+      "name": "Social Media - Create Social Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        900,
+        1000
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/social-media-posting/oauth/accounts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "social-get-accounts",
+      "name": "Social Media - Get Social Accounts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1120,
+        1000
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/workflows/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "workflows-get",
+      "name": "Workflows - Get Workflows",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1340,
+        1000
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/surveys/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "surveys-get",
+      "name": "Surveys - Get Surveys",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        680,
+        1100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/surveys/submissions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "surveys-get-submissions",
+      "name": "Surveys - Get Survey Submissions",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        900,
+        1100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/medias/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            },
+            {
+              "name": "limit",
+              "value": "20"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "media-get-files",
+      "name": "Media - Get Media Files",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1120,
+        1100
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node.Config.json.baseUrl }}/medias/upload-file",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "media-upload-file",
+      "name": "Media - Upload Media File",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1340,
+        1100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/campaigns/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "email-get-campaigns",
+      "name": "Email - Get Email Campaigns",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        680,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/templates/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "email-get-templates",
+      "name": "Email - Get Email Templates",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        900,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node.Config.json.baseUrl }}/templates/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "Welcome Email Template"
+            },
+            {
+              "name": "subject",
+              "value": "Welcome to our platform!"
+            },
+            {
+              "name": "body",
+              "value": "<h1>Welcome!</h1><p>Thanks for joining us.</p>"
+            },
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "email-create-template",
+      "name": "Email - Create Email Template",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1120,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/payments/orders",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            },
+            {
+              "name": "limit",
+              "value": "20"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "payments-get-orders",
+      "name": "Payments - Get Orders",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1340,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node.Config.json.baseUrl }}/payments/orders",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            },
+            {
+              "name": "contactId",
+              "value": "contact-id-123"
+            },
+            {
+              "name": "items",
+              "value": "[{\"name\": \"Product 1\", \"price\": 100, \"quantity\": 1}]"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "payments-create-order",
+      "name": "Payments - Create Order",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        680,
+        1300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/payments/transactions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "payments-get-transactions",
+      "name": "Payments - Get Transactions",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        900,
+        1300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/products/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            },
+            {
+              "name": "limit",
+              "value": "20"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "products-list",
+      "name": "Products - List Products",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1120,
+        1300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node.Config.json.baseUrl }}/products/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "New Product"
+            },
+            {
+              "name": "description",
+              "value": "A great product created via n8n"
+            },
+            {
+              "name": "price",
+              "value": "99.99"
+            },
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "products-create",
+      "name": "Products - Create Product",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1340,
+        1300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/objects/schemas",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "custom-objects-get-schemas",
+      "name": "Custom Objects - Get Object Schemas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        680,
+        1400
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node.Config.json.baseUrl }}/objects/schemas",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "Custom Object"
+            },
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            },
+            {
+              "name": "fields",
+              "value": "[{\"name\": \"customField1\", \"type\": \"text\"}]"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "custom-objects-create-schema",
+      "name": "Custom Objects - Create Object Schema",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        900,
+        1400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $node.Config.json.baseUrl }}/invoices/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "invoices-get",
+      "name": "Invoices - Get Invoices",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1120,
+        1400
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node.Config.json.baseUrl }}/invoices/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "httpHeaderAuth": "ghl_credentials",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $node.Config.json.authToken }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{ $node.Config.json.locationId }}"
+            },
+            {
+              "name": "contactId",
+              "value": "contact-id-123"
+            },
+            {
+              "name": "title",
+              "value": "Service Invoice"
+            },
+            {
+              "name": "items",
+              "value": "[{\"name\": \"Consultation\", \"price\": 150, \"quantity\": 1}]"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "invoices-create",
+      "name": "Invoices - Create Invoice",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1340,
+        1400
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Contacts - Create Contact",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Contacts - Get Contact",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Contacts - Update Contact",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Contacts - Delete Contact",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Contacts - Search Contacts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Contacts - Get All Contacts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Contacts - Add Contact Tags",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Contacts - Remove Contact Tags",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Conversations - Search Conversations",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Conversations - Get Conversation",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Conversations - Send Message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Conversations - Get Messages",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Calendar - Get Calendars",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Calendar - Create Calendar",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Calendar - Create Appointment",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Calendar - Get Appointment",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Calendar - Update Appointment",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Calendar - Delete Appointment",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Opportunities - Search Opportunities",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Opportunities - Create Opportunity",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Opportunities - Get Opportunity",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Opportunities - Update Opportunity",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Locations - Search Locations",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Locations - Get Location",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Locations - Create Location",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Blog - Get Blog Sites",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Blog - Get Blog Posts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Blog - Create Blog Post",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Social Media - Search Social Posts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Social Media - Create Social Post",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Social Media - Get Social Accounts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Workflows - Get Workflows",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Surveys - Get Surveys",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Surveys - Get Survey Submissions",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Media - Get Media Files",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Media - Upload Media File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Email - Get Email Campaigns",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Email - Get Email Templates",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Email - Create Email Template",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Payments - Get Orders",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Payments - Create Order",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Payments - Get Transactions",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Products - List Products",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Products - Create Product",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Custom Objects - Get Object Schemas",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Custom Objects - Create Object Schema",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Invoices - Get Invoices",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Invoices - Create Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2024-07-01T00:00:00.000Z",
+      "updatedAt": "2024-07-01T00:00:00.000Z",
+      "id": "tag1",
+      "name": "GoHighLevel"
+    },
+    {
+      "createdAt": "2024-07-01T00:00:00.000Z",
+      "updatedAt": "2024-07-01T00:00:00.000Z",
+      "id": "tag2",
+      "name": "API"
+    },
+    {
+      "createdAt": "2024-07-01T00:00:00.000Z",
+      "updatedAt": "2024-07-01T00:00:00.000Z",
+      "id": "tag3",
+      "name": "CRM"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2024-07-01T00:00:00.000Z",
+  "versionId": "1"
+}

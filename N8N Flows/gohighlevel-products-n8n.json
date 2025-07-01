@@ -1,0 +1,580 @@
+{
+  "name": "GoHighLevel - Products API Endpoints",
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [20, 300],
+      "parameters": {},
+      "typeVersion": 1,
+      "notes": "Start workflow to test Products API endpoints"
+    },
+    {
+      "id": "config",
+      "name": "GoHighLevel Config",
+      "type": "n8n-nodes-base.set",
+      "position": [300, 300],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "baseUrl",
+              "name": "baseUrl",
+              "type": "string",
+              "value": "https://services.leadconnectorhq.com"
+            },
+            {
+              "id": "authToken",
+              "name": "authToken",
+              "type": "string",
+              "value": "{{$vars.GHL_ACCESS_TOKEN}}"
+            },
+            {
+              "id": "locationId",
+              "name": "locationId",
+              "type": "string",
+              "value": "{{$vars.GHL_LOCATION_ID}}"
+            }
+          ]
+        }
+      },
+      "typeVersion": 3.4,
+      "notes": "Configure your GoHighLevel API settings"
+    },
+    {
+      "id": "products-create",
+      "name": "Create Product",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 100],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/products/",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "name": "Sample Product",
+          "productType": "DIGITAL",
+          "description": "A sample digital product created via n8n",
+          "locationId": "={{$node['GoHighLevel Config'].json.locationId}}",
+          "availableInStore": true,
+          "slug": "sample-product"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create a new product"
+    },
+    {
+      "id": "products-list",
+      "name": "List Products",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 100],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/products/",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{$node['GoHighLevel Config'].json.locationId}}"
+            },
+            {
+              "name": "limit",
+              "value": "20"
+            },
+            {
+              "name": "offset",
+              "value": "0"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "List all products with pagination"
+    },
+    {
+      "id": "products-get",
+      "name": "Get Product",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 100],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/products/PRODUCT_ID_HERE",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get specific product by ID"
+    },
+    {
+      "id": "products-update",
+      "name": "Update Product",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 100],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/products/PRODUCT_ID_HERE",
+        "httpMethod": "PUT",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "name": "Updated Product Name",
+          "description": "Updated product description",
+          "availableInStore": false,
+          "locationId": "={{$node['GoHighLevel Config'].json.locationId}}"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Update existing product"
+    },
+    {
+      "id": "products-delete",
+      "name": "Delete Product",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/products/PRODUCT_ID_HERE",
+        "httpMethod": "DELETE",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Delete product by ID"
+    },
+    {
+      "id": "prices-create",
+      "name": "Create Price",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/products/PRODUCT_ID_HERE/prices",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "name": "Standard Price",
+          "type": "one_time",
+          "currency": "USD",
+          "amount": 2999,
+          "locationId": "={{$node['GoHighLevel Config'].json.locationId}}"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create price for product"
+    },
+    {
+      "id": "prices-list",
+      "name": "List Prices",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/products/PRODUCT_ID_HERE/prices",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{$node['GoHighLevel Config'].json.locationId}}"
+            },
+            {
+              "name": "limit",
+              "value": "20"
+            },
+            {
+              "name": "offset",
+              "value": "0"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "List prices for a product"
+    },
+    {
+      "id": "inventory-list",
+      "name": "List Inventory",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/products/inventory",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "altId",
+              "value": "={{$node['GoHighLevel Config'].json.locationId}}"
+            },
+            {
+              "name": "altType",
+              "value": "location"
+            },
+            {
+              "name": "limit",
+              "value": "20"
+            },
+            {
+              "name": "offset",
+              "value": "0"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "List inventory items with stock levels"
+    },
+    {
+      "id": "collections-create",
+      "name": "Create Product Collection",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/products/collections",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "name": "New Collection",
+          "slug": "new-collection",
+          "altId": "={{$node['GoHighLevel Config'].json.locationId}}",
+          "altType": "location",
+          "seo": {
+            "title": "New Collection SEO Title",
+            "description": "SEO description for the new collection"
+          }
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create new product collection"
+    },
+    {
+      "id": "collections-list",
+      "name": "List Product Collections",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/products/collections",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "altId",
+              "value": "={{$node['GoHighLevel Config'].json.locationId}}"
+            },
+            {
+              "name": "altType",
+              "value": "location"
+            },
+            {
+              "name": "limit",
+              "value": "20"
+            },
+            {
+              "name": "offset",
+              "value": "0"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "List all product collections"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "GoHighLevel Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GoHighLevel Config": {
+      "main": [
+        [
+          {
+            "node": "Create Product",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "List Products",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Product",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Product",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Delete Product",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Price",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "List Prices",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "List Inventory",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Product Collection",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "List Product Collections",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {},
+  "tags": ["gohighlevel", "products", "api", "ecommerce"],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "version": "3"
+  },
+  "createdAt": "2025-07-01T00:00:00.000Z",
+  "updatedAt": "2025-07-01T00:00:00.000Z",
+  "versionId": "1"
+}

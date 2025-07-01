@@ -1,0 +1,809 @@
+{
+  "name": "GoHighLevel - Invoices API Endpoints",
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [20, 300],
+      "parameters": {},
+      "typeVersion": 1,
+      "notes": "Start workflow to test Invoices API endpoints"
+    },
+    {
+      "id": "config",
+      "name": "GoHighLevel Config",
+      "type": "n8n-nodes-base.set",
+      "position": [300, 300],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "baseUrl",
+              "name": "baseUrl",
+              "type": "string",
+              "value": "https://services.leadconnectorhq.com"
+            },
+            {
+              "id": "authToken",
+              "name": "authToken",
+              "type": "string",
+              "value": "{{$vars.GHL_ACCESS_TOKEN}}"
+            },
+            {
+              "id": "locationId",
+              "name": "locationId",
+              "type": "string",
+              "value": "{{$vars.GHL_LOCATION_ID}}"
+            }
+          ]
+        }
+      },
+      "typeVersion": 3.4,
+      "notes": "Configure your GoHighLevel API settings"
+    },
+    {
+      "id": "templates-create",
+      "name": "Create Invoice Template",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 100],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/invoices/template",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "altId": "={{$node['GoHighLevel Config'].json.locationId}}",
+          "altType": "location",
+          "name": "Standard Invoice Template",
+          "title": "Invoice",
+          "currency": "USD",
+          "issueDate": "2025-01-01",
+          "dueDate": "2025-01-15"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create new invoice template"
+    },
+    {
+      "id": "templates-list",
+      "name": "List Invoice Templates",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 100],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/invoices/template",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "altId",
+              "value": "={{$node['GoHighLevel Config'].json.locationId}}"
+            },
+            {
+              "name": "altType",
+              "value": "location"
+            },
+            {
+              "name": "limit",
+              "value": "20"
+            },
+            {
+              "name": "offset",
+              "value": "0"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "List all invoice templates"
+    },
+    {
+      "id": "templates-update",
+      "name": "Update Invoice Template",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 100],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/invoices/template/TEMPLATE_ID_HERE",
+        "httpMethod": "PUT",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "name": "Updated Invoice Template",
+          "title": "Updated Invoice",
+          "currency": "USD"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Update existing invoice template"
+    },
+    {
+      "id": "templates-delete",
+      "name": "Delete Invoice Template",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 100],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/invoices/template/TEMPLATE_ID_HERE",
+        "httpMethod": "DELETE",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Delete invoice template"
+    },
+    {
+      "id": "schedules-create",
+      "name": "Create Invoice Schedule",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/invoices/schedule",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "altId": "={{$node['GoHighLevel Config'].json.locationId}}",
+          "altType": "location",
+          "name": "Monthly Invoice Schedule",
+          "recurring": {
+            "frequency": "monthly",
+            "interval": 1
+          },
+          "contactId": "CONTACT_ID_HERE",
+          "templateId": "TEMPLATE_ID_HERE"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create invoice schedule"
+    },
+    {
+      "id": "schedules-list",
+      "name": "List Invoice Schedules",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/invoices/schedule",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "altId",
+              "value": "={{$node['GoHighLevel Config'].json.locationId}}"
+            },
+            {
+              "name": "altType",
+              "value": "location"
+            },
+            {
+              "name": "limit",
+              "value": "20"
+            },
+            {
+              "name": "offset",
+              "value": "0"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "List invoice schedules"
+    },
+    {
+      "id": "schedules-get",
+      "name": "Get Invoice Schedule",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/invoices/schedule/SCHEDULE_ID_HERE",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get specific invoice schedule"
+    },
+    {
+      "id": "schedules-cancel",
+      "name": "Cancel Invoice Schedule",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/invoices/schedule/SCHEDULE_ID_HERE/cancel",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {},
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Cancel invoice schedule"
+    },
+    {
+      "id": "invoices-create",
+      "name": "Create Invoice",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/invoices/",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "altId": "={{$node['GoHighLevel Config'].json.locationId}}",
+          "altType": "location",
+          "title": "Service Invoice",
+          "contactId": "CONTACT_ID_HERE",
+          "currency": "USD",
+          "issueDate": "2025-01-01",
+          "dueDate": "2025-01-15",
+          "items": [
+            {
+              "name": "Consulting Service",
+              "qty": 1,
+              "price": 100.00,
+              "description": "Professional consulting service"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create new invoice"
+    },
+    {
+      "id": "invoices-list",
+      "name": "List Invoices",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/invoices/",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "altId",
+              "value": "={{$node['GoHighLevel Config'].json.locationId}}"
+            },
+            {
+              "name": "altType",
+              "value": "location"
+            },
+            {
+              "name": "limit",
+              "value": "20"
+            },
+            {
+              "name": "offset",
+              "value": "0"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "List all invoices"
+    },
+    {
+      "id": "invoices-get",
+      "name": "Get Invoice",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/invoices/INVOICE_ID_HERE",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get specific invoice by ID"
+    },
+    {
+      "id": "invoices-update",
+      "name": "Update Invoice",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/invoices/INVOICE_ID_HERE",
+        "httpMethod": "PUT",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "title": "Updated Invoice Title",
+          "dueDate": "2025-01-30"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Update existing invoice"
+    },
+    {
+      "id": "invoices-void",
+      "name": "Void Invoice",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 400],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/invoices/INVOICE_ID_HERE/void",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {},
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Void an invoice"
+    },
+    {
+      "id": "invoices-send",
+      "name": "Send Invoice",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 400],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/invoices/INVOICE_ID_HERE/send",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "subject": "Your Invoice is Ready",
+          "message": "Please find your invoice attached."
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Send invoice to contact"
+    },
+    {
+      "id": "invoices-record-payment",
+      "name": "Record Invoice Payment",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 400],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/invoices/INVOICE_ID_HERE/record-payment",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "amount": 100.00,
+          "paymentMethod": "cash",
+          "paymentDate": "2025-01-15",
+          "notes": "Payment received in cash"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Record payment for invoice"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "GoHighLevel Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GoHighLevel Config": {
+      "main": [
+        [
+          {
+            "node": "Create Invoice Template",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "List Invoice Templates",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Invoice Template",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Delete Invoice Template",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Invoice Schedule",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "List Invoice Schedules",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Invoice Schedule",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Cancel Invoice Schedule",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Invoice",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "List Invoices",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Invoice",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Invoice",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Void Invoice",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Invoice",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Record Invoice Payment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {},
+  "tags": ["gohighlevel", "invoices", "api", "billing"],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "version": "3"
+  },
+  "createdAt": "2025-07-01T00:00:00.000Z",
+  "updatedAt": "2025-07-01T00:00:00.000Z",
+  "versionId": "1"
+}

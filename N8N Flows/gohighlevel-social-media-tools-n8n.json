@@ -1,0 +1,838 @@
+{
+  "name": "GoHighLevel - Social Media Tools API Endpoints",
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [20, 800],
+      "parameters": {},
+      "typeVersion": 1,
+      "notes": "Start workflow to test Social Media Tools API endpoints"
+    },
+    {
+      "id": "config",
+      "name": "GoHighLevel Config",
+      "type": "n8n-nodes-base.set",
+      "position": [300, 800],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "baseUrl",
+              "name": "baseUrl",
+              "type": "string",
+              "value": "https://services.leadconnectorhq.com"
+            },
+            {
+              "id": "authToken",
+              "name": "authToken",
+              "type": "string",
+              "value": "{{$vars.GHL_ACCESS_TOKEN}}"
+            },
+            {
+              "id": "locationId",
+              "name": "locationId",
+              "type": "string",
+              "value": "{{$vars.GHL_LOCATION_ID}}"
+            }
+          ]
+        }
+      },
+      "typeVersion": 3.4,
+      "notes": "Configure your GoHighLevel API settings"
+    },
+    {
+      "id": "search-social-posts",
+      "name": "Search Social Posts",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/social-media-posting/posts",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "all"
+            },
+            {
+              "name": "fromDate",
+              "value": "2025-01-01T00:00:00.000Z"
+            },
+            {
+              "name": "toDate",
+              "value": "2025-12-31T23:59:59.999Z"
+            },
+            {
+              "name": "limit",
+              "value": "10"
+            },
+            {
+              "name": "skip",
+              "value": "0"
+            },
+            {
+              "name": "includeUsers",
+              "value": "true"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Search and filter social media posts"
+    },
+    {
+      "id": "create-social-post",
+      "name": "Create Social Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/social-media-posting/posts",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "accountIds": [
+            "SOCIAL_ACCOUNT_ID_HERE"
+          ],
+          "summary": "Check out our latest product launch! 🚀 Exciting times ahead for our customers. #product #launch #innovation",
+          "type": "post",
+          "status": "draft",
+          "media": [
+            {
+              "url": "https://example.com/product-image.jpg",
+              "caption": "Product launch image",
+              "type": "image/jpeg"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create new social media post"
+    },
+    {
+      "id": "get-social-post",
+      "name": "Get Social Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/social-media-posting/posts/POST_ID_HERE",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get specific social media post details"
+    },
+    {
+      "id": "update-social-post",
+      "name": "Update Social Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/social-media-posting/posts/POST_ID_HERE",
+        "httpMethod": "PUT",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "summary": "Updated post content with more engaging text! 🔥 Join our community today. #updated #engagement",
+          "status": "scheduled",
+          "scheduleDate": "2025-07-02T10:00:00.000Z"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Update existing social media post"
+    },
+    {
+      "id": "delete-social-post",
+      "name": "Delete Social Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/social-media-posting/posts/POST_ID_HERE",
+        "httpMethod": "DELETE",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Delete social media post"
+    },
+    {
+      "id": "bulk-delete-posts",
+      "name": "Bulk Delete Social Posts",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/social-media-posting/posts/bulk-delete",
+        "httpMethod": "DELETE",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "postIds": [
+            "POST_ID_1_HERE",
+            "POST_ID_2_HERE",
+            "POST_ID_3_HERE"
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Delete multiple social posts (max 50)"
+    },
+    {
+      "id": "get-social-accounts",
+      "name": "Get Social Accounts",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/social-media-posting/accounts",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get all connected social media accounts"
+    },
+    {
+      "id": "delete-social-account",
+      "name": "Delete Social Account",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/social-media-posting/accounts/ACCOUNT_ID_HERE",
+        "httpMethod": "DELETE",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "companyId",
+              "value": "COMPANY_ID_HERE"
+            },
+            {
+              "name": "userId",
+              "value": "USER_ID_HERE"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Delete social media account connection"
+    },
+    {
+      "id": "upload-social-csv",
+      "name": "Upload Social CSV",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 400],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/social-media-posting/csv/upload",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "multipart/form-data"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "file",
+              "value": "BASE64_CSV_DATA_HERE"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Upload CSV file for bulk social posts"
+    },
+    {
+      "id": "get-csv-upload-status",
+      "name": "Get CSV Upload Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 400],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/social-media-posting/csv/upload/status",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "skip",
+              "value": "0"
+            },
+            {
+              "name": "limit",
+              "value": "10"
+            },
+            {
+              "name": "includeUsers",
+              "value": "true"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get status of CSV uploads"
+    },
+    {
+      "id": "get-social-categories",
+      "name": "Get Social Categories",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 400],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/social-media-posting/categories",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "limit",
+              "value": "10"
+            },
+            {
+              "name": "skip",
+              "value": "0"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get social media post categories"
+    },
+    {
+      "id": "get-social-category",
+      "name": "Get Social Category",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 400],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/social-media-posting/categories/CATEGORY_ID_HERE",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get specific social media category"
+    },
+    {
+      "id": "get-social-tags",
+      "name": "Get Social Tags",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 500],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/social-media-posting/tags",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "limit",
+              "value": "10"
+            },
+            {
+              "name": "skip",
+              "value": "0"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get social media post tags"
+    },
+    {
+      "id": "get-social-tags-by-ids",
+      "name": "Get Social Tags by IDs",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 500],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/social-media-posting/tags/by-ids",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "tagIds": [
+            "TAG_ID_1_HERE",
+            "TAG_ID_2_HERE"
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get specific tags by their IDs"
+    },
+    {
+      "id": "start-social-oauth",
+      "name": "Start Social OAuth",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 500],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/social-media-posting/oauth/facebook/start",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "userId": "USER_ID_HERE",
+          "page": "social-media-settings",
+          "reconnect": false
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Start OAuth process for Facebook"
+    },
+    {
+      "id": "get-platform-accounts",
+      "name": "Get Platform Accounts",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 500],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/social-media-posting/oauth/facebook/pages/OAUTH_ACCOUNT_ID_HERE",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get Facebook pages after OAuth"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "GoHighLevel Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GoHighLevel Config": {
+      "main": [
+        [
+          {
+            "node": "Search Social Posts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Social Post",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Social Post",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Social Post",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Delete Social Post",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Bulk Delete Social Posts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Social Accounts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Delete Social Account",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upload Social CSV",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get CSV Upload Status",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Social Categories",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Social Category",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Social Tags",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Social Tags by IDs",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Start Social OAuth",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Platform Accounts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {},
+  "tags": ["gohighlevel", "social-media", "posts", "facebook", "instagram", "linkedin", "twitter", "api"],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "version": "3"
+  },
+  "createdAt": "2025-07-01T00:00:00.000Z",
+  "updatedAt": "2025-07-01T00:00:00.000Z",
+  "versionId": "1"
+}

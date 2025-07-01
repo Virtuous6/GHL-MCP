@@ -1,0 +1,546 @@
+{
+  "name": "GoHighLevel - Association Tools API Endpoints",
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [20, 400],
+      "parameters": {},
+      "typeVersion": 1,
+      "notes": "Start workflow to test Association Tools API endpoints"
+    },
+    {
+      "id": "config",
+      "name": "GoHighLevel Config",
+      "type": "n8n-nodes-base.set",
+      "position": [300, 400],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "baseUrl",
+              "name": "baseUrl",
+              "type": "string",
+              "value": "https://services.leadconnectorhq.com"
+            },
+            {
+              "id": "authToken",
+              "name": "authToken",
+              "type": "string",
+              "value": "{{$vars.GHL_ACCESS_TOKEN}}"
+            },
+            {
+              "id": "locationId",
+              "name": "locationId",
+              "type": "string",
+              "value": "{{$vars.GHL_LOCATION_ID}}"
+            }
+          ]
+        }
+      },
+      "typeVersion": 3.4,
+      "notes": "Configure your GoHighLevel API settings"
+    },
+    {
+      "id": "associations-get-all",
+      "name": "Get All Associations",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/associations/",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{$node['GoHighLevel Config'].json.locationId}}"
+            },
+            {
+              "name": "skip",
+              "value": "0"
+            },
+            {
+              "name": "limit",
+              "value": "20"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get all associations with pagination"
+    },
+    {
+      "id": "associations-create",
+      "name": "Create Association",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/associations/",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "locationId": "={{$node['GoHighLevel Config'].json.locationId}}",
+          "key": "student_teacher",
+          "firstObjectLabel": "Student",
+          "firstObjectKey": "custom_objects.student",
+          "secondObjectLabel": "Teacher",
+          "secondObjectKey": "contact"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create new association between entities"
+    },
+    {
+      "id": "associations-get-by-id",
+      "name": "Get Association by ID",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/associations/ASSOCIATION_ID_HERE",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get specific association by ID"
+    },
+    {
+      "id": "associations-update",
+      "name": "Update Association",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/associations/ASSOCIATION_ID_HERE",
+        "httpMethod": "PUT",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "firstObjectLabel": "Updated Student Label",
+          "secondObjectLabel": "Updated Teacher Label"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Update association labels"
+    },
+    {
+      "id": "associations-delete",
+      "name": "Delete Association",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/associations/ASSOCIATION_ID_HERE",
+        "httpMethod": "DELETE",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Delete user-defined association"
+    },
+    {
+      "id": "associations-get-by-key",
+      "name": "Get Association by Key",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/associations/key/student_teacher",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{$node['GoHighLevel Config'].json.locationId}}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get association by key name"
+    },
+    {
+      "id": "associations-get-by-object-key",
+      "name": "Get Association by Object Key",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/associations/object/contact",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{$node['GoHighLevel Config'].json.locationId}}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get associations by object key"
+    },
+    {
+      "id": "relations-create",
+      "name": "Create Relation",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/relations/",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "locationId": "={{$node['GoHighLevel Config'].json.locationId}}",
+          "associationId": "ASSOCIATION_ID_HERE",
+          "firstRecordId": "FIRST_RECORD_ID_HERE",
+          "secondRecordId": "SECOND_RECORD_ID_HERE"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create relation between two entities"
+    },
+    {
+      "id": "relations-get-by-record",
+      "name": "Get Relations by Record",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 400],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/relations/RECORD_ID_HERE",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{$node['GoHighLevel Config'].json.locationId}}"
+            },
+            {
+              "name": "skip",
+              "value": "0"
+            },
+            {
+              "name": "limit",
+              "value": "20"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get all relations for a specific record"
+    },
+    {
+      "id": "relations-delete",
+      "name": "Delete Relation",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 400],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/relations/RELATION_ID_HERE",
+        "httpMethod": "DELETE",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{$node['GoHighLevel Config'].json.locationId}}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Delete specific relation between entities"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "GoHighLevel Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GoHighLevel Config": {
+      "main": [
+        [
+          {
+            "node": "Get All Associations",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Association",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Association by ID",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Association",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Delete Association",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Association by Key",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Association by Object Key",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Relation",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Relations by Record",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Delete Relation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {},
+  "tags": ["gohighlevel", "associations", "relations", "api", "entities"],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "version": "3"
+  },
+  "createdAt": "2025-07-01T00:00:00.000Z",
+  "updatedAt": "2025-07-01T00:00:00.000Z",
+  "versionId": "1"
+}

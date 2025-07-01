@@ -1,0 +1,1132 @@
+{
+  "name": "GoHighLevel - Contact Tools API Endpoints",
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [20, 400],
+      "parameters": {},
+      "typeVersion": 1,
+      "notes": "Start workflow to test Contact Tools API endpoints"
+    },
+    {
+      "id": "config",
+      "name": "GoHighLevel Config",
+      "type": "n8n-nodes-base.set",
+      "position": [300, 400],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "baseUrl",
+              "name": "baseUrl",
+              "type": "string",
+              "value": "https://services.leadconnectorhq.com"
+            },
+            {
+              "id": "authToken",
+              "name": "authToken",
+              "type": "string",
+              "value": "{{$vars.GHL_ACCESS_TOKEN}}"
+            },
+            {
+              "id": "locationId",
+              "name": "locationId",
+              "type": "string",
+              "value": "{{$vars.GHL_LOCATION_ID}}"
+            }
+          ]
+        }
+      },
+      "typeVersion": 3.4,
+      "notes": "Configure your GoHighLevel API settings"
+    },
+    {
+      "id": "contacts-create",
+      "name": "Create Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 100],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "locationId": "={{$node['GoHighLevel Config'].json.locationId}}",
+          "firstName": "John",
+          "lastName": "Doe",
+          "email": "john.doe@example.com",
+          "phone": "+1234567890",
+          "tags": ["lead", "new"],
+          "source": "api"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create new contact with basic information"
+    },
+    {
+      "id": "contacts-search",
+      "name": "Search Contacts",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 100],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{$node['GoHighLevel Config'].json.locationId}}"
+            },
+            {
+              "name": "query",
+              "value": "john.doe@example.com"
+            },
+            {
+              "name": "limit",
+              "value": "25"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Search contacts with filters"
+    },
+    {
+      "id": "contacts-get",
+      "name": "Get Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 100],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/CONTACT_ID_HERE",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get specific contact by ID"
+    },
+    {
+      "id": "contacts-update",
+      "name": "Update Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 100],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/CONTACT_ID_HERE",
+        "httpMethod": "PUT",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "firstName": "John",
+          "lastName": "Smith",
+          "email": "john.smith@example.com",
+          "phone": "+1234567891",
+          "tags": ["lead", "updated"]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Update existing contact information"
+    },
+    {
+      "id": "contacts-delete",
+      "name": "Delete Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/CONTACT_ID_HERE",
+        "httpMethod": "DELETE",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Delete contact by ID"
+    },
+    {
+      "id": "contacts-add-tags",
+      "name": "Add Contact Tags",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/CONTACT_ID_HERE/tags",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "tags": ["premium", "vip"]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Add tags to contact"
+    },
+    {
+      "id": "contacts-remove-tags",
+      "name": "Remove Contact Tags",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/CONTACT_ID_HERE/tags",
+        "httpMethod": "DELETE",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "tags": ["old-tag"]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Remove tags from contact"
+    },
+    {
+      "id": "contact-tasks-get",
+      "name": "Get Contact Tasks",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/CONTACT_ID_HERE/tasks",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get all tasks for a contact"
+    },
+    {
+      "id": "contact-tasks-create",
+      "name": "Create Contact Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/CONTACT_ID_HERE/tasks",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "title": "Follow up call",
+          "body": "Schedule a follow-up call with the prospect",
+          "dueDate": "2025-07-15T10:00:00.000Z",
+          "completed": false,
+          "assignedTo": "USER_ID_HERE"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create new task for contact"
+    },
+    {
+      "id": "contact-task-get",
+      "name": "Get Contact Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/CONTACT_ID_HERE/tasks/TASK_ID_HERE",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get specific task for contact"
+    },
+    {
+      "id": "contact-task-update",
+      "name": "Update Contact Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/CONTACT_ID_HERE/tasks/TASK_ID_HERE",
+        "httpMethod": "PUT",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "title": "Updated follow up call",
+          "body": "Updated task description",
+          "dueDate": "2025-07-16T10:00:00.000Z",
+          "completed": true
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Update existing contact task"
+    },
+    {
+      "id": "contact-task-delete",
+      "name": "Delete Contact Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/CONTACT_ID_HERE/tasks/TASK_ID_HERE",
+        "httpMethod": "DELETE",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Delete contact task by ID"
+    },
+    {
+      "id": "contact-notes-get",
+      "name": "Get Contact Notes",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 400],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/CONTACT_ID_HERE/notes",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get all notes for a contact"
+    },
+    {
+      "id": "contact-notes-create",
+      "name": "Create Contact Note",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 400],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/CONTACT_ID_HERE/notes",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "body": "Initial contact note - customer seems interested in our premium package",
+          "userId": "USER_ID_HERE"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create new note for contact"
+    },
+    {
+      "id": "contact-note-get",
+      "name": "Get Contact Note",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 400],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/CONTACT_ID_HERE/notes/NOTE_ID_HERE",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get specific note for contact"
+    },
+    {
+      "id": "contact-note-update",
+      "name": "Update Contact Note",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 400],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/CONTACT_ID_HERE/notes/NOTE_ID_HERE",
+        "httpMethod": "PUT",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "body": "Updated note - customer has decided to proceed with premium package",
+          "userId": "USER_ID_HERE"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Update existing contact note"
+    },
+    {
+      "id": "contact-note-delete",
+      "name": "Delete Contact Note",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 500],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/CONTACT_ID_HERE/notes/NOTE_ID_HERE",
+        "httpMethod": "DELETE",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Delete contact note by ID"
+    },
+    {
+      "id": "contacts-upsert",
+      "name": "Upsert Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 500],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/upsert",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "locationId": "={{$node['GoHighLevel Config'].json.locationId}}",
+          "firstName": "Jane",
+          "lastName": "Smith",
+          "email": "jane.smith@example.com",
+          "phone": "+1234567892",
+          "tags": ["prospect"],
+          "source": "website"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create or update contact (smart merge)"
+    },
+    {
+      "id": "contacts-duplicate-check",
+      "name": "Check Duplicate Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 500],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/lookup",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "email",
+              "value": "jane.smith@example.com"
+            },
+            {
+              "name": "phone",
+              "value": "+1234567892"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Check for duplicate contacts by email/phone"
+    },
+    {
+      "id": "contacts-appointments",
+      "name": "Get Contact Appointments",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 500],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/CONTACT_ID_HERE/appointments",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get all appointments for contact"
+    },
+    {
+      "id": "contacts-bulk-tags",
+      "name": "Bulk Update Contact Tags",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 600],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/bulk/tags",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "contactIds": ["CONTACT_ID_1", "CONTACT_ID_2"],
+          "tags": ["bulk-update", "processed"],
+          "operation": "add"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Bulk add/remove tags from multiple contacts"
+    },
+    {
+      "id": "contacts-add-followers",
+      "name": "Add Contact Followers",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 600],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/CONTACT_ID_HERE/followers",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "followers": ["USER_ID_1", "USER_ID_2"]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Add followers to contact"
+    },
+    {
+      "id": "contacts-add-campaign",
+      "name": "Add Contact to Campaign",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 600],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/CONTACT_ID_HERE/campaigns/CAMPAIGN_ID_HERE",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Add contact to marketing campaign"
+    },
+    {
+      "id": "contacts-add-workflow",
+      "name": "Add Contact to Workflow",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 600],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/contacts/CONTACT_ID_HERE/workflow/WORKFLOW_ID_HERE",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "eventStartTime": "2025-07-01T12:00:00.000Z"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Add contact to workflow automation"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "GoHighLevel Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GoHighLevel Config": {
+      "main": [
+        [
+          {
+            "node": "Create Contact",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Search Contacts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Contact",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Contact",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Delete Contact",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add Contact Tags",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Remove Contact Tags",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Contact Tasks",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Contact Task",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Contact Task",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Contact Task",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Delete Contact Task",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Contact Notes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Contact Note",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Contact Note",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Contact Note",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Delete Contact Note",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upsert Contact",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check Duplicate Contact",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Contact Appointments",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Bulk Update Contact Tags",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add Contact Followers",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add Contact to Campaign",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add Contact to Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {},
+  "tags": ["gohighlevel", "contacts", "crm", "api", "management"],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "version": "3"
+  },
+  "createdAt": "2025-07-01T00:00:00.000Z",
+  "updatedAt": "2025-07-01T00:00:00.000Z",
+  "versionId": "1"
+}

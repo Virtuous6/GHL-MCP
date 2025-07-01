@@ -1,0 +1,647 @@
+{
+  "name": "GoHighLevel - Payments API Endpoints",
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [20, 300],
+      "parameters": {},
+      "typeVersion": 1,
+      "notes": "Start workflow to test Payments API endpoints"
+    },
+    {
+      "id": "config",
+      "name": "GoHighLevel Config",
+      "type": "n8n-nodes-base.set",
+      "position": [300, 300],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "baseUrl",
+              "name": "baseUrl",
+              "type": "string",
+              "value": "https://services.leadconnectorhq.com"
+            },
+            {
+              "id": "authToken",
+              "name": "authToken",
+              "type": "string",
+              "value": "{{$vars.GHL_ACCESS_TOKEN}}"
+            },
+            {
+              "id": "locationId",
+              "name": "locationId",
+              "type": "string",
+              "value": "{{$vars.GHL_LOCATION_ID}}"
+            }
+          ]
+        }
+      },
+      "typeVersion": 3.4,
+      "notes": "Configure your GoHighLevel API settings"
+    },
+    {
+      "id": "providers-create",
+      "name": "Create Payment Provider",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 100],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/payments/integrations/provider",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "altId": "={{$node['GoHighLevel Config'].json.locationId}}",
+          "altType": "location",
+          "uniqueName": "custom-payment-provider",
+          "title": "Custom Payment Provider",
+          "provider": "authorize-net",
+          "description": "Custom payment integration for our business",
+          "imageUrl": "https://example.com/provider-logo.png"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create white-label payment provider"
+    },
+    {
+      "id": "providers-list",
+      "name": "List Payment Providers",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 100],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/payments/integrations/provider",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "altId",
+              "value": "={{$node['GoHighLevel Config'].json.locationId}}"
+            },
+            {
+              "name": "altType",
+              "value": "location"
+            },
+            {
+              "name": "limit",
+              "value": "20"
+            },
+            {
+              "name": "offset",
+              "value": "0"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "List all payment providers"
+    },
+    {
+      "id": "orders-list",
+      "name": "List Orders",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 100],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/payments/orders",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{$node['GoHighLevel Config'].json.locationId}}"
+            },
+            {
+              "name": "limit",
+              "value": "20"
+            },
+            {
+              "name": "offset",
+              "value": "0"
+            },
+            {
+              "name": "status",
+              "value": ""
+            },
+            {
+              "name": "paymentMode",
+              "value": "live"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "List orders with filtering options"
+    },
+    {
+      "id": "orders-create",
+      "name": "Create Order",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 100],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/payments/orders",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "locationId": "={{$node['GoHighLevel Config'].json.locationId}}",
+          "contactId": "CONTACT_ID_HERE",
+          "items": [
+            {
+              "productId": "PRODUCT_ID_HERE",
+              "priceId": "PRICE_ID_HERE",
+              "quantity": 1
+            }
+          ],
+          "currency": "USD",
+          "paymentMode": "live"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create new order"
+    },
+    {
+      "id": "orders-get",
+      "name": "Get Order",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/payments/orders/ORDER_ID_HERE",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get specific order by ID"
+    },
+    {
+      "id": "fulfillments-create",
+      "name": "Create Fulfillment",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/payments/orders/ORDER_ID_HERE/fulfillments",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "trackingUrls": ["https://tracking.example.com/12345"],
+          "trackingNumbers": ["TRACK123456"],
+          "shippingCarrier": "UPS",
+          "fulfillmentStatus": "fulfilled"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create fulfillment for order"
+    },
+    {
+      "id": "fulfillments-list",
+      "name": "List Fulfillments",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/payments/orders/ORDER_ID_HERE/fulfillments",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "List fulfillments for order"
+    },
+    {
+      "id": "transactions-list",
+      "name": "List Transactions",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/payments/transactions",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{$node['GoHighLevel Config'].json.locationId}}"
+            },
+            {
+              "name": "limit",
+              "value": "20"
+            },
+            {
+              "name": "offset",
+              "value": "0"
+            },
+            {
+              "name": "paymentMode",
+              "value": "live"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "List all transactions"
+    },
+    {
+      "id": "subscriptions-list",
+      "name": "List Subscriptions",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/payments/subscriptions",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{$node['GoHighLevel Config'].json.locationId}}"
+            },
+            {
+              "name": "limit",
+              "value": "20"
+            },
+            {
+              "name": "offset",
+              "value": "0"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "List subscriptions"
+    },
+    {
+      "id": "coupons-list",
+      "name": "List Coupons",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/payments/coupons",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{$node['GoHighLevel Config'].json.locationId}}"
+            },
+            {
+              "name": "limit",
+              "value": "20"
+            },
+            {
+              "name": "offset",
+              "value": "0"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "List discount coupons"
+    },
+    {
+      "id": "coupons-create",
+      "name": "Create Coupon",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/payments/coupons",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "name": "Sample Coupon",
+          "code": "SAVE10",
+          "type": "percentage",
+          "value": 10,
+          "locationId": "={{$node['GoHighLevel Config'].json.locationId}}",
+          "status": "active"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create discount coupon"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "GoHighLevel Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GoHighLevel Config": {
+      "main": [
+        [
+          {
+            "node": "Create Payment Provider",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "List Payment Providers",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "List Orders",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Order",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Order",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Fulfillment",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "List Fulfillments",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "List Transactions",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "List Subscriptions",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "List Coupons",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Coupon",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {},
+  "tags": ["gohighlevel", "payments", "api", "ecommerce"],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "version": "3"
+  },
+  "createdAt": "2025-07-01T00:00:00.000Z",
+  "updatedAt": "2025-07-01T00:00:00.000Z",
+  "versionId": "1"
+}

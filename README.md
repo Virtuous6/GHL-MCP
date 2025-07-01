@@ -77,6 +77,7 @@ This project was a 'time-taker' but I felt it was important. Feel free to donate
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/mastanley13/GoHighLevel-MCP)
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/mastanley13/GoHighLevel-MCP)
+[![Deploy on Fly.io](https://fly.io/static/images/launch.svg)](https://fly.io/docs/getting-started/)
 [![Donate to the Project](https://img.shields.io/badge/Donate_to_the_Project-💝_Support_Development-ff69b4?style=for-the-badge&logo=stripe&logoColor=white)](https://buy.stripe.com/28E14o1hT7JAfstfvqdZ60y)
 
 > **🔥 Transform Claude Desktop into a complete GoHighLevel CRM powerhouse with 269+ powerful tools across 19+ categories**
@@ -112,211 +113,148 @@ This comprehensive MCP (Model Context Protocol) server connects Claude Desktop d
 - ✅ Automatic scaling
 - ✅ Great for production workloads
 
+### ✈️ Fly.io
+[![Deploy on Fly.io](https://fly.io/static/images/launch.svg)](https://fly.io/docs/getting-started/)
+
+**Why Fly.io:**
+- ✅ Global edge deployment
+- ✅ $3.88/month for 512MB RAM
+- ✅ Auto-scaling and hibernation
+- ✅ Excellent performance
+
 ### 🎨 Render
 - ✅ Free tier available
 - ✅ Auto-deploy from GitHub
 - ✅ Built-in SSL
 
-## 🌟 Complete Tool Catalog (269 Tools)
+---
 
-### 🎯 Contact Management (31 Tools)
-**Core Operations:**
-- `create_contact`, `search_contacts`, `get_contact`, `update_contact`, `delete_contact`
-- `add_contact_tags`, `remove_contact_tags` - Organize with tags
+## ✈️ **Fly.io Deployment Guide**
 
-**Task & Note Management:**
-- `get_contact_tasks`, `create_contact_task`, `update_contact_task`, `delete_contact_task`
-- `get_contact_notes`, `create_contact_note`, `update_contact_note`, `delete_contact_note`
+### **💰 Pricing**
+```
+Free Tier: 3 machines × 256MB RAM (may need upgrade)
+Recommended: shared-cpu-2x (512MB RAM) = $3.88/month
+Bandwidth: Included
+Storage: Included
+Total: ~$4/month
+```
 
-**Advanced Features:**
-- `upsert_contact` - Smart create/update
-- `get_duplicate_contact` - Duplicate detection
-- `bulk_update_contact_tags` - Mass tag operations
-- `add_contact_to_workflow`, `remove_contact_from_workflow` - Workflow automation
-- `add_contact_followers`, `remove_contact_followers` - Team collaboration
+### **🔧 Setup & Deployment**
 
-### 💬 Messaging & Conversations (20 Tools)
-**Direct Communication:**
-- `send_sms`, `send_email` - Send messages with rich formatting
-- `search_conversations`, `get_conversation`, `create_conversation`
+#### **1. Install Fly CLI**
+```bash
+# macOS
+brew install flyctl
 
-**Message Management:**
-- `get_message`, `get_email_message`, `upload_message_attachments`
-- `update_message_status`, `cancel_scheduled_message`
+# Linux/WSL
+curl -L https://fly.io/install.sh | sh
 
-**Call Features:**
-- `get_message_recording`, `get_message_transcription`, `download_transcription`
-- `add_inbound_message`, `add_outbound_call` - Manual logging
+# Windows
+powershell -Command "iwr https://fly.io/install.ps1 -useb | iex"
+```
 
-**Live Chat:**
-- `live_chat_typing` - Real-time typing indicators
+#### **2. Login to Fly.io**
+```bash
+fly auth login
+```
 
-### 📝 Blog Management (7 Tools)
-- `create_blog_post`, `update_blog_post` - Content creation with SEO
-- `get_blog_posts`, `get_blog_sites` - Content discovery
-- `get_blog_authors`, `get_blog_categories` - Organization
-- `check_url_slug` - SEO validation
+#### **3. Deploy from Repository**
+```bash
+# Clone the repository
+git clone https://github.com/mastanley13/GoHighLevel-MCP.git
+cd GoHighLevel-MCP
 
-### 💰 Opportunity Management (10 Tools)
-- `search_opportunities` - Advanced filtering by pipeline, stage, contact
-- `get_pipelines` - Sales pipeline management
-- `create_opportunity`, `update_opportunity`, `delete_opportunity`
-- `update_opportunity_status` - Quick win/loss updates
-- `upsert_opportunity` - Smart pipeline management
-- `add_opportunity_followers`, `remove_opportunity_followers`
+# Initialize Fly app
+fly launch
 
-### 🗓️ Calendar & Appointments (14 Tools)
-**Calendar Management:**
-- `get_calendar_groups`, `get_calendars`, `create_calendar`
-- `update_calendar`, `delete_calendar`
+# Set environment variables
+fly secrets set GHL_API_KEY=your_private_integrations_api_key
+fly secrets set GHL_BASE_URL=https://services.leadconnectorhq.com
+fly secrets set GHL_LOCATION_ID=your_location_id
+fly secrets set NODE_ENV=production
 
-**Appointment Booking:**
-- `get_calendar_events`, `get_free_slots` - Availability checking
-- `create_appointment`, `get_appointment`, `update_appointment`, `delete_appointment`
+# Deploy
+fly deploy
+```
 
-**Schedule Control:**
-- `create_block_slot`, `update_block_slot` - Time blocking
+#### **4. Configuration File (fly.toml)**
+The repository includes a pre-configured `fly.toml` with:
+- ✅ 512MB RAM allocation
+- ✅ Auto-scaling enabled
+- ✅ Health checks configured  
+- ✅ HTTPS enforcement
+- ✅ Port 8080 internal routing
 
-### 📧 Email Marketing (5 Tools)
-- `get_email_campaigns` - Campaign management
-- `create_email_template`, `get_email_templates` - Template system
-- `update_email_template`, `delete_email_template`
+#### **5. Health Check & Monitoring**
+```bash
+# Check app status
+fly status
 
-### 🏢 Location Management (24 Tools)
-**Sub-Account Management:**
-- `search_locations`, `get_location`, `create_location`, `update_location`, `delete_location`
+# View logs
+fly logs
 
-**Tag System:**
-- `get_location_tags`, `create_location_tag`, `update_location_tag`, `delete_location_tag`
+# Monitor resources
+fly vm status
 
-**Custom Fields & Values:**
-- `get_location_custom_fields`, `create_location_custom_field`, `update_location_custom_field`
-- `get_location_custom_values`, `create_location_custom_value`, `update_location_custom_value`
+# Scale if needed
+fly scale vm shared-cpu-1x --memory 1024
+```
 
-**Templates & Settings:**
-- `get_location_templates`, `delete_location_template`, `get_timezones`
+### **🎯 Fly.io Advantages for MCP Server**
 
-### ✅ Email Verification (1 Tool)
-- `verify_email` - Deliverability and risk assessment
+#### **🌍 Global Edge Deployment**
+- **Multiple regions**: Deploy close to your users
+- **Low latency**: ~50ms response times globally
+- **Automatic failover**: Built-in redundancy
 
-### 📱 Social Media Management (17 Tools)
-**Post Management:**
-- `search_social_posts`, `create_social_post`, `get_social_post`
-- `update_social_post`, `delete_social_post`, `bulk_delete_social_posts`
+#### **💰 Cost-Effective Scaling**
+```
+Development: Free tier (256MB) = $0/month
+Production: shared-cpu-2x (512MB) = $3.88/month  
+High-traffic: dedicated-cpu-1x (2GB) = $23.92/month
+```
 
-**Account Integration:**
-- `get_social_accounts`, `delete_social_account`, `start_social_oauth`
+#### **🔄 Auto-Hibernation**
+- **Sleep when idle**: Reduces costs for low-traffic apps
+- **Instant wake**: <1 second cold start
+- **Smart scaling**: Auto-adjust based on demand
 
-**Bulk Operations:**
-- `upload_social_csv`, `get_csv_upload_status`, `set_csv_accounts`
+#### **🛠️ DevOps Features**
+- **Rolling deployments**: Zero-downtime updates
+- **Built-in secrets**: Secure environment variables
+- **Integrated monitoring**: Real-time metrics and alerts
+- **Custom domains**: Easy HTTPS setup
 
-**Organization:**
-- `get_social_categories`, `get_social_tags`, `get_social_tags_by_ids`
+### **📊 Fly.io vs Other Platforms**
 
-**Platforms:** Google Business, Facebook, Instagram, LinkedIn, Twitter, TikTok
+| Feature | Fly.io | Railway | Vercel | Render |
+|---------|--------|---------|--------|--------|
+| **Free Tier** | 256MB RAM | $5 credit | Generous | 750hrs |
+| **Paid Price** | $3.88/month | $5/month | $20/month | $7/month |
+| **Global Edge** | ✅ | ❌ | ✅ | ❌ |
+| **Auto-hibernate** | ✅ | ❌ | ✅ | ✅ |
+| **Custom domains** | ✅ | ✅ | ✅ | ✅ |
+| **CLI Tool** | ✅ Excellent | ✅ Good | ✅ Good | ❌ |
 
-### 📁 Media Library (3 Tools)
-- `get_media_files` - Search and filter media
-- `upload_media_file` - File uploads and hosted URLs
-- `delete_media_file` - Clean up media assets
+### **🚀 Quick Start (5 minutes)**
+```bash
+# 1. Install & login
+brew install flyctl && fly auth login
 
-### 🏗️ Custom Objects (9 Tools)
-**Schema Management:**
-- `get_all_objects`, `create_object_schema`, `get_object_schema`, `update_object_schema`
+# 2. Deploy
+fly launch --generate-name
 
-**Record Operations:**
-- `create_object_record`, `get_object_record`, `update_object_record`, `delete_object_record`
+# 3. Set secrets
+fly secrets set GHL_API_KEY=your_key GHL_LOCATION_ID=your_id
 
-**Advanced Search:**
-- `search_object_records` - Query custom data
+# 4. Access your MCP server
+fly open
+```
 
-**Use Cases:** Pet records, support tickets, inventory, custom business data
+Your GoHighLevel MCP server will be live at: `https://your-app-name.fly.dev`
 
-### 🔗 Association Management (10 Tools)
-- `ghl_get_all_associations`, `ghl_create_association`, `ghl_get_association_by_id`
-- `ghl_update_association`, `ghl_delete_association`
-- `ghl_create_relation`, `ghl_get_relations_by_record`, `ghl_delete_relation`
-- Advanced relationship mapping between objects
-
-### 🎛️ Custom Fields V2 (8 Tools)
-- `ghl_get_custom_field_by_id`, `ghl_create_custom_field`, `ghl_update_custom_field`
-- `ghl_delete_custom_field`, `ghl_get_custom_fields_by_object_key`
-- `ghl_create_custom_field_folder`, `ghl_update_custom_field_folder`, `ghl_delete_custom_field_folder`
-
-### ⚡ Workflow Management (1 Tool)
-- `ghl_get_workflows` - Automation workflow discovery
-
-### 📊 Survey Management (2 Tools)
-- `ghl_get_surveys` - Survey management
-- `ghl_get_survey_submissions` - Response analysis
-
-### 🛒 Store Management (18 Tools)
-**Shipping Zones:**
-- `ghl_create_shipping_zone`, `ghl_list_shipping_zones`, `ghl_get_shipping_zone`
-- `ghl_update_shipping_zone`, `ghl_delete_shipping_zone`
-
-**Shipping Rates:**
-- `ghl_get_available_shipping_rates`, `ghl_create_shipping_rate`, `ghl_list_shipping_rates`
-- `ghl_get_shipping_rate`, `ghl_update_shipping_rate`, `ghl_delete_shipping_rate`
-
-**Carriers & Settings:**
-- `ghl_create_shipping_carrier`, `ghl_list_shipping_carriers`, `ghl_update_shipping_carrier`
-- `ghl_create_store_setting`, `ghl_get_store_setting`
-
-### 📦 Products Management (10 Tools)
-**Product Operations:**
-- `ghl_create_product`, `ghl_list_products`, `ghl_get_product`
-- `ghl_update_product`, `ghl_delete_product`
-
-**Pricing & Inventory:**
-- `ghl_create_price`, `ghl_list_prices`, `ghl_list_inventory`
-
-**Collections:**
-- `ghl_create_product_collection`, `ghl_list_product_collections`
-
-### 💳 Payments Management (20 Tools)
-**Integration Providers:**
-- `create_whitelabel_integration_provider`, `list_whitelabel_integration_providers`
-
-**Order Management:**
-- `list_orders`, `get_order_by_id`, `create_order_fulfillment`, `list_order_fulfillments`
-
-**Transaction Tracking:**
-- `list_transactions`, `get_transaction_by_id`
-
-**Subscription Management:**
-- `list_subscriptions`, `get_subscription_by_id`
-
-**Coupon System:**
-- `list_coupons`, `create_coupon`, `update_coupon`, `delete_coupon`, `get_coupon`
-
-**Custom Payment Gateways:**
-- `create_custom_provider_integration`, `delete_custom_provider_integration`
-- `get_custom_provider_config`, `create_custom_provider_config`
-
-### 🧾 Invoices & Billing (39 Tools)
-**Invoice Templates:**
-- `create_invoice_template`, `list_invoice_templates`, `get_invoice_template`
-- `update_invoice_template`, `delete_invoice_template`
-- `update_invoice_template_late_fees`, `update_invoice_template_payment_methods`
-
-**Recurring Invoices:**
-- `create_invoice_schedule`, `list_invoice_schedules`, `get_invoice_schedule`
-- `update_invoice_schedule`, `delete_invoice_schedule`, `schedule_invoice_schedule`
-- `auto_payment_invoice_schedule`, `cancel_invoice_schedule`
-
-**Invoice Management:**
-- `create_invoice`, `list_invoices`, `get_invoice`, `update_invoice`
-- `delete_invoice`, `void_invoice`, `send_invoice`, `record_invoice_payment`
-- `generate_invoice_number`, `text2pay_invoice`
-
-**Estimates:**
-- `create_estimate`, `list_estimates`, `update_estimate`, `delete_estimate`
-- `send_estimate`, `create_invoice_from_estimate`, `generate_estimate_number`
-
-**Estimate Templates:**
-- `list_estimate_templates`, `create_estimate_template`, `update_estimate_template`
-- `delete_estimate_template`, `preview_estimate_template`
+---
 
 ## 🎮 Claude Desktop Usage Examples
 
@@ -384,9 +322,9 @@ npm run dev
 ### Environment Configuration
 ```bash
 # Required Environment Variables
-GHL_API_KEY=your_private_integrations_api_key_here  # From Private Integrations, NOT regular API key
+GHL_API_KEY=your_private_integrations_api_key  # From Private Integrations, NOT regular API key
 GHL_BASE_URL=https://services.leadconnectorhq.com
-GHL_LOCATION_ID=your_location_id_here              # From Settings → Company → Locations
+GHL_LOCATION_ID=your_location_id              # From Settings → Company → Locations
 NODE_ENV=production
 
 # Optional Configuration

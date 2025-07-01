@@ -1,0 +1,1047 @@
+{
+  "name": "GoHighLevel - Calendar Tools API Endpoints",
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [20, 600],
+      "parameters": {},
+      "typeVersion": 1,
+      "notes": "Start workflow to test Calendar Tools API endpoints"
+    },
+    {
+      "id": "config",
+      "name": "GoHighLevel Config",
+      "type": "n8n-nodes-base.set",
+      "position": [300, 600],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "baseUrl",
+              "name": "baseUrl",
+              "type": "string",
+              "value": "https://services.leadconnectorhq.com"
+            },
+            {
+              "id": "authToken",
+              "name": "authToken",
+              "type": "string",
+              "value": "{{$vars.GHL_ACCESS_TOKEN}}"
+            },
+            {
+              "id": "locationId",
+              "name": "locationId",
+              "type": "string",
+              "value": "{{$vars.GHL_LOCATION_ID}}"
+            }
+          ]
+        }
+      },
+      "typeVersion": 3.4,
+      "notes": "Configure your GoHighLevel API settings"
+    },
+    {
+      "id": "calendar-groups-get",
+      "name": "Get Calendar Groups",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/calendars/groups",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{$node['GoHighLevel Config'].json.locationId}}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get all calendar groups"
+    },
+    {
+      "id": "calendars-get",
+      "name": "Get Calendars",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/calendars/",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{$node['GoHighLevel Config'].json.locationId}}"
+            },
+            {
+              "name": "showDrafted",
+              "value": "true"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get all calendars with optional filtering"
+    },
+    {
+      "id": "calendars-create",
+      "name": "Create Calendar",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/calendars/",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "locationId": "={{$node['GoHighLevel Config'].json.locationId}}",
+          "name": "Consultation Appointments",
+          "description": "30-minute consultation calls with potential clients",
+          "calendarType": "event",
+          "slotDuration": 30,
+          "slotDurationUnit": "mins",
+          "autoConfirm": true,
+          "allowReschedule": true,
+          "allowCancellation": true,
+          "isActive": true
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create new calendar"
+    },
+    {
+      "id": "calendar-get",
+      "name": "Get Calendar",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/calendars/CALENDAR_ID_HERE",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get specific calendar by ID"
+    },
+    {
+      "id": "calendar-update",
+      "name": "Update Calendar",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/calendars/CALENDAR_ID_HERE",
+        "httpMethod": "PUT",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "name": "Updated Consultation Appointments",
+          "description": "45-minute consultation calls with potential clients",
+          "slotDuration": 45,
+          "autoConfirm": false
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Update existing calendar"
+    },
+    {
+      "id": "calendar-delete",
+      "name": "Delete Calendar",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/calendars/CALENDAR_ID_HERE",
+        "httpMethod": "DELETE",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Delete calendar"
+    },
+    {
+      "id": "calendar-events-get",
+      "name": "Get Calendar Events",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/calendars/events",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{$node['GoHighLevel Config'].json.locationId}}"
+            },
+            {
+              "name": "startTime",
+              "value": "1704067200000"
+            },
+            {
+              "name": "endTime",
+              "value": "1706745599999"
+            },
+            {
+              "name": "calendarId",
+              "value": "CALENDAR_ID_HERE"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get calendar events in date range"
+    },
+    {
+      "id": "calendar-free-slots",
+      "name": "Get Free Slots",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/calendars/CALENDAR_ID_HERE/free-slots",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "startDate",
+              "value": "1704067200000"
+            },
+            {
+              "name": "endDate",
+              "value": "1706745599999"
+            },
+            {
+              "name": "timezone",
+              "value": "America/New_York"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get available time slots for booking"
+    },
+    {
+      "id": "appointments-create",
+      "name": "Create Appointment",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 400],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/calendars/events/appointments",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "calendarId": "CALENDAR_ID_HERE",
+          "locationId": "={{$node['GoHighLevel Config'].json.locationId}}",
+          "contactId": "CONTACT_ID_HERE",
+          "startTime": "2025-07-15T10:00:00-05:00",
+          "endTime": "2025-07-15T10:30:00-05:00",
+          "title": "Initial Consultation Call",
+          "appointmentStatus": "confirmed",
+          "address": "Zoom Meeting",
+          "meetingLocationType": "zoom",
+          "toNotify": true
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create new appointment"
+    },
+    {
+      "id": "appointment-get",
+      "name": "Get Appointment",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 400],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/calendars/events/appointments/APPOINTMENT_ID_HERE",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get specific appointment by ID"
+    },
+    {
+      "id": "appointment-update",
+      "name": "Update Appointment",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 400],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/calendars/events/appointments/APPOINTMENT_ID_HERE",
+        "httpMethod": "PUT",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "title": "Updated Consultation Call",
+          "appointmentStatus": "confirmed",
+          "startTime": "2025-07-15T10:30:00-05:00",
+          "endTime": "2025-07-15T11:00:00-05:00",
+          "toNotify": true
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Update existing appointment"
+    },
+    {
+      "id": "appointment-delete",
+      "name": "Delete Appointment",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 400],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/calendars/events/appointments/APPOINTMENT_ID_HERE",
+        "httpMethod": "DELETE",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Cancel/delete appointment"
+    },
+    {
+      "id": "block-slot-create",
+      "name": "Create Block Slot",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 500],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/calendars/events/block-slots",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "locationId": "={{$node['GoHighLevel Config'].json.locationId}}",
+          "startTime": "2025-07-15T12:00:00-05:00",
+          "endTime": "2025-07-15T13:00:00-05:00",
+          "title": "Lunch Break",
+          "calendarId": "CALENDAR_ID_HERE"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create blocked time slot"
+    },
+    {
+      "id": "block-slot-update",
+      "name": "Update Block Slot",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 500],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/calendars/events/block-slots/BLOCK_SLOT_ID_HERE",
+        "httpMethod": "PUT",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "startTime": "2025-07-15T12:30:00-05:00",
+          "endTime": "2025-07-15T13:30:00-05:00",
+          "title": "Extended Lunch Break"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Update blocked time slot"
+    },
+    {
+      "id": "calendar-group-create",
+      "name": "Create Calendar Group",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 500],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/calendars/groups",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "locationId": "={{$node['GoHighLevel Config'].json.locationId}}",
+          "name": "Sales Team Calendars",
+          "description": "Group for all sales team appointment calendars",
+          "slug": "sales-team-calendars",
+          "isActive": true
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create new calendar group"
+    },
+    {
+      "id": "appointment-notes-get",
+      "name": "Get Appointment Notes",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 500],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/calendars/events/appointments/APPOINTMENT_ID_HERE/notes",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "limit",
+              "value": "10"
+            },
+            {
+              "name": "offset",
+              "value": "0"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get notes for appointment"
+    },
+    {
+      "id": "appointment-note-create",
+      "name": "Create Appointment Note",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 600],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/calendars/events/appointments/APPOINTMENT_ID_HERE/notes",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "body": "Client was very engaged and interested in our premium package. Follow up with proposal within 24 hours.",
+          "userId": "USER_ID_HERE"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create note for appointment"
+    },
+    {
+      "id": "calendar-resources-get",
+      "name": "Get Calendar Resources",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 600],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/calendars/resources/equipments",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{$node['GoHighLevel Config'].json.locationId}}"
+            },
+            {
+              "name": "limit",
+              "value": "20"
+            },
+            {
+              "name": "skip",
+              "value": "0"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get calendar equipment resources"
+    },
+    {
+      "id": "calendar-notifications-get",
+      "name": "Get Calendar Notifications",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 600],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/calendars/CALENDAR_ID_HERE/notifications",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "isActive",
+              "value": "true"
+            },
+            {
+              "name": "limit",
+              "value": "20"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get calendar notifications"
+    },
+    {
+      "id": "blocked-slots-get",
+      "name": "Get Blocked Slots",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 600],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/calendars/blocked-slots",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{$node['GoHighLevel Config'].json.locationId}}"
+            },
+            {
+              "name": "startTime",
+              "value": "1704067200000"
+            },
+            {
+              "name": "endTime",
+              "value": "1706745599999"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get blocked time slots in date range"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "GoHighLevel Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GoHighLevel Config": {
+      "main": [
+        [
+          {
+            "node": "Get Calendar Groups",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Calendars",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Calendar",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Calendar",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Calendar",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Delete Calendar",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Calendar Events",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Free Slots",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Appointment",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Appointment",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Appointment",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Delete Appointment",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Block Slot",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Block Slot",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Calendar Group",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Appointment Notes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Appointment Note",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Calendar Resources",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Calendar Notifications",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Blocked Slots",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {},
+  "tags": ["gohighlevel", "calendar", "appointments", "scheduling", "api"],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "version": "3"
+  },
+  "createdAt": "2025-07-01T00:00:00.000Z",
+  "updatedAt": "2025-07-01T00:00:00.000Z",
+  "versionId": "1"
+}

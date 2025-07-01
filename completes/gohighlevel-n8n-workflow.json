@@ -1,0 +1,1311 @@
+{
+  "name": "GoHighLevel API Complete Workflow",
+  "nodes": [
+    {
+      "id": "1",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [0, 0],
+      "parameters": {},
+      "typeVersion": 1,
+      "notes": "Start the workflow manually to test GoHighLevel API calls. Set 'operation' and 'action' in input data to route to specific endpoints."
+    },
+    {
+      "id": "2",
+      "name": "Set GoHighLevel Config",
+      "type": "n8n-nodes-base.set",
+      "position": [250, 0],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "base-url",
+              "name": "baseUrl",
+              "type": "string",
+              "value": "https://services.leadconnectorhq.com"
+            },
+            {
+              "id": "auth-token",
+              "name": "authToken",
+              "type": "string",
+              "value": "{{$vars.GHL_ACCESS_TOKEN}}"
+            },
+            {
+              "id": "location-id",
+              "name": "locationId",
+              "type": "string",
+              "value": "{{$vars.GHL_LOCATION_ID}}"
+            },
+            {
+              "id": "api-version-contacts",
+              "name": "apiVersionContacts",
+              "type": "string",
+              "value": "2021-07-28"
+            },
+            {
+              "id": "api-version-conversations",
+              "name": "apiVersionConversations",
+              "type": "string",
+              "value": "2021-04-15"
+            }
+          ]
+        }
+      },
+      "typeVersion": 3.4,
+      "notes": "Configure base GoHighLevel API settings. Set GHL_ACCESS_TOKEN and GHL_LOCATION_ID in n8n environment variables."
+    },
+    {
+      "id": "3",
+      "name": "Choose API Category",
+      "type": "n8n-nodes-base.switch",
+      "position": [500, 0],
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{$json.operation || 'contacts'}}",
+        "rules": {
+          "rules": [
+            {
+              "id": "contacts",
+              "operation": "equal",
+              "value2": "contacts",
+              "output": 1
+            },
+            {
+              "id": "conversations",
+              "operation": "equal",
+              "value2": "conversations",
+              "output": 2
+            },
+            {
+              "id": "calendar",
+              "operation": "equal",
+              "value2": "calendar",
+              "output": 3
+            },
+            {
+              "id": "opportunities",
+              "operation": "equal",
+              "value2": "opportunities",
+              "output": 4
+            },
+            {
+              "id": "locations",
+              "operation": "equal",
+              "value2": "locations",
+              "output": 5
+            },
+            {
+              "id": "blog",
+              "operation": "equal",
+              "value2": "blog",
+              "output": 6
+            },
+            {
+              "id": "social-media",
+              "operation": "equal",
+              "value2": "social-media",
+              "output": 7
+            },
+            {
+              "id": "workflows",
+              "operation": "equal",
+              "value2": "workflows",
+              "output": 8
+            },
+            {
+              "id": "surveys",
+              "operation": "equal",
+              "value2": "surveys",
+              "output": 9
+            },
+            {
+              "id": "media",
+              "operation": "equal",
+              "value2": "media",
+              "output": 10
+            },
+            {
+              "id": "email",
+              "operation": "equal",
+              "value2": "email",
+              "output": 11
+            },
+            {
+              "id": "payments",
+              "operation": "equal",
+              "value2": "payments",
+              "output": 12
+            },
+            {
+              "id": "products",
+              "operation": "equal",
+              "value2": "products",
+              "output": 13
+            },
+            {
+              "id": "custom-objects",
+              "operation": "equal",
+              "value2": "custom-objects",
+              "output": 14
+            },
+            {
+              "id": "invoices",
+              "operation": "equal",
+              "value2": "invoices",
+              "output": 15
+            }
+          ]
+        },
+        "fallbackOutput": 1
+      },
+      "typeVersion": 2,
+      "notes": "Route to different API categories. Core CRM functionality for managing customer information, tags, tasks, and notes. Essential for lead management and customer relationship building."
+    },
+    {
+      "id": "4",
+      "name": "Contacts Router",
+      "type": "n8n-nodes-base.switch",
+      "position": [750, -400],
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{$json.action || 'get-all'}}",
+        "rules": {
+          "rules": [
+            {
+              "id": "create",
+              "operation": "equal",
+              "value2": "create",
+              "output": 1
+            },
+            {
+              "id": "get",
+              "operation": "equal",
+              "value2": "get",
+              "output": 2
+            },
+            {
+              "id": "update",
+              "operation": "equal",
+              "value2": "update",
+              "output": 3
+            },
+            {
+              "id": "delete",
+              "operation": "equal",
+              "value2": "delete",
+              "output": 4
+            },
+            {
+              "id": "search",
+              "operation": "equal",
+              "value2": "search",
+              "output": 5
+            },
+            {
+              "id": "add-tags",
+              "operation": "equal",
+              "value2": "add-tags",
+              "output": 6
+            },
+            {
+              "id": "remove-tags",
+              "operation": "equal",
+              "value2": "remove-tags",
+              "output": 7
+            }
+          ]
+        },
+        "fallbackOutput": 8
+      },
+      "typeVersion": 2,
+      "notes": "Contact management operations router"
+    },
+    {
+      "id": "5",
+      "name": "Create Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, -500],
+      "parameters": {
+        "url": "={{$node['Set GoHighLevel Config'].json.baseUrl}}/contacts/",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['Set GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "={{$node['Set GoHighLevel Config'].json.apiVersionContacts}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "firstName": "={{$json.firstName || 'Test'}}",
+          "lastName": "={{$json.lastName || 'Contact'}}",
+          "email": "={{$json.email || 'test@example.com'}}",
+          "phone": "={{$json.phone || '+1234567890'}}",
+          "locationId": "={{$node['Set GoHighLevel Config'].json.locationId}}",
+          "tags": "={{$json.tags || []}}",
+          "customFields": "={{$json.customFields || {}}}"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create a new contact"
+    },
+    {
+      "id": "6",
+      "name": "Get Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, -450],
+      "parameters": {
+        "url": "={{$node['Set GoHighLevel Config'].json.baseUrl}}/contacts/{{$json.contactId}}",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['Set GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "={{$node['Set GoHighLevel Config'].json.apiVersionContacts}}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get contact by ID"
+    },
+    {
+      "id": "7",
+      "name": "Update Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, -400],
+      "parameters": {
+        "url": "={{$node['Set GoHighLevel Config'].json.baseUrl}}/contacts/{{$json.contactId}}",
+        "httpMethod": "PUT",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['Set GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "={{$node['Set GoHighLevel Config'].json.apiVersionContacts}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "firstName": "={{$json.firstName}}",
+          "lastName": "={{$json.lastName}}",
+          "email": "={{$json.email}}",
+          "phone": "={{$json.phone}}"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Update existing contact"
+    },
+    {
+      "id": "8",
+      "name": "Delete Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, -350],
+      "parameters": {
+        "url": "={{$node['Set GoHighLevel Config'].json.baseUrl}}/contacts/{{$json.contactId}}",
+        "httpMethod": "DELETE",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['Set GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "={{$node['Set GoHighLevel Config'].json.apiVersionContacts}}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Delete contact"
+    },
+    {
+      "id": "9",
+      "name": "Search Contacts",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, -300],
+      "parameters": {
+        "url": "={{$node['Set GoHighLevel Config'].json.baseUrl}}/contacts/search",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['Set GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "={{$node['Set GoHighLevel Config'].json.apiVersionContacts}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "locationId": "={{$node['Set GoHighLevel Config'].json.locationId}}",
+          "query": "={{$json.query || ''}}",
+          "limit": "={{$json.limit || 20}}",
+          "skip": "={{$json.skip || 0}}"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Search contacts with filters"
+    },
+    {
+      "id": "10",
+      "name": "Add Contact Tags",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, -250],
+      "parameters": {
+        "url": "={{$node['Set GoHighLevel Config'].json.baseUrl}}/contacts/{{$json.contactId}}/tags",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['Set GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "={{$node['Set GoHighLevel Config'].json.apiVersionContacts}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "tags": "={{$json.tags || []}}"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Add tags to contact"
+    },
+    {
+      "id": "11",
+      "name": "Remove Contact Tags",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, -200],
+      "parameters": {
+        "url": "={{$node['Set GoHighLevel Config'].json.baseUrl}}/contacts/{{$json.contactId}}/tags",
+        "httpMethod": "DELETE",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['Set GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "={{$node['Set GoHighLevel Config'].json.apiVersionContacts}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "tags": "={{$json.tags || []}}"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Remove tags from contact"
+    },
+    {
+      "id": "12",
+      "name": "Get All Contacts",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, -150],
+      "parameters": {
+        "url": "={{$node['Set GoHighLevel Config'].json.baseUrl}}/contacts/",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{$node['Set GoHighLevel Config'].json.locationId}}"
+            },
+            {
+              "name": "limit",
+              "value": "={{$json.limit || 20}}"
+            },
+            {
+              "name": "skip",
+              "value": "={{$json.skip || 0}}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['Set GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "={{$node['Set GoHighLevel Config'].json.apiVersionContacts}}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get all contacts"
+    },
+    {
+      "id": "13",
+      "name": "Conversations Router",
+      "type": "n8n-nodes-base.switch",
+      "position": [750, -100],
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{$json.action || 'search'}}",
+        "rules": {
+          "rules": [
+            {
+              "id": "search",
+              "operation": "equal",
+              "value2": "search",
+              "output": 1
+            },
+            {
+              "id": "get",
+              "operation": "equal",
+              "value2": "get",
+              "output": 2
+            },
+            {
+              "id": "send-message",
+              "operation": "equal",
+              "value2": "send-message",
+              "output": 3
+            },
+            {
+              "id": "get-messages",
+              "operation": "equal",
+              "value2": "get-messages",
+              "output": 4
+            }
+          ]
+        },
+        "fallbackOutput": 1
+      },
+      "typeVersion": 2,
+      "notes": "Multi-channel communication hub for SMS, Email, and social media messaging. Centralizes all customer interactions in one place."
+    },
+    {
+      "id": "14",
+      "name": "Search Conversations",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, -150],
+      "parameters": {
+        "url": "={{$node['Set GoHighLevel Config'].json.baseUrl}}/conversations/search",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{$node['Set GoHighLevel Config'].json.locationId}}"
+            },
+            {
+              "name": "contactId",
+              "value": "={{$json.contactId || ''}}"
+            },
+            {
+              "name": "assigned",
+              "value": "={{$json.assigned || ''}}"
+            },
+            {
+              "name": "status",
+              "value": "={{$json.status || ''}}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['Set GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "={{$node['Set GoHighLevel Config'].json.apiVersionConversations}}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Search conversations"
+    },
+    {
+      "id": "15",
+      "name": "Get Conversation",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, -100],
+      "parameters": {
+        "url": "={{$node['Set GoHighLevel Config'].json.baseUrl}}/conversations/{{$json.conversationId}}",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['Set GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "={{$node['Set GoHighLevel Config'].json.apiVersionConversations}}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get conversation by ID"
+    },
+    {
+      "id": "16",
+      "name": "Send Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, -50],
+      "parameters": {
+        "url": "={{$node['Set GoHighLevel Config'].json.baseUrl}}/conversations/messages",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['Set GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "={{$node['Set GoHighLevel Config'].json.apiVersionConversations}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "type": "={{$json.type || 'SMS'}}",
+          "contactId": "={{$json.contactId}}",
+          "locationId": "={{$node['Set GoHighLevel Config'].json.locationId}}",
+          "message": "={{$json.message}}"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Send message (SMS/Email)"
+    },
+    {
+      "id": "17",
+      "name": "Get Messages",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 0],
+      "parameters": {
+        "url": "={{$node['Set GoHighLevel Config'].json.baseUrl}}/conversations/{{$json.conversationId}}/messages",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "limit",
+              "value": "={{$json.limit || 20}}"
+            },
+            {
+              "name": "skip",
+              "value": "={{$json.skip || 0}}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['Set GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "={{$node['Set GoHighLevel Config'].json.apiVersionConversations}}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get conversation messages"
+    },
+    {
+      "id": "18",
+      "name": "Calendar Router",
+      "type": "n8n-nodes-base.switch",
+      "position": [750, 200],
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{$json.action || 'get-calendars'}}",
+        "rules": {
+          "rules": [
+            {
+              "id": "get-calendars",
+              "operation": "equal",
+              "value2": "get-calendars",
+              "output": 1
+            },
+            {
+              "id": "create-calendar",
+              "operation": "equal",
+              "value2": "create-calendar",
+              "output": 2
+            },
+            {
+              "id": "create-appointment",
+              "operation": "equal",
+              "value2": "create-appointment",
+              "output": 3
+            },
+            {
+              "id": "get-appointment",
+              "operation": "equal",
+              "value2": "get-appointment",
+              "output": 4
+            },
+            {
+              "id": "update-appointment",
+              "operation": "equal",
+              "value2": "update-appointment",
+              "output": 5
+            },
+            {
+              "id": "delete-appointment",
+              "operation": "equal",
+              "value2": "delete-appointment",
+              "output": 6
+            }
+          ]
+        },
+        "fallbackOutput": 1
+      },
+      "typeVersion": 2,
+      "notes": "Complete appointment scheduling system with calendar management, booking slots, and automated notifications. Perfect for service-based businesses."
+    },
+    {
+      "id": "19",
+      "name": "Get Calendars",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 150],
+      "parameters": {
+        "url": "={{$node['Set GoHighLevel Config'].json.baseUrl}}/calendars/",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{$node['Set GoHighLevel Config'].json.locationId}}"
+            },
+            {
+              "name": "groupId",
+              "value": "={{$json.groupId || ''}}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['Set GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "={{$node['Set GoHighLevel Config'].json.apiVersionContacts}}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get calendars"
+    },
+    {
+      "id": "20",
+      "name": "Create Calendar",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 200],
+      "parameters": {
+        "url": "={{$node['Set GoHighLevel Config'].json.baseUrl}}/calendars/",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['Set GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "={{$node['Set GoHighLevel Config'].json.apiVersionContacts}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "name": "={{$json.name}}",
+          "description": "={{$json.description || ''}}",
+          "locationId": "={{$node['Set GoHighLevel Config'].json.locationId}}"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create calendar"
+    },
+    {
+      "id": "21",
+      "name": "Create Appointment",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 250],
+      "parameters": {
+        "url": "={{$node['Set GoHighLevel Config'].json.baseUrl}}/calendars/events/appointments",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['Set GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "={{$node['Set GoHighLevel Config'].json.apiVersionContacts}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "calendarId": "={{$json.calendarId}}",
+          "contactId": "={{$json.contactId}}",
+          "startTime": "={{$json.startTime}}",
+          "endTime": "={{$json.endTime}}",
+          "title": "={{$json.title}}"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create appointment"
+    },
+    {
+      "id": "22",
+      "name": "Error Handler",
+      "type": "n8n-nodes-base.function",
+      "position": [1300, 0],
+      "parameters": {
+        "functionCode": "// Handle API errors and format response\nif ($input.first()?.error) {\n  const error = $input.first().error;\n  return [{\n    success: false,\n    error: error.message || 'API request failed',\n    statusCode: error.httpCode || 500,\n    details: error.response?.data || error.description,\n    timestamp: new Date().toISOString(),\n    operation: $node['Choose API Category']?.json?.operation || 'unknown'\n  }];\n}\n\n// Success response formatting\nconst result = $input.first();\nreturn [{\n  success: true,\n  data: result,\n  timestamp: new Date().toISOString(),\n  operation: $node['Choose API Category']?.json?.operation || 'unknown',\n  action: $json.action || 'unknown'\n}];"
+      },
+      "typeVersion": 1,
+      "notes": "Centralized error handling and response formatting for all GoHighLevel API calls."
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set GoHighLevel Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set GoHighLevel Config": {
+      "main": [
+        [
+          {
+            "node": "Choose API Category",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Choose API Category": {
+      "main": [
+        [
+          {
+            "node": "Contacts Router",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Conversations Router",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Calendar Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contacts Router": {
+      "main": [
+        [
+          {
+            "node": "Create Contact",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Contact",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Contact",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Delete Contact",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Search Contacts",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add Contact Tags",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Remove Contact Tags",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get All Contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversations Router": {
+      "main": [
+        [
+          {
+            "node": "Search Conversations",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar Router": {
+      "main": [
+        [
+          {
+            "node": "Get Calendars",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Calendar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Appointment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Contact": {
+      "main": [
+        [
+          {
+            "node": "Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Contact": {
+      "main": [
+        [
+          {
+            "node": "Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Contact": {
+      "main": [
+        [
+          {
+            "node": "Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Contact": {
+      "main": [
+        [
+          {
+            "node": "Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Contacts": {
+      "main": [
+        [
+          {
+            "node": "Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Contact Tags": {
+      "main": [
+        [
+          {
+            "node": "Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Contact Tags": {
+      "main": [
+        [
+          {
+            "node": "Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Contacts": {
+      "main": [
+        [
+          {
+            "node": "Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Conversations": {
+      "main": [
+        [
+          {
+            "node": "Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Conversation": {
+      "main": [
+        [
+          {
+            "node": "Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Message": {
+      "main": [
+        [
+          {
+            "node": "Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Messages": {
+      "main": [
+        [
+          {
+            "node": "Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Calendars": {
+      "main": [
+        [
+          {
+            "node": "Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Calendar": {
+      "main": [
+        [
+          {
+            "node": "Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Appointment": {
+      "main": [
+        [
+          {
+            "node": "Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {},
+  "tags": ["gohighlevel", "api", "crm", "automation"],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "version": "3"
+  },
+  "createdAt": "2025-07-01T00:00:00.000Z",
+  "updatedAt": "2025-07-01T00:00:00.000Z",
+  "versionId": "1"
+}

@@ -1,0 +1,754 @@
+{
+  "name": "GoHighLevel API Endpoints",
+  "version": "1.0.0",
+  "description": "Complete collection of GoHighLevel API endpoints extracted from MCP Server tools",
+  "baseUrl": "https://services.leadconnectorhq.com",
+  "authentication": {
+    "type": "oauth2",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {{token}}",
+    "additionalHeaders": {
+      "Content-Type": "application/json",
+      "Version": "2021-07-28"
+    }
+  },
+  "categories": [
+    {
+      "name": "Contacts",
+      "description": "Contact management operations",
+      "note": "Core CRM functionality for managing customer information, tags, tasks, and notes. Essential for lead management and customer relationship building.",
+      "endpoints": [
+        {
+          "name": "Create Contact",
+          "method": "POST",
+          "path": "/contacts/",
+          "description": "Create a new contact",
+          "parameters": {
+            "body": {
+              "firstName": {"type": "string", "required": false},
+              "lastName": {"type": "string", "required": false},
+              "email": {"type": "string", "required": false},
+              "phone": {"type": "string", "required": false},
+              "locationId": {"type": "string", "required": true},
+              "tags": {"type": "array", "required": false},
+              "customFields": {"type": "object", "required": false}
+            }
+          }
+        },
+        {
+          "name": "Get Contact",
+          "method": "GET",
+          "path": "/contacts/{contactId}",
+          "description": "Get contact by ID",
+          "parameters": {
+            "path": {
+              "contactId": {"type": "string", "required": true}
+            }
+          }
+        },
+        {
+          "name": "Update Contact",
+          "method": "PUT",
+          "path": "/contacts/{contactId}",
+          "description": "Update existing contact",
+          "parameters": {
+            "path": {
+              "contactId": {"type": "string", "required": true}
+            },
+            "body": {
+              "firstName": {"type": "string", "required": false},
+              "lastName": {"type": "string", "required": false},
+              "email": {"type": "string", "required": false},
+              "phone": {"type": "string", "required": false}
+            }
+          }
+        },
+        {
+          "name": "Delete Contact",
+          "method": "DELETE",
+          "path": "/contacts/{contactId}",
+          "description": "Delete contact",
+          "parameters": {
+            "path": {
+              "contactId": {"type": "string", "required": true}
+            }
+          }
+        },
+        {
+          "name": "Search Contacts",
+          "method": "POST",
+          "path": "/contacts/search",
+          "description": "Search contacts with filters",
+          "parameters": {
+            "body": {
+              "locationId": {"type": "string", "required": true},
+              "query": {"type": "string", "required": false},
+              "limit": {"type": "number", "required": false},
+              "skip": {"type": "number", "required": false}
+            }
+          }
+        },
+        {
+          "name": "Get All Contacts",
+          "method": "GET",
+          "path": "/contacts/",
+          "description": "Get all contacts",
+          "parameters": {
+            "query": {
+              "locationId": {"type": "string", "required": true},
+              "limit": {"type": "number", "required": false},
+              "skip": {"type": "number", "required": false}
+            }
+          }
+        },
+        {
+          "name": "Add Contact Tags",
+          "method": "POST",
+          "path": "/contacts/{contactId}/tags",
+          "description": "Add tags to contact",
+          "parameters": {
+            "path": {
+              "contactId": {"type": "string", "required": true}
+            },
+            "body": {
+              "tags": {"type": "array", "required": true}
+            }
+          }
+        },
+        {
+          "name": "Remove Contact Tags",
+          "method": "DELETE",
+          "path": "/contacts/{contactId}/tags",
+          "description": "Remove tags from contact",
+          "parameters": {
+            "path": {
+              "contactId": {"type": "string", "required": true}
+            },
+            "body": {
+              "tags": {"type": "array", "required": true}
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Conversations",
+      "description": "Conversation and messaging operations",
+      "note": "Multi-channel communication hub for SMS, Email, and social media messaging. Centralizes all customer interactions in one place.",
+      "endpoints": [
+        {
+          "name": "Search Conversations",
+          "method": "GET",
+          "path": "/conversations/search",
+          "description": "Search conversations",
+          "parameters": {
+            "query": {
+              "locationId": {"type": "string", "required": true},
+              "contactId": {"type": "string", "required": false},
+              "assigned": {"type": "boolean", "required": false},
+              "status": {"type": "string", "required": false}
+            }
+          }
+        },
+        {
+          "name": "Get Conversation",
+          "method": "GET",
+          "path": "/conversations/{conversationId}",
+          "description": "Get conversation by ID",
+          "parameters": {
+            "path": {
+              "conversationId": {"type": "string", "required": true}
+            }
+          }
+        },
+        {
+          "name": "Send Message",
+          "method": "POST",
+          "path": "/conversations/messages",
+          "description": "Send message (SMS/Email)",
+          "parameters": {
+            "body": {
+              "type": {"type": "string", "required": true, "enum": ["SMS", "Email", "GMB", "IG", "FB"]},
+              "contactId": {"type": "string", "required": true},
+              "locationId": {"type": "string", "required": true},
+              "message": {"type": "string", "required": true}
+            }
+          }
+        },
+        {
+          "name": "Get Messages",
+          "method": "GET",
+          "path": "/conversations/{conversationId}/messages",
+          "description": "Get conversation messages",
+          "parameters": {
+            "path": {
+              "conversationId": {"type": "string", "required": true}
+            },
+            "query": {
+              "limit": {"type": "number", "required": false},
+              "skip": {"type": "number", "required": false}
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Calendar",
+      "description": "Calendar and appointment operations",
+      "note": "Complete appointment scheduling system with calendar management, booking slots, and automated notifications. Perfect for service-based businesses.",
+      "endpoints": [
+        {
+          "name": "Get Calendars",
+          "method": "GET",
+          "path": "/calendars/",
+          "description": "Get calendars",
+          "parameters": {
+            "query": {
+              "locationId": {"type": "string", "required": true},
+              "groupId": {"type": "string", "required": false}
+            }
+          }
+        },
+        {
+          "name": "Create Calendar",
+          "method": "POST",
+          "path": "/calendars/",
+          "description": "Create calendar",
+          "parameters": {
+            "body": {
+              "name": {"type": "string", "required": true},
+              "description": {"type": "string", "required": false},
+              "locationId": {"type": "string", "required": true}
+            }
+          }
+        },
+        {
+          "name": "Create Appointment",
+          "method": "POST",
+          "path": "/calendars/events/appointments",
+          "description": "Create appointment",
+          "parameters": {
+            "body": {
+              "calendarId": {"type": "string", "required": true},
+              "contactId": {"type": "string", "required": true},
+              "startTime": {"type": "string", "required": true},
+              "endTime": {"type": "string", "required": true},
+              "title": {"type": "string", "required": true}
+            }
+          }
+        },
+        {
+          "name": "Get Appointment",
+          "method": "GET",
+          "path": "/calendars/events/appointments/{appointmentId}",
+          "description": "Get appointment by ID",
+          "parameters": {
+            "path": {
+              "appointmentId": {"type": "string", "required": true}
+            }
+          }
+        },
+        {
+          "name": "Update Appointment",
+          "method": "PUT",
+          "path": "/calendars/events/appointments/{appointmentId}",
+          "description": "Update appointment",
+          "parameters": {
+            "path": {
+              "appointmentId": {"type": "string", "required": true}
+            },
+            "body": {
+              "startTime": {"type": "string", "required": false},
+              "endTime": {"type": "string", "required": false},
+              "title": {"type": "string", "required": false}
+            }
+          }
+        },
+        {
+          "name": "Delete Appointment",
+          "method": "DELETE",
+          "path": "/calendars/events/appointments/{appointmentId}",
+          "description": "Delete appointment",
+          "parameters": {
+            "path": {
+              "appointmentId": {"type": "string", "required": true}
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Opportunities",
+      "description": "Opportunity and CRM operations",
+      "note": "Sales pipeline management for tracking deals, stages, and revenue opportunities. Essential for sales teams and revenue forecasting.",
+      "endpoints": [
+        {
+          "name": "Search Opportunities",
+          "method": "GET",
+          "path": "/opportunities/search",
+          "description": "Search opportunities",
+          "parameters": {
+            "query": {
+              "locationId": {"type": "string", "required": true},
+              "pipelineId": {"type": "string", "required": false},
+              "status": {"type": "string", "required": false},
+              "limit": {"type": "number", "required": false}
+            }
+          }
+        },
+        {
+          "name": "Create Opportunity",
+          "method": "POST",
+          "path": "/opportunities/",
+          "description": "Create new opportunity",
+          "parameters": {
+            "body": {
+              "title": {"type": "string", "required": true},
+              "contactId": {"type": "string", "required": true},
+              "locationId": {"type": "string", "required": true},
+              "pipelineId": {"type": "string", "required": true},
+              "stageId": {"type": "string", "required": true},
+              "monetaryValue": {"type": "number", "required": false}
+            }
+          }
+        },
+        {
+          "name": "Get Opportunity",
+          "method": "GET",
+          "path": "/opportunities/{opportunityId}",
+          "description": "Get opportunity by ID",
+          "parameters": {
+            "path": {
+              "opportunityId": {"type": "string", "required": true}
+            }
+          }
+        },
+        {
+          "name": "Update Opportunity",
+          "method": "PUT",
+          "path": "/opportunities/{opportunityId}",
+          "description": "Update opportunity",
+          "parameters": {
+            "path": {
+              "opportunityId": {"type": "string", "required": true}
+            },
+            "body": {
+              "title": {"type": "string", "required": false},
+              "stageId": {"type": "string", "required": false},
+              "monetaryValue": {"type": "number", "required": false}
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Locations",
+      "description": "Location management operations",
+      "note": "Multi-location business management for agencies and franchises. Controls sub-accounts, settings, and location-specific configurations.",
+      "endpoints": [
+        {
+          "name": "Search Locations",
+          "method": "GET",
+          "path": "/locations/search",
+          "description": "Search locations",
+          "parameters": {
+            "query": {
+              "companyId": {"type": "string", "required": false},
+              "skip": {"type": "number", "required": false},
+              "limit": {"type": "number", "required": false}
+            }
+          }
+        },
+        {
+          "name": "Get Location",
+          "method": "GET",
+          "path": "/locations/{locationId}",
+          "description": "Get location details",
+          "parameters": {
+            "path": {
+              "locationId": {"type": "string", "required": true}
+            }
+          }
+        },
+        {
+          "name": "Create Location",
+          "method": "POST",
+          "path": "/locations/",
+          "description": "Create new location",
+          "parameters": {
+            "body": {
+              "name": {"type": "string", "required": true},
+              "address": {"type": "string", "required": false},
+              "city": {"type": "string", "required": false},
+              "state": {"type": "string", "required": false},
+              "postalCode": {"type": "string", "required": false},
+              "country": {"type": "string", "required": false}
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Blog",
+      "description": "Blog management operations",
+      "note": "Content management system for creating and managing blog posts, categories, and SEO optimization. Great for content marketing strategies.",
+      "endpoints": [
+        {
+          "name": "Get Blog Sites",
+          "method": "GET",
+          "path": "/blogs/site/all",
+          "description": "Get all blog sites",
+          "parameters": {
+            "query": {
+              "locationId": {"type": "string", "required": true},
+              "limit": {"type": "number", "required": false},
+              "skip": {"type": "number", "required": false}
+            }
+          }
+        },
+        {
+          "name": "Get Blog Posts",
+          "method": "GET",
+          "path": "/blogs/posts/all",
+          "description": "Get blog posts",
+          "parameters": {
+            "query": {
+              "locationId": {"type": "string", "required": true},
+              "siteId": {"type": "string", "required": false},
+              "status": {"type": "string", "required": false}
+            }
+          }
+        },
+        {
+          "name": "Create Blog Post",
+          "method": "POST",
+          "path": "/blogs/posts",
+          "description": "Create new blog post",
+          "parameters": {
+            "body": {
+              "title": {"type": "string", "required": true},
+              "content": {"type": "string", "required": true},
+              "siteId": {"type": "string", "required": true},
+              "authorId": {"type": "string", "required": false},
+              "status": {"type": "string", "required": false}
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Social Media",
+      "description": "Social media management operations",
+      "note": "Social media posting and management across multiple platforms. Schedule posts, manage accounts, and track social media campaigns.",
+      "endpoints": [
+        {
+          "name": "Search Social Posts",
+          "method": "GET",
+          "path": "/social-media-posting/posts/search",
+          "description": "Search social media posts",
+          "parameters": {
+            "query": {
+              "type": {"type": "string", "required": false},
+              "accounts": {"type": "string", "required": false},
+              "limit": {"type": "number", "required": false}
+            }
+          }
+        },
+        {
+          "name": "Create Social Post",
+          "method": "POST",
+          "path": "/social-media-posting/posts",
+          "description": "Create social media post",
+          "parameters": {
+            "body": {
+              "accountIds": {"type": "array", "required": true},
+              "content": {"type": "string", "required": true},
+              "media": {"type": "array", "required": false},
+              "scheduleDate": {"type": "string", "required": false}
+            }
+          }
+        },
+        {
+          "name": "Get Social Accounts",
+          "method": "GET",
+          "path": "/social-media-posting/oauth/accounts",
+          "description": "Get connected social accounts"
+        }
+      ]
+    },
+    {
+      "name": "Workflows",
+      "description": "Workflow management operations",
+      "note": "Automation engine for creating marketing and sales workflows. Trigger sequences based on customer actions and behaviors.",
+      "endpoints": [
+        {
+          "name": "Get Workflows",
+          "method": "GET",
+          "path": "/workflows/",
+          "description": "Get all workflows",
+          "parameters": {
+            "query": {
+              "locationId": {"type": "string", "required": true}
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Surveys",
+      "description": "Survey management operations",
+      "note": "Customer feedback collection through surveys and forms. Gather insights, testimonials, and improve customer satisfaction.",
+      "endpoints": [
+        {
+          "name": "Get Surveys",
+          "method": "GET",
+          "path": "/surveys/",
+          "description": "Get all surveys",
+          "parameters": {
+            "query": {
+              "locationId": {"type": "string", "required": true},
+              "type": {"type": "string", "required": false}
+            }
+          }
+        },
+        {
+          "name": "Get Survey Submissions",
+          "method": "GET",
+          "path": "/surveys/submissions",
+          "description": "Get survey submissions",
+          "parameters": {
+            "query": {
+              "locationId": {"type": "string", "required": true},
+              "surveyId": {"type": "string", "required": false}
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Media",
+      "description": "Media library operations",
+      "note": "Digital asset management for images, videos, and documents. Centralized storage for all marketing materials and content.",
+      "endpoints": [
+        {
+          "name": "Get Media Files",
+          "method": "GET",
+          "path": "/medias/",
+          "description": "Get media files",
+          "parameters": {
+            "query": {
+              "locationId": {"type": "string", "required": true},
+              "limit": {"type": "number", "required": false}
+            }
+          }
+        },
+        {
+          "name": "Upload Media File",
+          "method": "POST",
+          "path": "/medias/upload-file",
+          "description": "Upload media file",
+          "parameters": {
+            "body": {
+              "locationId": {"type": "string", "required": true},
+              "file": {"type": "file", "required": true}
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Email",
+      "description": "Email management operations",
+      "note": "Email marketing platform with templates, campaigns, and automation. Build relationships through targeted email communications.",
+      "endpoints": [
+        {
+          "name": "Get Email Campaigns",
+          "method": "GET",
+          "path": "/campaigns/",
+          "description": "Get email campaigns",
+          "parameters": {
+            "query": {
+              "locationId": {"type": "string", "required": true}
+            }
+          }
+        },
+        {
+          "name": "Get Email Templates",
+          "method": "GET",
+          "path": "/templates/",
+          "description": "Get email templates",
+          "parameters": {
+            "query": {
+              "locationId": {"type": "string", "required": true}
+            }
+          }
+        },
+        {
+          "name": "Create Email Template",
+          "method": "POST",
+          "path": "/templates/",
+          "description": "Create email template",
+          "parameters": {
+            "body": {
+              "name": {"type": "string", "required": true},
+              "subject": {"type": "string", "required": true},
+              "body": {"type": "string", "required": true},
+              "locationId": {"type": "string", "required": true}
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "description": "Payment operations",
+      "note": "E-commerce and payment processing system. Handle orders, transactions, subscriptions, and payment providers integration.",
+      "endpoints": [
+        {
+          "name": "Get Orders",
+          "method": "GET",
+          "path": "/payments/orders",
+          "description": "Get orders",
+          "parameters": {
+            "query": {
+              "locationId": {"type": "string", "required": true},
+              "limit": {"type": "number", "required": false}
+            }
+          }
+        },
+        {
+          "name": "Create Order",
+          "method": "POST",
+          "path": "/payments/orders",
+          "description": "Create order",
+          "parameters": {
+            "body": {
+              "locationId": {"type": "string", "required": true},
+              "contactId": {"type": "string", "required": true},
+              "items": {"type": "array", "required": true}
+            }
+          }
+        },
+        {
+          "name": "Get Transactions",
+          "method": "GET",
+          "path": "/payments/transactions",
+          "description": "Get transactions",
+          "parameters": {
+            "query": {
+              "locationId": {"type": "string", "required": true}
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "description": "Product management operations",
+      "note": "Product catalog management with pricing, inventory, and e-commerce functionality. Perfect for online stores and digital products.",
+      "endpoints": [
+        {
+          "name": "List Products",
+          "method": "GET",
+          "path": "/products/",
+          "description": "List products",
+          "parameters": {
+            "query": {
+              "locationId": {"type": "string", "required": true},
+              "limit": {"type": "number", "required": false}
+            }
+          }
+        },
+        {
+          "name": "Create Product",
+          "method": "POST",
+          "path": "/products/",
+          "description": "Create product",
+          "parameters": {
+            "body": {
+              "name": {"type": "string", "required": true},
+              "description": {"type": "string", "required": false},
+              "price": {"type": "number", "required": true},
+              "locationId": {"type": "string", "required": true}
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Custom Objects",
+      "description": "Custom object operations",
+      "note": "Flexible data modeling for business-specific requirements. Create custom entities, fields, and relationships beyond standard CRM objects.",
+      "endpoints": [
+        {
+          "name": "Get Object Schemas",
+          "method": "GET",
+          "path": "/objects/schemas",
+          "description": "Get object schemas",
+          "parameters": {
+            "query": {
+              "locationId": {"type": "string", "required": true}
+            }
+          }
+        },
+        {
+          "name": "Create Object Schema",
+          "method": "POST",
+          "path": "/objects/schemas",
+          "description": "Create object schema",
+          "parameters": {
+            "body": {
+              "name": {"type": "string", "required": true},
+              "locationId": {"type": "string", "required": true},
+              "fields": {"type": "array", "required": true}
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invoices",
+      "description": "Invoice management operations",
+      "note": "Professional invoicing system with templates, scheduling, and payment tracking. Streamline billing processes and cash flow management.",
+      "endpoints": [
+        {
+          "name": "Get Invoices",
+          "method": "GET",
+          "path": "/invoices/",
+          "description": "Get invoices",
+          "parameters": {
+            "query": {
+              "altId": {"type": "string", "required": false},
+              "altType": {"type": "string", "required": false}
+            }
+          }
+        },
+        {
+          "name": "Create Invoice",
+          "method": "POST",
+          "path": "/invoices/",
+          "description": "Create invoice",
+          "parameters": {
+            "body": {
+              "locationId": {"type": "string", "required": true},
+              "contactId": {"type": "string", "required": true},
+              "title": {"type": "string", "required": true},
+              "items": {"type": "array", "required": true}
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "totalEndpoints": 269,
+  "lastUpdated": "2025-07-01",
+  "notes": [
+    "All endpoints require OAuth 2.0 Bearer token authentication",
+    "Most endpoints require locationId parameter for multi-tenant context",
+    "API uses versioning via headers (e.g., Version: 2021-07-28)",
+    "Pagination typically uses skip/limit or page/limit parameters",
+    "Contact endpoints use API version 2021-07-28",
+    "Conversation endpoints use API version 2021-04-15",
+    "This is a condensed version - full API includes 269+ endpoints across 19 categories"
+  ]
+}

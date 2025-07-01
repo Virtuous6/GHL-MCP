@@ -1,0 +1,957 @@
+{
+  "name": "GoHighLevel - Location Tools API Endpoints",
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [20, 700],
+      "parameters": {},
+      "typeVersion": 1,
+      "notes": "Start workflow to test Location Tools API endpoints"
+    },
+    {
+      "id": "config",
+      "name": "GoHighLevel Config",
+      "type": "n8n-nodes-base.set",
+      "position": [300, 700],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "baseUrl",
+              "name": "baseUrl",
+              "type": "string",
+              "value": "https://services.leadconnectorhq.com"
+            },
+            {
+              "id": "authToken",
+              "name": "authToken",
+              "type": "string",
+              "value": "{{$vars.GHL_ACCESS_TOKEN}}"
+            },
+            {
+              "id": "locationId",
+              "name": "locationId",
+              "type": "string",
+              "value": "{{$vars.GHL_LOCATION_ID}}"
+            },
+            {
+              "id": "companyId",
+              "name": "companyId",
+              "type": "string",
+              "value": "{{$vars.GHL_COMPANY_ID}}"
+            }
+          ]
+        }
+      },
+      "typeVersion": 3.4,
+      "notes": "Configure your GoHighLevel API settings"
+    },
+    {
+      "id": "search-locations",
+      "name": "Search Locations",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/locations/search",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "companyId",
+              "value": "={{$node['GoHighLevel Config'].json.companyId}}"
+            },
+            {
+              "name": "limit",
+              "value": "10"
+            },
+            {
+              "name": "skip",
+              "value": "0"
+            },
+            {
+              "name": "order",
+              "value": "asc"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Search for locations/sub-accounts with filtering"
+    },
+    {
+      "id": "get-location",
+      "name": "Get Location",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/locations/LOCATION_ID_HERE",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get detailed location information by ID"
+    },
+    {
+      "id": "create-location",
+      "name": "Create Location",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/locations/",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "name": "New Client Business",
+          "companyId": "={{$node['GoHighLevel Config'].json.companyId}}",
+          "phone": "+1234567890",
+          "address": "123 Business St",
+          "city": "New York",
+          "state": "NY",
+          "country": "US",
+          "postalCode": "10001",
+          "website": "https://newclientbusiness.com",
+          "timezone": "US/Eastern",
+          "prospectInfo": {
+            "firstName": "John",
+            "lastName": "Doe",
+            "email": "john.doe@newclientbusiness.com"
+          }
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create new sub-account/location (Agency Pro required)"
+    },
+    {
+      "id": "update-location",
+      "name": "Update Location",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 200],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/locations/LOCATION_ID_HERE",
+        "httpMethod": "PUT",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "name": "Updated Client Business",
+          "companyId": "={{$node['GoHighLevel Config'].json.companyId}}",
+          "phone": "+1234567891",
+          "website": "https://updatedclientbusiness.com",
+          "timezone": "US/Central"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Update existing location information"
+    },
+    {
+      "id": "delete-location",
+      "name": "Delete Location",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/locations/LOCATION_ID_HERE",
+        "httpMethod": "DELETE",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "deleteTwilioAccount",
+              "value": "false"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Delete location/sub-account"
+    },
+    {
+      "id": "get-location-tags",
+      "name": "Get Location Tags",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/locations/LOCATION_ID_HERE/tags",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get all tags for a location"
+    },
+    {
+      "id": "create-location-tag",
+      "name": "Create Location Tag",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/locations/LOCATION_ID_HERE/tags",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "name": "Premium Client"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create new tag for location"
+    },
+    {
+      "id": "update-location-tag",
+      "name": "Update Location Tag",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 300],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/locations/LOCATION_ID_HERE/tags/TAG_ID_HERE",
+        "httpMethod": "PUT",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "name": "VIP Premium Client"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Update existing location tag"
+    },
+    {
+      "id": "delete-location-tag",
+      "name": "Delete Location Tag",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 400],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/locations/LOCATION_ID_HERE/tags/TAG_ID_HERE",
+        "httpMethod": "DELETE",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Delete location tag"
+    },
+    {
+      "id": "search-location-tasks",
+      "name": "Search Location Tasks",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 400],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/locations/LOCATION_ID_HERE/tasks/search",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "limit",
+              "value": "25"
+            },
+            {
+              "name": "skip",
+              "value": "0"
+            },
+            {
+              "name": "completed",
+              "value": "false"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Search tasks within location with filtering"
+    },
+    {
+      "id": "get-custom-fields",
+      "name": "Get Location Custom Fields",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 400],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/locations/LOCATION_ID_HERE/customFields",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "contact"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get custom fields for location"
+    },
+    {
+      "id": "create-custom-field",
+      "name": "Create Location Custom Field",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 400],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/locations/LOCATION_ID_HERE/customFields",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "name": "Company Size",
+          "dataType": "TEXT",
+          "placeholder": "Enter company size (e.g., 1-10, 11-50, etc.)",
+          "model": "contact",
+          "position": 0
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create new custom field for location"
+    },
+    {
+      "id": "update-custom-field",
+      "name": "Update Location Custom Field",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 500],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/locations/LOCATION_ID_HERE/customFields/FIELD_ID_HERE",
+        "httpMethod": "PUT",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "name": "Company Size (Updated)",
+          "placeholder": "Enter company size range",
+          "position": 1
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Update existing custom field"
+    },
+    {
+      "id": "delete-custom-field",
+      "name": "Delete Location Custom Field",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 500],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/locations/LOCATION_ID_HERE/customFields/FIELD_ID_HERE",
+        "httpMethod": "DELETE",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Delete custom field from location"
+    },
+    {
+      "id": "get-custom-values",
+      "name": "Get Location Custom Values",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 500],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/locations/LOCATION_ID_HERE/customValues",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get all custom values for location"
+    },
+    {
+      "id": "create-custom-value",
+      "name": "Create Location Custom Value",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1200, 500],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/locations/LOCATION_ID_HERE/customValues",
+        "httpMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "name": "Default Lead Source",
+          "value": "Website"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Create new custom value for location"
+    },
+    {
+      "id": "get-templates",
+      "name": "Get Location Templates",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 600],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/locations/LOCATION_ID_HERE/templates",
+        "httpMethod": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "originId",
+              "value": "ORIGIN_ID_HERE"
+            },
+            {
+              "name": "type",
+              "value": "sms"
+            },
+            {
+              "name": "limit",
+              "value": "25"
+            },
+            {
+              "name": "skip",
+              "value": "0"
+            },
+            {
+              "name": "deleted",
+              "value": "false"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get SMS/Email templates for location"
+    },
+    {
+      "id": "delete-template",
+      "name": "Delete Location Template",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 600],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/locations/LOCATION_ID_HERE/templates/TEMPLATE_ID_HERE",
+        "httpMethod": "DELETE",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Delete template from location"
+    },
+    {
+      "id": "get-timezones",
+      "name": "Get Timezones",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1000, 600],
+      "parameters": {
+        "url": "={{$node['GoHighLevel Config'].json.baseUrl}}/timezones",
+        "httpMethod": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$node['GoHighLevel Config'].json.authToken}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "Get available timezones for location configuration"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "GoHighLevel Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GoHighLevel Config": {
+      "main": [
+        [
+          {
+            "node": "Search Locations",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Location",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Location",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Location",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Delete Location",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Location Tags",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Location Tag",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Location Tag",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Delete Location Tag",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Search Location Tasks",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Location Custom Fields",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Location Custom Field",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Location Custom Field",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Delete Location Custom Field",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Location Custom Values",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Location Custom Value",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Location Templates",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Delete Location Template",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Timezones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {},
+  "tags": ["gohighlevel", "location", "sub-account", "management", "api"],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "version": "3"
+  },
+  "createdAt": "2025-07-01T00:00:00.000Z",
+  "updatedAt": "2025-07-01T00:00:00.000Z",
+  "versionId": "1"
+}
