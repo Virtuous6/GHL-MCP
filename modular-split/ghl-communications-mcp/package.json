@@ -1,0 +1,49 @@
+{
+  "name": "@ghl/communications-mcp",
+  "version": "1.0.0",
+  "description": "GoHighLevel Communications MCP Server - Focused on conversations and email campaigns",
+  "main": "dist/server.js",
+  "type": "module",
+  "bin": {
+    "ghl-communications-mcp": "dist/server.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "nodemon --exec ts-node src/server.ts",
+    "start": "node dist/server.js",
+    "start:http": "node dist/http-server.js",
+    "test": "jest",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "mcp",
+    "gohighlevel",
+    "communications",
+    "conversations",
+    "email",
+    "crm",
+    "claude",
+    "ai"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "@types/express": "^5.0.2",
+    "axios": "^1.9.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.18",
+    "@types/node": "^22.15.29",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3",
+    "jest": "^29.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+} 

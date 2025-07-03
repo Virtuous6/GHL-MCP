@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "ghl-dynamic": {
+      "command": "node",
+      "args": ["/path/to/modular-split/ghl-core-mcp/dist/server.js"]
+    }
+  }
+} 

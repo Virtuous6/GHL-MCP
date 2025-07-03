@@ -1,0 +1,28 @@
+{
+  "name": "ghl-sales-mcp",
+  "version": "1.0.0", 
+  "description": "GoHighLevel Sales Management MCP Server - Dynamic Multi-Tenant Architecture",
+  "main": "dist/server.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js", 
+    "start:http": "node dist/http-server.js",
+    "dev": "tsc && node dist/server.js",
+    "dev:http": "tsc && node dist/http-server.js",
+    "readme": "echo '# GHL Sales MCP\\n\\nGoHighLevel Sales MCP Server with dynamic multi-tenant architecture.\\n\\n## Features\\n- Opportunity management tools\\n- Payment processing tools\\n- Invoice management tools\\n\\n## Usage\\n```\\ncurl https://ghl-sales-mcp.fly.dev/health\\n```' > README.md"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "axios": "^1.9.0",
+    "cors": "^2.8.5", 
+    "dotenv": "^16.3.1",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0", 
+    "@types/node": "^22.10.1",
+    "typescript": "^5.8.3"
+  }
+} 
