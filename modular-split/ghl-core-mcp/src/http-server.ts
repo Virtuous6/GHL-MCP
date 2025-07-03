@@ -56,16 +56,36 @@ class DynamicMultiTenantHttpServer {
     this.app.use(cors({
       origin: '*',
       methods: ['GET', 'POST', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-GHL-API-Key', 'X-GHL-Location-ID'],
       credentials: true
     }));
 
     // Parse JSON requests
     this.app.use(express.json());
 
+    // Extract MCP remote headers and set as environment variables
+    this.app.use((req, res, next) => {
+      // Extract GHL credentials from headers if present
+      const apiKeyHeader = req.headers['x-ghl-api-key'] as string;
+      const locationIdHeader = req.headers['x-ghl-location-id'] as string;
+      
+      // Set environment variables for this request context
+      if (apiKeyHeader) {
+        process.env.GHL_API_KEY = apiKeyHeader;
+      }
+      if (locationIdHeader) {
+        process.env.GHL_LOCATION_ID = locationIdHeader;
+      }
+      
+      next();
+    });
+
     // Request logging
     this.app.use((req, res, next) => {
       console.log(`[HTTP] ${req.method} ${req.path} - ${new Date().toISOString()}`);
+      const hasApiKey = !!(req.headers['x-ghl-api-key'] || process.env.GHL_API_KEY);
+      const hasLocationId = !!(req.headers['x-ghl-location-id'] || process.env.GHL_LOCATION_ID);
+      console.log(`[HTTP] Credentials available - API Key: ${hasApiKey}, Location ID: ${hasLocationId}`);
       next();
     });
   }
@@ -75,196 +95,50 @@ class DynamicMultiTenantHttpServer {
    */
   private setupMCPHandlers(): void {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
-      return {
-        tools: [
-          // Contact Tools with dynamic credentials
-          {
-            name: 'search_contacts',
-            description: 'Search contacts in GoHighLevel CRM',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                apiKey: {
-                  type: 'string',
-                  description: 'GoHighLevel Private Integration API key (optional if using headers)',
-                },
-                locationId: {
-                  type: 'string',
-                  description: 'GoHighLevel Location ID (optional if using headers)',
-                },
-                userId: {
-                  type: 'string',
-                  description: 'User identifier for tracking/logging (optional)',
-                },
-                query: {
-                  type: 'string',
-                  description: 'Search query for contacts',
-                },
-                limit: {
-                  type: 'number',
-                  description: 'Maximum number of contacts to return',
-                  default: 100
-                }
-              },
-              required: ['apiKey', 'locationId']
-            }
+      // Create temporary tool instances to get their definitions
+      const tempGhlClient = new GHLApiClient({
+        accessToken: 'temp',
+        baseUrl: 'https://services.leadconnectorhq.com',
+        locationId: 'temp',
+        version: '2021-07-28'
+      });
+      
+      const contactTools = new ContactTools(tempGhlClient);
+      const customFieldTools = new CustomFieldV2Tools(tempGhlClient);
+      const emailISVTools = new EmailISVTools(tempGhlClient);
+
+      // Get all tool definitions from the tool classes
+      const allTools = [
+        ...contactTools.getToolDefinitions(),
+        ...customFieldTools.getTools(),
+        ...emailISVTools.getToolDefinitions()
+      ];
+
+      // Add dynamic credential parameters to each tool
+      const toolsWithCredentials = allTools.map(tool => ({
+        ...tool,
+        inputSchema: {
+          ...tool.inputSchema,
+          properties: {
+            apiKey: {
+              type: 'string',
+              description: 'GoHighLevel Private Integration API key (optional if using headers)',
+            },
+            locationId: {
+              type: 'string',
+              description: 'GoHighLevel Location ID (optional if using headers)',
+            },
+            userId: {
+              type: 'string',
+              description: 'User identifier for tracking/logging (optional)',
+            },
+            ...tool.inputSchema.properties
           },
-          {
-            name: 'get_contact',
-            description: 'Get a specific contact by ID',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                apiKey: {
-                  type: 'string',
-                  description: 'GoHighLevel Private Integration API key (optional if using headers)',
-                },
-                locationId: {
-                  type: 'string',
-                  description: 'GoHighLevel Location ID (optional if using headers)',
-                },
-                userId: {
-                  type: 'string',
-                  description: 'User identifier for tracking/logging (optional)',
-                },
-                contactId: {
-                  type: 'string',
-                  description: 'The contact ID to retrieve',
-                }
-              },
-              required: ['apiKey', 'locationId', 'contactId']
-            }
-          },
-          {
-            name: 'create_contact',
-            description: 'Create a new contact',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                apiKey: {
-                  type: 'string',
-                  description: 'GoHighLevel Private Integration API key (optional if using headers)',
-                },
-                locationId: {
-                  type: 'string',
-                  description: 'GoHighLevel Location ID (optional if using headers)',
-                },
-                userId: {
-                  type: 'string',
-                  description: 'User identifier for tracking/logging (optional)',
-                },
-                firstName: {
-                  type: 'string',
-                  description: 'Contact first name',
-                },
-                lastName: {
-                  type: 'string',
-                  description: 'Contact last name',
-                },
-                email: {
-                  type: 'string',
-                  description: 'Contact email address',
-                },
-                phone: {
-                  type: 'string',
-                  description: 'Contact phone number',
-                }
-              },
-              required: ['apiKey', 'locationId', 'firstName']
-            }
-          },
-          {
-            name: 'update_contact',
-            description: 'Update an existing contact',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                apiKey: { type: 'string', description: 'GoHighLevel Private Integration API key' },
-                locationId: { type: 'string', description: 'GoHighLevel Location ID (optional if using headers)' },
-                userId: { type: 'string', description: 'User identifier (optional)' },
-                contactId: { type: 'string', description: 'Contact ID to update' },
-                firstName: { type: 'string', description: 'Contact first name' },
-                lastName: { type: 'string', description: 'Contact last name' },
-                email: { type: 'string', description: 'Contact email address' },
-                phone: { type: 'string', description: 'Contact phone number' }
-              },
-              required: ['apiKey', 'locationId', 'contactId']
-            }
-          },
-          {
-            name: 'delete_contact',
-            description: 'Delete a contact',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                apiKey: { type: 'string', description: 'GoHighLevel Private Integration API key' },
-                locationId: { type: 'string', description: 'GoHighLevel Location ID (optional if using headers)' },
-                userId: { type: 'string', description: 'User identifier (optional)' },
-                contactId: { type: 'string', description: 'Contact ID to delete' }
-              },
-              required: ['apiKey', 'locationId', 'contactId']
-            }
-          },
-          {
-            name: 'add_contact_tags',
-            description: 'Add tags to a contact',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                apiKey: { type: 'string', description: 'GoHighLevel Private Integration API key' },
-                locationId: { type: 'string', description: 'GoHighLevel Location ID (optional if using headers)' },
-                userId: { type: 'string', description: 'User identifier (optional)' },
-                contactId: { type: 'string', description: 'Contact ID' },
-                tags: { type: 'array', items: { type: 'string' }, description: 'Tags to add' }
-              },
-              required: ['apiKey', 'locationId', 'contactId', 'tags']
-            }
-          },
-          {
-            name: 'remove_contact_tags',
-            description: 'Remove tags from a contact',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                apiKey: { type: 'string', description: 'GoHighLevel Private Integration API key' },
-                locationId: { type: 'string', description: 'GoHighLevel Location ID (optional if using headers)' },
-                userId: { type: 'string', description: 'User identifier (optional)' },
-                contactId: { type: 'string', description: 'Contact ID' },
-                tags: { type: 'array', items: { type: 'string' }, description: 'Tags to remove' }
-              },
-              required: ['apiKey', 'locationId', 'contactId', 'tags']
-            }
-          },
-          {
-            name: 'list_custom_fields',
-            description: 'List all custom fields',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                apiKey: { type: 'string', description: 'GoHighLevel Private Integration API key' },
-                locationId: { type: 'string', description: 'GoHighLevel Location ID (optional if using headers)' },
-                userId: { type: 'string', description: 'User identifier (optional)' },
-                model: { type: 'string', enum: ['contact', 'opportunity'], description: 'Model type' }
-              },
-              required: ['apiKey', 'locationId']
-            }
-          },
-          {
-            name: 'verify_email',
-            description: 'Verify an email address',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                apiKey: { type: 'string', description: 'GoHighLevel Private Integration API key' },
-                locationId: { type: 'string', description: 'GoHighLevel Location ID (optional if using headers)' },
-                userId: { type: 'string', description: 'User identifier (optional)' },
-                email: { type: 'string', description: 'Email address to verify' }
-              },
-              required: ['apiKey', 'locationId', 'email']
-            }
-          }
-        ]
-      };
+          required: ['apiKey', 'locationId', ...(tool.inputSchema.required || [])]
+        }
+      }));
+
+      return { tools: toolsWithCredentials };
     });
 
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
@@ -349,16 +223,25 @@ class DynamicMultiTenantHttpServer {
           case 'get_business_by_contact_id':
             return await contactTools.executeTool(toolName, args);
 
-          // Custom Field Tools
-          case 'create_custom_field':
-          case 'get_custom_field':
-          case 'update_custom_field':
-          case 'delete_custom_field':
-          case 'list_custom_fields':
-          case 'upload_custom_field_file':
-          case 'list_custom_field_options':
-          case 'create_custom_field_option':
-            return await customFieldTools.executeCustomFieldV2Tool(toolName, args);
+                  // Custom Field Tools
+        case 'create_custom_field':
+        case 'get_custom_field':
+        case 'update_custom_field':
+        case 'delete_custom_field':
+        case 'list_custom_fields':
+        case 'upload_custom_field_file':
+        case 'list_custom_field_options':
+        case 'create_custom_field_option':
+        // New Custom Field V2 Tools with correct names
+        case 'ghl_get_custom_field_by_id':
+        case 'ghl_create_custom_field':
+        case 'ghl_update_custom_field':
+        case 'ghl_delete_custom_field':
+        case 'ghl_get_custom_fields_by_object_key':
+        case 'ghl_create_custom_field_folder':
+        case 'ghl_update_custom_field_folder':
+        case 'ghl_delete_custom_field_folder':
+          return await customFieldTools.executeCustomFieldV2Tool(toolName, args);
 
           // Email ISV Tools
           case 'verify_email':
@@ -454,8 +337,31 @@ class DynamicMultiTenantHttpServer {
             });
           }
         } else if (jsonrpcRequest.method === 'tools/call') {
-          const response = await this.server.request(jsonrpcRequest, CallToolRequestSchema);
-          res.json(response);
+          try {
+            const result = await this.executeToolDirectly(jsonrpcRequest.params);
+            res.json({
+              jsonrpc: '2.0',
+              result,
+              id: jsonrpcRequest.id
+            });
+          } catch (error) {
+            console.error('[HTTP] Error executing tool directly:', error);
+            res.json({
+              jsonrpc: '2.0',
+              error: {
+                code: error instanceof McpError ? error.code : -32603,
+                message: error instanceof Error ? error.message : 'Internal error'
+              },
+              id: jsonrpcRequest.id
+            });
+          }
+        } else if (jsonrpcRequest.method === 'resources/list') {
+          // This server doesn't provide resources, return empty list
+          res.json({
+            jsonrpc: '2.0',
+            result: { resources: [] },
+            id: jsonrpcRequest.id
+          });
         } else {
           res.status(404).json({
             jsonrpc: '2.0',
@@ -518,110 +424,196 @@ class DynamicMultiTenantHttpServer {
   }
 
   /**
+   * Execute a tool directly without MCP server (for HTTP mode)
+   */
+  private async executeToolDirectly(params: any) {
+    const { name: toolName, arguments: args } = params;
+
+    if (!args) {
+      throw new McpError(ErrorCode.InvalidParams, 'Arguments are required');
+    }
+
+    // Try to get credentials from args first, then fallback to env vars
+    let apiKey = args.apiKey as string;
+    let locationId = args.locationId as string;
+    
+    // If not in args, try environment variables (set by mcp-remote from headers)
+    if (!apiKey) {
+      apiKey = process.env.GHL_API_KEY || '';
+    }
+    if (!locationId) {
+      locationId = process.env.GHL_LOCATION_ID || '';
+    }
+    const userId = (args.userId as string) || 'anonymous';
+    
+    if (!apiKey) {
+      throw new McpError(
+        ErrorCode.InvalidParams,
+        'apiKey is required. Please provide your GoHighLevel Private Integration API key.'
+      );
+    }
+
+    if (!locationId) {
+      throw new McpError(
+        ErrorCode.InvalidParams,
+        'locationId is required. Please provide your GoHighLevel Location ID (optional if using headers).'
+      );
+    }
+
+    try {
+      // Create API client with provided credentials
+      const ghlClient = new GHLApiClient({
+        accessToken: apiKey,
+        baseUrl: 'https://services.leadconnectorhq.com',
+        locationId: locationId,
+        version: '2021-07-28'
+      });
+
+      // Log the request (optional, for debugging)
+      console.log(`[${new Date().toISOString()}] User: ${userId} | Tool: ${toolName}`);
+
+      // Initialize tool handlers with the dynamic client
+      const contactTools = new ContactTools(ghlClient);
+      const customFieldTools = new CustomFieldV2Tools(ghlClient);
+      const emailISVTools = new EmailISVTools(ghlClient);
+
+      // Route to appropriate tool handler
+      switch (toolName) {
+        // Contact Tools
+        case 'search_contacts':
+        case 'get_contact':
+        case 'create_contact':
+        case 'update_contact':
+        case 'delete_contact':
+        case 'bulk_delete_contacts':
+        case 'get_contact_followers':
+        case 'add_contact_follower':
+        case 'remove_contact_follower':
+        case 'add_contact_tags':
+        case 'remove_contact_tags':
+        case 'create_contact_task':
+        case 'update_contact_task':
+        case 'delete_contact_task':
+        case 'get_contact_tasks':
+        case 'update_contact_task_status':
+        case 'create_contact_note':
+        case 'update_contact_note':
+        case 'delete_contact_note':
+        case 'get_contact_notes':
+        case 'create_contact_appointment':
+        case 'delete_contact_appointment':
+        case 'get_contact_appointments':
+        case 'upsert_contact':
+        case 'duplicate_contact_check':
+        case 'get_business_by_contact_id':
+          return await contactTools.executeTool(toolName, args);
+
+        // Custom Field Tools
+        case 'create_custom_field':
+        case 'get_custom_field':
+        case 'update_custom_field':
+        case 'delete_custom_field':
+        case 'list_custom_fields':
+        case 'upload_custom_field_file':
+        case 'list_custom_field_options':
+        case 'create_custom_field_option':
+        // New Custom Field V2 Tools with correct names
+        case 'ghl_get_custom_field_by_id':
+        case 'ghl_create_custom_field':
+        case 'ghl_update_custom_field':
+        case 'ghl_delete_custom_field':
+        case 'ghl_get_custom_fields_by_object_key':
+        case 'ghl_create_custom_field_folder':
+        case 'ghl_update_custom_field_folder':
+        case 'ghl_delete_custom_field_folder':
+          return await customFieldTools.executeCustomFieldV2Tool(toolName, args);
+
+        // Email ISV Tools
+        case 'verify_email':
+          return await emailISVTools.executeTool(toolName, args);
+
+        default:
+          throw new McpError(
+            ErrorCode.MethodNotFound,
+            `Unknown tool: ${toolName}`
+          );
+      }
+    } catch (error) {
+      console.error(`Error executing tool ${toolName} for user ${userId}:`, error);
+      
+      if (error instanceof McpError) {
+        throw error;
+      }
+      
+      // Handle authentication errors specifically
+      if (error instanceof Error && error.message.includes('401')) {
+        throw new McpError(
+          ErrorCode.InvalidParams,
+          'Invalid API key or insufficient permissions. Please check your GoHighLevel Private Integration API key and scopes.'
+        );
+      }
+      
+      throw new McpError(
+        ErrorCode.InternalError,
+        `Failed to execute tool: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  }
+
+  /**
    * Get tools directly without MCP server (fallback method)
    */
   private getToolsDirectly() {
-    return [
-      // Contact Tools with dynamic credentials
-      {
-        name: 'search_contacts',
-        description: 'Search contacts in GoHighLevel CRM',
-        inputSchema: {
-          type: 'object',
-          properties: {
-            apiKey: { type: 'string', description: 'GoHighLevel Private Integration API key (pk_live_...)' },
-            locationId: { type: 'string', description: 'GoHighLevel Location ID (optional, uses default if not provided)' },
-            userId: { type: 'string', description: 'User identifier for tracking/logging (optional)' },
-            query: { type: 'string', description: 'Search query for contacts' },
-            limit: { type: 'number', description: 'Maximum number of contacts to return', default: 100 }
-          },
-          required: ['apiKey', 'locationId']
-        }
-      },
-      {
-        name: 'get_contact',
-        description: 'Get a specific contact by ID',
-        inputSchema: {
-          type: 'object',
-          properties: {
-            apiKey: { type: 'string', description: 'GoHighLevel Private Integration API key (pk_live_...)' },
-            locationId: { type: 'string', description: 'GoHighLevel Location ID (optional, uses default if not provided)' },
-            userId: { type: 'string', description: 'User identifier for tracking/logging (optional)' },
-            contactId: { type: 'string', description: 'The contact ID to retrieve' }
-          },
-          required: ['apiKey', 'locationId', 'contactId']
-        }
-      },
-      {
-        name: 'create_contact',
-        description: 'Create a new contact',
-        inputSchema: {
-          type: 'object',
-          properties: {
-            apiKey: { type: 'string', description: 'GoHighLevel Private Integration API key (pk_live_...)' },
-            locationId: { type: 'string', description: 'GoHighLevel Location ID (optional, uses default if not provided)' },
-            userId: { type: 'string', description: 'User identifier for tracking/logging (optional)' },
-            firstName: { type: 'string', description: 'Contact first name' },
-            lastName: { type: 'string', description: 'Contact last name' },
-            email: { type: 'string', description: 'Contact email address' },
-            phone: { type: 'string', description: 'Contact phone number' }
-          },
-          required: ['apiKey', 'locationId', 'firstName']
-        }
-      },
-      {
-        name: 'update_contact',
-        description: 'Update an existing contact',
-        inputSchema: {
-          type: 'object',
-          properties: {
-            apiKey: { type: 'string', description: 'GoHighLevel Private Integration API key (pk_live_...)' },
-            locationId: { type: 'string', description: 'GoHighLevel Location ID (optional, uses default if not provided)' },
-            userId: { type: 'string', description: 'User identifier for tracking/logging (optional)' },
-            contactId: { type: 'string', description: 'Contact ID to update' },
-            firstName: { type: 'string', description: 'Contact first name' },
-            lastName: { type: 'string', description: 'Contact last name' },
-            email: { type: 'string', description: 'Contact email address' },
-            phone: { type: 'string', description: 'Contact phone number' }
-          },
-          required: ['apiKey', 'locationId', 'contactId']
-        }
-      },
-      {
-        name: 'delete_contact',
-        description: 'Delete a contact',
-        inputSchema: {
-          type: 'object',
-          properties: {
-            apiKey: { type: 'string', description: 'GoHighLevel Private Integration API key (pk_live_...)' },
-            locationId: { type: 'string', description: 'GoHighLevel Location ID (optional, uses default if not provided)' },
-            userId: { type: 'string', description: 'User identifier for tracking/logging (optional)' },
-            contactId: { type: 'string', description: 'Contact ID to delete' }
-          },
-          required: ['apiKey', 'locationId', 'contactId']
-        }
-      },
-      {
-        name: 'verify_email',
-        description: 'Verify an email address',
-        inputSchema: {
-          type: 'object',
-          properties: {
-            apiKey: { type: 'string', description: 'GoHighLevel Private Integration API key (pk_live_...)' },
-            locationId: { type: 'string', description: 'GoHighLevel Location ID (optional, uses default if not provided)' },
-            userId: { type: 'string', description: 'User identifier for tracking/logging (optional)' },
-            email: { type: 'string', description: 'Email address to verify' }
-          },
-          required: ['apiKey', 'locationId', 'email']
-        }
-      }
+    // Create temporary tool instances to get their definitions
+    const tempGhlClient = new GHLApiClient({
+      accessToken: 'temp',
+      baseUrl: 'https://services.leadconnectorhq.com',
+      locationId: 'temp',
+      version: '2021-07-28'
+    });
+    
+    const contactTools = new ContactTools(tempGhlClient);
+    const customFieldTools = new CustomFieldV2Tools(tempGhlClient);
+    const emailISVTools = new EmailISVTools(tempGhlClient);
+
+    // Get all tool definitions from the tool classes
+    const allTools = [
+      ...contactTools.getToolDefinitions(),
+      ...customFieldTools.getTools(),
+      ...emailISVTools.getToolDefinitions()
     ];
+
+    // Add dynamic credential parameters to each tool
+    const toolsWithCredentials = allTools.map(tool => ({
+      ...tool,
+      inputSchema: {
+        ...tool.inputSchema,
+        properties: {
+          apiKey: {
+            type: 'string',
+            description: 'GoHighLevel Private Integration API key (pk_live_...)',
+          },
+          locationId: {
+            type: 'string',
+            description: 'GoHighLevel Location ID (optional, uses default if not provided)',
+          },
+          userId: {
+            type: 'string',
+            description: 'User identifier for tracking/logging (optional)',
+          },
+          ...tool.inputSchema.properties
+        },
+        required: ['apiKey', 'locationId', ...(tool.inputSchema.required || [])]
+      }
+    }));
+
+    return toolsWithCredentials;
   }
 
   /**
    * Start the HTTP server
    */
-  async start(): Promise<void> {
+  async run(): Promise<void> {
     return new Promise((resolve) => {
       this.app.listen(this.port, '0.0.0.0', () => {
         console.log(`[HTTP] GoHighLevel Core MCP server running on port ${this.port}`);
@@ -650,7 +642,7 @@ async function main(): Promise<void> {
     setupGracefulShutdown();
     
     const server = new DynamicMultiTenantHttpServer();
-    await server.start();
+    await server.run();
     
     console.log('[HTTP] GoHighLevel Core MCP server is ready for connections');
   } catch (error) {
@@ -660,7 +652,7 @@ async function main(): Promise<void> {
 }
 
 // Start the server if this file is run directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch(console.error);
 }
 

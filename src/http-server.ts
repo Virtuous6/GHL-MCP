@@ -119,16 +119,27 @@ class GHLMCPHttpServer {
     this.app.use(cors({
       origin: ['https://chatgpt.com', 'https://chat.openai.com', 'http://localhost:*'],
       methods: ['GET', 'POST', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-GHL-API-Key', 'X-GHL-Location-ID'],
       credentials: true
     }));
 
     // Parse JSON requests
     this.app.use(express.json());
 
-    // Request logging
+    // Extract credentials from headers and set as environment variables
     this.app.use((req, res, next) => {
+      const apiKey = req.headers['x-ghl-api-key'] as string;
+      const locationId = req.headers['x-ghl-location-id'] as string;
+      
+      if (apiKey) {
+        process.env.GHL_API_KEY = apiKey;
+      }
+      if (locationId) {
+        process.env.GHL_LOCATION_ID = locationId;
+      }
+      
       console.log(`[HTTP] ${req.method} ${req.path} - ${new Date().toISOString()}`);
+      console.log(`[HTTP] Credentials available - API Key: ${!!apiKey}, Location ID: ${!!locationId}`);
       next();
     });
   }
@@ -137,27 +148,18 @@ class GHLMCPHttpServer {
    * Initialize GoHighLevel API client with configuration
    */
   private initializeGHLClient(): GHLApiClient {
-    // Load configuration from environment
+    // Load configuration from environment (will be set by headers middleware)
     const config: GHLConfig = {
-      accessToken: process.env.GHL_API_KEY || '',
+      accessToken: process.env.GHL_API_KEY || 'placeholder',
       baseUrl: process.env.GHL_BASE_URL || 'https://services.leadconnectorhq.com',
       version: '2021-07-28',
-      locationId: process.env.GHL_LOCATION_ID || ''
+      locationId: process.env.GHL_LOCATION_ID || 'placeholder'
     };
-
-    // Validate required configuration
-    if (!config.accessToken) {
-      throw new Error('GHL_API_KEY environment variable is required');
-    }
-
-    if (!config.locationId) {
-      throw new Error('GHL_LOCATION_ID environment variable is required');
-    }
 
     console.log('[GHL MCP HTTP] Initializing GHL API client...');
     console.log(`[GHL MCP HTTP] Base URL: ${config.baseUrl}`);
     console.log(`[GHL MCP HTTP] Version: ${config.version}`);
-    console.log(`[GHL MCP HTTP] Location ID: ${config.locationId}`);
+    console.log(`[GHL MCP HTTP] Credentials will be provided via headers`);
 
     return new GHLApiClient(config);
   }
@@ -189,6 +191,7 @@ class GHLMCPHttpServer {
         const storeToolDefinitions = this.storeTools.getTools();
         const productsToolDefinitions = this.productsTools.getTools();
         
+        // Remove API key and location ID from tool definitions since they come from headers
         const allTools = [
           ...contactToolDefinitions,
           ...conversationToolDefinitions,
@@ -207,7 +210,31 @@ class GHLMCPHttpServer {
           ...surveyToolDefinitions,
           ...storeToolDefinitions,
           ...productsToolDefinitions
-        ];
+        ].map(tool => {
+          // Remove apiKey, locationId, and userId from both properties and required fields since they come from headers
+          if (tool.inputSchema && tool.inputSchema.type === 'object') {
+            const newProperties = { ...tool.inputSchema.properties } as any;
+            delete newProperties.apiKey;
+            delete newProperties.locationId;
+            delete newProperties.userId;
+            
+            const newRequired = tool.inputSchema.required 
+              ? tool.inputSchema.required.filter(field => 
+                  field !== 'apiKey' && field !== 'locationId' && field !== 'userId'
+                )
+              : [];
+            
+            return {
+              ...tool,
+              inputSchema: {
+                ...tool.inputSchema,
+                properties: newProperties,
+                required: newRequired.length > 0 ? newRequired : undefined
+              }
+            };
+          }
+          return tool;
+        });
         
         console.log(`[GHL MCP HTTP] Registered ${allTools.length} tools total`);
         
@@ -341,9 +368,41 @@ class GHLMCPHttpServer {
         const storeTools = this.storeTools.getTools();
         const productsTools = this.productsTools.getTools();
         
+        // Apply the same credential removal logic as in setupMCPHandlers
+        const allTools = [
+          ...contactTools, ...conversationTools, ...blogTools, ...opportunityTools, 
+          ...calendarTools, ...emailTools, ...locationTools, ...emailISVTools, 
+          ...socialMediaTools, ...mediaTools, ...objectTools, ...associationTools, 
+          ...customFieldV2Tools, ...workflowTools, ...surveyTools, ...storeTools, ...productsTools
+        ].map(tool => {
+          // Remove apiKey, locationId, and userId from both properties and required fields since they come from headers
+          if (tool.inputSchema && tool.inputSchema.type === 'object') {
+            const newProperties = { ...tool.inputSchema.properties } as any;
+            delete newProperties.apiKey;
+            delete newProperties.locationId;
+            delete newProperties.userId;
+            
+            const newRequired = tool.inputSchema.required 
+              ? tool.inputSchema.required.filter(field => 
+                  field !== 'apiKey' && field !== 'locationId' && field !== 'userId'
+                )
+              : [];
+            
+            return {
+              ...tool,
+              inputSchema: {
+                ...tool.inputSchema,
+                properties: newProperties,
+                required: newRequired.length > 0 ? newRequired : undefined
+              }
+            };
+          }
+          return tool;
+        });
+        
         res.json({
-          tools: [...contactTools, ...conversationTools, ...blogTools, ...opportunityTools, ...calendarTools, ...emailTools, ...locationTools, ...emailISVTools, ...socialMediaTools, ...mediaTools, ...objectTools, ...associationTools, ...customFieldV2Tools, ...workflowTools, ...surveyTools, ...storeTools, ...productsTools],
-          count: contactTools.length + conversationTools.length + blogTools.length + opportunityTools.length + calendarTools.length + emailTools.length + locationTools.length + emailISVTools.length + socialMediaTools.length + mediaTools.length + objectTools.length + associationTools.length + customFieldV2Tools.length + workflowTools.length + surveyTools.length + storeTools.length + productsTools.length
+          tools: allTools,
+          count: allTools.length
         });
       } catch (error) {
         res.status(500).json({ error: 'Failed to list tools' });
@@ -666,17 +725,9 @@ class GHLMCPHttpServer {
    * Test GHL API connection
    */
   private async testGHLConnection(): Promise<void> {
-    try {
-      console.log('[GHL MCP HTTP] Testing GHL API connection...');
-      
-      const result = await this.ghlClient.testConnection();
-      
-      console.log('[GHL MCP HTTP] ✅ GHL API connection successful');
-      console.log(`[GHL MCP HTTP] Connected to location: ${result.data?.locationId}`);
-    } catch (error) {
-      console.error('[GHL MCP HTTP] ❌ GHL API connection failed:', error);
-      throw new Error(`Failed to connect to GHL API: ${error}`);
-    }
+    // Skip connection test on startup since credentials come from headers
+    console.log('[GHL MCP HTTP] GHL API client initialized');
+    console.log('[GHL MCP HTTP] Connection will be tested when credentials are provided via headers');
   }
 
   /**

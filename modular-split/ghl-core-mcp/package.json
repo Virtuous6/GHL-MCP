@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "GoHighLevel Core CRM MCP Server - Contact management, tasks, notes, and custom fields",
   "main": "dist/server.js",
+  "type": "module",
   "bin": {
     "ghl-core-mcp": "dist/server.js"
   },
