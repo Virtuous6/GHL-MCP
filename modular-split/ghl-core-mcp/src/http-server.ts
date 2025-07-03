@@ -407,29 +407,6 @@ class DynamicMultiTenantHttpServer {
       });
     });
 
-    // MCP SSE endpoint - GET for SSE stream
-    this.app.get('/sse', async (req, res) => {
-      console.log('[HTTP] New SSE connection');
-      
-      // Set SSE headers
-      res.setHeader('Content-Type', 'text/event-stream');
-      res.setHeader('Cache-Control', 'no-cache');
-      res.setHeader('Connection', 'keep-alive');
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Access-Control-Allow-Headers', 'Cache-Control');
-
-      // Create SSE transport
-      const transport = new SSEServerTransport('/sse', res);
-      
-      try {
-        await this.server.connect(transport);
-        console.log('[HTTP] MCP server connected via SSE');
-      } catch (error) {
-        console.error('[HTTP] SSE connection error:', error);
-        res.status(500).end();
-      }
-    });
-
     // MCP SSE endpoint - POST for JSON-RPC messages
     this.app.post('/sse', async (req, res) => {
       console.log('[HTTP] Received JSON-RPC message:', req.body);
@@ -454,9 +431,28 @@ class DynamicMultiTenantHttpServer {
             },
             id: jsonrpcRequest.id
           });
+        } else if (jsonrpcRequest.method === 'notifications/initialized') {
+          console.log('[HTTP] MCP initialized notification received');
+          res.status(200).end();
+          return;
+        } else if (jsonrpcRequest.method === 'notifications/cancelled') {
+          console.log('[HTTP] MCP cancelled notification received');
+          res.status(200).end();
+          return;
         } else if (jsonrpcRequest.method === 'tools/list') {
-          const response = await this.server.request(jsonrpcRequest, ListToolsRequestSchema);
-          res.json(response);
+          try {
+            const response = await this.server.request(jsonrpcRequest, ListToolsRequestSchema);
+            res.json(response);
+          } catch (error) {
+            console.error('[HTTP] Error calling server.request for tools/list:', error);
+            // Fallback to direct handler call
+            const tools = this.getToolsDirectly();
+            res.json({
+              jsonrpc: '2.0',
+              result: { tools },
+              id: jsonrpcRequest.id
+            });
+          }
         } else if (jsonrpcRequest.method === 'tools/call') {
           const response = await this.server.request(jsonrpcRequest, CallToolRequestSchema);
           res.json(response);
@@ -519,6 +515,107 @@ class DynamicMultiTenantHttpServer {
         description: 'Dynamic multi-tenant GoHighLevel MCP server with 40 specialized tools'
       });
     });
+  }
+
+  /**
+   * Get tools directly without MCP server (fallback method)
+   */
+  private getToolsDirectly() {
+    return [
+      // Contact Tools with dynamic credentials
+      {
+        name: 'search_contacts',
+        description: 'Search contacts in GoHighLevel CRM',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            apiKey: { type: 'string', description: 'GoHighLevel Private Integration API key (pk_live_...)' },
+            locationId: { type: 'string', description: 'GoHighLevel Location ID (optional, uses default if not provided)' },
+            userId: { type: 'string', description: 'User identifier for tracking/logging (optional)' },
+            query: { type: 'string', description: 'Search query for contacts' },
+            limit: { type: 'number', description: 'Maximum number of contacts to return', default: 100 }
+          },
+          required: ['apiKey', 'locationId']
+        }
+      },
+      {
+        name: 'get_contact',
+        description: 'Get a specific contact by ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            apiKey: { type: 'string', description: 'GoHighLevel Private Integration API key (pk_live_...)' },
+            locationId: { type: 'string', description: 'GoHighLevel Location ID (optional, uses default if not provided)' },
+            userId: { type: 'string', description: 'User identifier for tracking/logging (optional)' },
+            contactId: { type: 'string', description: 'The contact ID to retrieve' }
+          },
+          required: ['apiKey', 'locationId', 'contactId']
+        }
+      },
+      {
+        name: 'create_contact',
+        description: 'Create a new contact',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            apiKey: { type: 'string', description: 'GoHighLevel Private Integration API key (pk_live_...)' },
+            locationId: { type: 'string', description: 'GoHighLevel Location ID (optional, uses default if not provided)' },
+            userId: { type: 'string', description: 'User identifier for tracking/logging (optional)' },
+            firstName: { type: 'string', description: 'Contact first name' },
+            lastName: { type: 'string', description: 'Contact last name' },
+            email: { type: 'string', description: 'Contact email address' },
+            phone: { type: 'string', description: 'Contact phone number' }
+          },
+          required: ['apiKey', 'locationId', 'firstName']
+        }
+      },
+      {
+        name: 'update_contact',
+        description: 'Update an existing contact',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            apiKey: { type: 'string', description: 'GoHighLevel Private Integration API key (pk_live_...)' },
+            locationId: { type: 'string', description: 'GoHighLevel Location ID (optional, uses default if not provided)' },
+            userId: { type: 'string', description: 'User identifier for tracking/logging (optional)' },
+            contactId: { type: 'string', description: 'Contact ID to update' },
+            firstName: { type: 'string', description: 'Contact first name' },
+            lastName: { type: 'string', description: 'Contact last name' },
+            email: { type: 'string', description: 'Contact email address' },
+            phone: { type: 'string', description: 'Contact phone number' }
+          },
+          required: ['apiKey', 'locationId', 'contactId']
+        }
+      },
+      {
+        name: 'delete_contact',
+        description: 'Delete a contact',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            apiKey: { type: 'string', description: 'GoHighLevel Private Integration API key (pk_live_...)' },
+            locationId: { type: 'string', description: 'GoHighLevel Location ID (optional, uses default if not provided)' },
+            userId: { type: 'string', description: 'User identifier for tracking/logging (optional)' },
+            contactId: { type: 'string', description: 'Contact ID to delete' }
+          },
+          required: ['apiKey', 'locationId', 'contactId']
+        }
+      },
+      {
+        name: 'verify_email',
+        description: 'Verify an email address',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            apiKey: { type: 'string', description: 'GoHighLevel Private Integration API key (pk_live_...)' },
+            locationId: { type: 'string', description: 'GoHighLevel Location ID (optional, uses default if not provided)' },
+            userId: { type: 'string', description: 'User identifier for tracking/logging (optional)' },
+            email: { type: 'string', description: 'Email address to verify' }
+          },
+          required: ['apiKey', 'locationId', 'email']
+        }
+      }
+    ];
   }
 
   /**

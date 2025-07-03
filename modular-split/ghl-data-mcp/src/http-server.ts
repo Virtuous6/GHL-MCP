@@ -215,9 +215,28 @@ class DynamicMultiTenantDataHttpServer {
             },
             id: jsonrpcRequest.id
           });
+        } else if (jsonrpcRequest.method === 'notifications/initialized') {
+          console.log('[HTTP] MCP initialized notification received');
+          res.status(200).end();
+          return;
+        } else if (jsonrpcRequest.method === 'notifications/cancelled') {
+          console.log('[HTTP] MCP cancelled notification received');
+          res.status(200).end();
+          return;
         } else if (jsonrpcRequest.method === 'tools/list') {
-          const response = await this.server.request(jsonrpcRequest, ListToolsRequestSchema);
-          res.json(response);
+          try {
+            const response = await this.server.request(jsonrpcRequest, ListToolsRequestSchema);
+            res.json(response);
+          } catch (error) {
+            console.error('[HTTP] Error calling server.request for tools/list:', error);
+            // Fallback to direct handler call
+            const tools = this.getToolsDirectly();
+            res.json({
+              jsonrpc: '2.0',
+              result: { tools },
+              id: jsonrpcRequest.id
+            });
+          }
         } else if (jsonrpcRequest.method === 'tools/call') {
           const response = await this.server.request(jsonrpcRequest, CallToolRequestSchema);
           res.json(response);
@@ -283,11 +302,49 @@ class DynamicMultiTenantDataHttpServer {
   }
 
   /**
+   * Get tools directly without MCP server (fallback method)
+   */
+  private getToolsDirectly() {
+    // Get tool definitions from the static tool classes and add dynamic credentials
+    const objectToolDefs = ObjectTools.getStaticToolDefinitions();
+    const associationToolDefs = AssociationTools.getStaticToolDefinitions();
+    
+    // Add dynamic credentials to each tool
+    const enhancedTools = [...objectToolDefs, ...associationToolDefs].map(tool => ({
+      ...tool,
+      inputSchema: {
+        ...tool.inputSchema,
+        properties: {
+          // Required credentials
+          apiKey: {
+            type: 'string',
+            description: 'GoHighLevel Private Integration API key (pk_live_...)',
+          },
+          locationId: {
+            type: 'string',
+            description: 'GoHighLevel Location ID (optional, uses default if not provided)',
+          },
+          // Optional user identifier
+          userId: {
+            type: 'string',
+            description: 'User identifier for tracking/logging (optional)',
+          },
+          // Original tool properties
+          ...tool.inputSchema.properties
+        },
+        required: ['apiKey', ...((tool.inputSchema.required as string[]) || [])]
+      }
+    }));
+
+    return enhancedTools;
+  }
+
+  /**
    * Start the HTTP server
    */
   async start(): Promise<void> {
-    this.app.listen(this.port, '0.0.0.0', () => {
-      console.log(`[HTTP] GoHighLevel Data MCP Server running on 0.0.0.0:${this.port}`);
+    this.app.listen(this.port, () => {
+      console.log(`[HTTP] GoHighLevel Data MCP Server running on port ${this.port}`);
       console.log(`[HTTP] Health check: http://localhost:${this.port}/health`);
       console.log(`[HTTP] Tools info: http://localhost:${this.port}/tools`);
       console.log(`[HTTP] MCP endpoint: http://localhost:${this.port}/sse`);
