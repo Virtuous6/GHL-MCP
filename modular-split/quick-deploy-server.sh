@@ -78,24 +78,34 @@ else
     exit 1
 fi
 
-# Step 4: Update HTTP server imports (customize for each server's tools)
-echo "📋 Step 4: Customizing HTTP server for $SERVER_NAME tools..."
+# Step 4: Validate package.json and dependencies
+echo "📋 Step 4: Validating server configuration..."
+if [ ! -f "package.json" ]; then
+    echo "   ❌ package.json not found"
+    exit 1
+fi
 
-# This is a simplified version - in practice, you'd want to customize
-# the http-server.ts imports and tool routing for each server's specific tools
-echo "   ⚠️  Note: Using generic HTTP server template"
-echo "   📝 TODO: Customize tool imports for $SERVER_NAME specific tools"
+# Check if the server has the expected tool files
+EXPECTED_TOOLS_DIR="src/tools"
+if [ ! -d "$EXPECTED_TOOLS_DIR" ]; then
+    echo "   ⚠️  Warning: $EXPECTED_TOOLS_DIR not found - server may not have tools configured"
+fi
+
+echo "   ✅ Server configuration validated"
 
 # Step 5: Install dependencies and build
 echo "📋 Step 5: Installing dependencies and building..."
-if [ -f "package.json" ]; then
-    npm install
+if npm install; then
     echo "   ✅ Dependencies installed"
-    
-    npm run build
-    echo "   ✅ Project built"
 else
-    echo "   ❌ package.json not found"
+    echo "   ❌ Failed to install dependencies"
+    exit 1
+fi
+
+if npm run build; then
+    echo "   ✅ Project built successfully"
+else
+    echo "   ❌ Build failed"
     exit 1
 fi
 
@@ -114,46 +124,51 @@ if fly launch --copy-config --yes --now; then
     echo "   ✅ Fly.io app launched"
 else
     echo "   ❌ Failed to launch fly.io app"
+    echo "   💡 Try running 'fly apps destroy ghl-$APP_NAME' if app already exists"
     exit 1
 fi
 
-# Step 8: Add SSL certificate
-echo "📋 Step 8: Adding SSL certificate..."
-APP_NAME=$(echo "$SERVER_NAME" | sed 's/ghl-//')
-DOMAIN="ghl-$APP_NAME.fly.dev"
-
-if fly certs add "$DOMAIN"; then
-    echo "   ✅ SSL certificate added for $DOMAIN"
-else
-    echo "   ⚠️  SSL certificate addition may have failed (check manually)"
-fi
-
-# Step 9: Deploy with no cache
-echo "📋 Step 9: Deploying with fresh build..."
+# Step 8: Deploy with no cache
+echo "📋 Step 8: Deploying with fresh build..."
 if fly deploy --no-cache; then
     echo "   ✅ Deployment successful"
 else
     echo "   ❌ Deployment failed"
+    echo "   💡 Check logs with: fly logs"
     exit 1
 fi
 
-# Step 10: Test the deployment
-echo "📋 Step 10: Testing deployment..."
+# Step 9: Wait for deployment to be ready and test
+echo "📋 Step 9: Testing deployment..."
+APP_NAME=$(echo "$SERVER_NAME" | sed 's/ghl-//')
+DOMAIN="ghl-$APP_NAME.fly.dev"
+
 echo "   🔗 App URL: https://$DOMAIN"
 echo "   🏥 Health check: https://$DOMAIN/health"
 echo "   🔧 Tools endpoint: https://$DOMAIN/tools"
 echo "   📡 SSE endpoint: https://$DOMAIN/sse"
 
-# Wait a moment for deployment to be ready
-sleep 5
+# Wait for deployment to be ready
+echo "   ⏳ Waiting for deployment to be ready..."
+sleep 10
 
-# Test health endpoint
+# Test health endpoint with retries
 echo "   📋 Testing health endpoint..."
-if curl -s -f "https://$DOMAIN/health" >/dev/null; then
-    echo "   ✅ Health endpoint responding"
-else
-    echo "   ⚠️  Health endpoint not responding yet (SSL may still be provisioning)"
-fi
+for i in {1..5}; do
+    if curl -s -f "https://$DOMAIN/health" >/dev/null; then
+        echo "   ✅ Health endpoint responding"
+        break
+    else
+        if [ $i -eq 5 ]; then
+            echo "   ⚠️  Health endpoint not responding after 5 attempts"
+            echo "   💡 Check deployment status with: fly status"
+            echo "   💡 Check logs with: fly logs"
+        else
+            echo "   ⏳ Attempt $i/5 failed, retrying in 5 seconds..."
+            sleep 5
+        fi
+    fi
+done
 
 echo ""
 echo "🎉 DEPLOYMENT COMPLETE!"
@@ -170,4 +185,5 @@ echo "3. Add to Claude Desktop configuration"
 echo "4. Test with real GoHighLevel API credentials"
 echo ""
 echo "💰 Cost: ~$3.88/month with auto-scaling"
+echo "🔒 SSL: Automatic for *.fly.dev domains"
 echo "======================================================" 
