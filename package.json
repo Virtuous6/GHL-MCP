@@ -1,7 +1,7 @@
 {
-  "name": "@mastanley13/ghl-mcp-server",
+  "name": "@virtuours6/ghl-mcp-server",
   "version": "1.0.0",
-  "description": "GoHighLevel MCP Server for Claude Desktop and ChatGPT integration",
+  "description": "GoHighLevel MCP Server for Claude Desktop and AI integration",
   "main": "dist/server.js",
   "bin": {
     "ghl-mcp-server": "dist/server.js"
@@ -30,11 +30,12 @@
   "keywords": [
     "mcp",
     "gohighlevel",
-    "chatgpt",
+    "claude",
+    "ai-integration",
     "api"
   ],
-  "author": "",
-  "license": "ISC",
+  "author": "Virtuours6",
+  "license": "MIT",
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@types/node": "^22.15.29",

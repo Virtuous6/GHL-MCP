@@ -2,13 +2,13 @@
 
 ## 🚨 **IMPORTANT: FOUNDATIONAL PROJECT NOTICE** 
 
-> **⚠️ This is a BASE-LEVEL foundational project designed to connect the GoHighLevel community with AI automation through MCP (Model Context Protocol).**
+> **⚠️ This is a comprehensive GoHighLevel MCP integration designed to connect your GHL account with AI automation through MCP (Model Context Protocol).**
 
 ### **🎯 What This Project Is:**
-- **Foundation Layer**: Provides access to ALL sub-account level GoHighLevel API endpoints via MCP
-- **Community Starter**: Built to get the community moving forward together, faster
-- **Open Architecture**: API client and types can be further modularized and segmented as needed
-- **Educational Resource**: Learn how to integrate GoHighLevel with AI systems
+- **Complete Integration**: Provides access to ALL sub-account level GoHighLevel API endpoints via MCP
+- **AI-Ready**: Built specifically for Claude Desktop and other AI integrations
+- **Modular Architecture**: API client and types are organized for easy extension and customization
+- **Production Ready**: Includes comprehensive testing, deployment configs, and documentation
 
 ### **⚠️ Critical AI Safety Considerations:**
 - **Memory/Recall Systems**: If you don't implement proper memory or recall mechanisms, AI may perform unintended actions
@@ -20,12 +20,12 @@
 - **Personal/Business Use**: Integrate your own GoHighLevel accounts with AI
 - **Development Base**: Build upon this foundation for custom solutions  
 - **Learning & Experimentation**: Understand GoHighLevel API patterns
-- **Community Contribution**: Help improve and extend this foundation
+- **Production Deployment**: Ready for real-world usage with proper configuration
 
 ### **🚫 NOT Intended For:**
-- **Direct Resale**: This is freely available community software
-- **Production Without Testing**: Always test thoroughly in development environments
 - **Unmonitored AI Usage**: Implement proper safeguards and monitoring
+- **Production Without Testing**: Always test thoroughly in development environments
+- **Unauthorized Access**: Only use with your own GHL accounts and proper API keys
 
 ---
 
@@ -73,13 +73,6 @@
 
 ---
 
-This project was a 'time-taker' but I felt it was important. Feel free to donate - everything will go into furthering this Project -> Aiming for Mass Agency "Agent Driven Operations".
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/mastanley13/GoHighLevel-MCP)
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/mastanley13/GoHighLevel-MCP)
-[![Deploy on Fly.io](https://fly.io/static/images/launch.svg)](https://fly.io/docs/getting-started/)
-[![Donate to the Project](https://img.shields.io/badge/Donate_to_the_Project-💝_Support_Development-ff69b4?style=for-the-badge&logo=stripe&logoColor=white)](https://buy.stripe.com/28E14o1hT7JAfstfvqdZ60y)
-
 > **🔥 Transform Claude Desktop into a complete GoHighLevel CRM powerhouse with 269+ powerful tools across 19+ categories**
 
 ## 🎯 What This Does
@@ -96,8 +89,6 @@ This comprehensive MCP (Model Context Protocol) server connects Claude Desktop d
 ## ⚡ Quick Deploy Options
 
 ### 🟢 Vercel (Recommended)
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/ghl-mcp-server)
-
 **Why Vercel:**
 - ✅ Free tier with generous limits
 - ✅ Automatic HTTPS and global CDN
@@ -105,8 +96,6 @@ This comprehensive MCP (Model Context Protocol) server connects Claude Desktop d
 - ✅ Perfect for MCP servers
 
 ### 🚂 Railway  
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template)
-
 **Why Railway:**
 - ✅ $5 free monthly credit
 - ✅ Simple one-click deployment
@@ -114,8 +103,6 @@ This comprehensive MCP (Model Context Protocol) server connects Claude Desktop d
 - ✅ Great for production workloads
 
 ### ✈️ Fly.io
-[![Deploy on Fly.io](https://fly.io/static/images/launch.svg)](https://fly.io/docs/getting-started/)
-
 **Why Fly.io:**
 - ✅ Global edge deployment
 - ✅ $3.88/month for 512MB RAM
@@ -161,10 +148,6 @@ fly auth login
 
 #### **3. Deploy from Repository**
 ```bash
-# Clone the repository
-git clone https://github.com/mastanley13/GoHighLevel-MCP.git
-cd GoHighLevel-MCP
-
 # Initialize Fly app
 fly launch
 
