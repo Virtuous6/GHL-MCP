@@ -1,0 +1,475 @@
+{
+  "name": "GoHighLevel MCP Integration Example",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "notes": "Start the workflow manually for testing MCP integration"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ghl_api_key",
+              "name": "ghl_api_key",
+              "type": "string",
+              "value": "={{$vars.GHL_API_KEY}}"
+            },
+            {
+              "id": "ghl_location_id",
+              "name": "ghl_location_id",
+              "type": "string",
+              "value": "={{$vars.GHL_LOCATION_ID}}"
+            },
+            {
+              "id": "search_query",
+              "name": "search_query",
+              "type": "string",
+              "value": "VIP"
+            }
+          ]
+        }
+      },
+      "id": "set-credentials",
+      "name": "Set Credentials",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [450, 300],
+      "notes": "Set your GoHighLevel credentials here or use n8n variables"
+    },
+    {
+      "parameters": {
+        "url": "https://ghl-core-mcp.fly.dev/sse",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "jsonrpc": "2.0",
+          "method": "tools/list",
+          "params": {},
+          "id": 1
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "list-tools",
+      "name": "List Available Tools",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [650, 100],
+      "notes": "Get list of all available MCP tools"
+    },
+    {
+      "parameters": {
+        "url": "https://ghl-core-mcp.fly.dev/sse",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "name": "search_contacts",
+            "arguments": {
+              "apiKey": "={{$json.ghl_api_key}}",
+              "locationId": "={{$json.ghl_location_id}}",
+              "query": "={{$json.search_query}}",
+              "limit": 10
+            }
+          },
+          "id": 2
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "search-contacts-body",
+      "name": "Search Contacts (Body Auth)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [650, 300],
+      "notes": "Search contacts using credentials in request body"
+    },
+    {
+      "parameters": {
+        "url": "https://ghl-core-mcp.fly.dev/sse",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-GHL-API-Key",
+              "value": "={{$json.ghl_api_key}}"
+            },
+            {
+              "name": "X-GHL-Location-ID",
+              "value": "={{$json.ghl_location_id}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "name": "search_contacts",
+            "arguments": {
+              "query": "={{$json.search_query}}",
+              "limit": 10
+            }
+          },
+          "id": 3
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "search-contacts-headers",
+      "name": "Search Contacts (Header Auth)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [650, 500],
+      "notes": "Search contacts using credentials in headers"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process MCP response\nconst response = $input.first().json;\n\n// Check for errors\nif (response.error) {\n  throw new Error(`MCP Error ${response.error.code}: ${response.error.message}`);\n}\n\n// Extract contacts from result\nconst contacts = response.result?.contacts || [];\n\n// Format contacts for output\nreturn contacts.map(contact => ({\n  json: {\n    id: contact.id,\n    firstName: contact.firstName || '',\n    lastName: contact.lastName || '',\n    fullName: `${contact.firstName || ''} ${contact.lastName || ''}`.trim(),\n    email: contact.email || '',\n    phone: contact.phone || '',\n    tags: contact.tags || [],\n    customFields: contact.customFields || {},\n    source: 'MCP Search',\n    raw: contact\n  }\n}));"
+      },
+      "id": "process-contacts",
+      "name": "Process Contacts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 300],
+      "notes": "Extract and format contact data from MCP response"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "has-contacts",
+              "leftValue": "={{$json.length}}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-has-contacts",
+      "name": "Has Contacts?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ghl-core-mcp.fly.dev/sse",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "jsonrpc": "2.0",
+          "method": "tools/call",
+          "params": {
+            "name": "add_contact_tags",
+            "arguments": {
+              "apiKey": "={{$node['Set Credentials'].json.ghl_api_key}}",
+              "locationId": "={{$node['Set Credentials'].json.ghl_location_id}}",
+              "contactId": "={{$json.id}}",
+              "tags": ["processed-by-n8n", "mcp-integration"]
+            }
+          },
+          "id": "={{$itemIndex + 100}}"
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "add-tags",
+      "name": "Add Tags to Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1250, 200],
+      "notes": "Add tags to each found contact"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "message",
+              "value": "No contacts found matching the search criteria"
+            }
+          ]
+        }
+      },
+      "id": "no-contacts",
+      "name": "No Contacts Found",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1250, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Example: Create a new contact using MCP\nconst credentials = $node['Set Credentials'].json;\n\n// Prepare contact data\nconst newContact = {\n  firstName: \"Test\",\n  lastName: \"User\",\n  email: `test.user.${Date.now()}@example.com`,\n  phone: \"+1234567890\",\n  tags: [\"n8n-created\", \"mcp-test\"]\n};\n\n// Return the MCP request structure\nreturn [{\n  json: {\n    url: \"https://ghl-core-mcp.fly.dev/sse\",\n    body: {\n      jsonrpc: \"2.0\",\n      method: \"tools/call\",\n      params: {\n        name: \"create_contact\",\n        arguments: {\n          apiKey: credentials.ghl_api_key,\n          locationId: credentials.ghl_location_id,\n          ...newContact\n        }\n      },\n      id: 999\n    }\n  }\n}];"
+      },
+      "id": "prepare-create",
+      "name": "Prepare Create Contact",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 700],
+      "notes": "Example of dynamically building MCP requests"
+    },
+    {
+      "parameters": {
+        "url": "={{$json.url}}",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{$json.body}}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "create-contact",
+      "name": "Create Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [850, 700],
+      "notes": "Execute the dynamically prepared MCP request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aggregate all results\nconst toolsList = $node['List Available Tools'].json;\nconst searchResults = $node['Process Contacts'].all();\nconst createResult = $node['Create Contact'].json;\n\n// Count available tools\nconst toolCount = toolsList.result?.tools?.length || 0;\nconst contactsFound = searchResults.length;\n\n// Check if contact was created successfully\nconst contactCreated = !createResult.error && createResult.result?.contact;\n\nreturn [{\n  json: {\n    summary: {\n      timestamp: new Date().toISOString(),\n      mcp_server: \"ghl-core-mcp\",\n      tools_available: toolCount,\n      contacts_found: contactsFound,\n      contact_created: contactCreated,\n      credentials_used: {\n        method: \"dynamic\",\n        api_key_present: !!$node['Set Credentials'].json.ghl_api_key,\n        location_id_present: !!$node['Set Credentials'].json.ghl_location_id\n      }\n    },\n    results: {\n      tools_sample: toolsList.result?.tools?.slice(0, 5).map(t => t.name) || [],\n      contacts: searchResults.map(r => r.json),\n      new_contact: contactCreated ? createResult.result.contact : null\n    },\n    raw_responses: {\n      tools_list: toolsList,\n      search_response: $node['Search Contacts (Body Auth)'].json,\n      create_response: createResult\n    }\n  }\n}];"
+      },
+      "id": "aggregate-results",
+      "name": "Aggregate Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 700],
+      "notes": "Combine all results into a summary"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Credentials": {
+      "main": [
+        [
+          {
+            "node": "List Available Tools",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Search Contacts (Body Auth)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Search Contacts (Header Auth)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Prepare Create Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Contacts (Body Auth)": {
+      "main": [
+        [
+          {
+            "node": "Process Contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Contacts": {
+      "main": [
+        [
+          {
+            "node": "Has Contacts?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Contacts?": {
+      "main": [
+        [
+          {
+            "node": "Add Tags to Contact",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Contacts Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Create Contact": {
+      "main": [
+        [
+          {
+            "node": "Create Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Contact": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Tags to Contact": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Contacts Found": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1.0.0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "mcp-integration-example"
+  },
+  "id": "ghl-mcp-integration-001",
+  "tags": [
+    {
+      "name": "MCP",
+      "createdAt": "2024-01-15T10:00:00.000Z"
+    },
+    {
+      "name": "GoHighLevel",
+      "createdAt": "2024-01-15T10:00:00.000Z"
+    }
+  ],
+  "notes": "This workflow demonstrates how to integrate n8n with GoHighLevel MCP servers using dynamic credentials. It shows both body-based and header-based authentication methods."
+} 

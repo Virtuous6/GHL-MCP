@@ -29,7 +29,19 @@ import {
 } from '../types/ghl-types.js';
 
 export class PaymentsTools {
-  constructor(private client: GHLApiClient) {}
+  constructor(private ghlClient: GHLApiClient) {}
+
+  /**
+   * Format response for MCP protocol
+   */
+  private formatResponse(data: any): any {
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(data, null, 2)
+      }]
+    };
+  }
 
   /**
    * Get static tool definitions without requiring API client
@@ -134,11 +146,12 @@ export class PaymentsTools {
             },
             altId: {
               type: 'string',
-              description: 'Alt ID (unique identifier like location ID)'
+              description: 'Location ID (automatically populated from MCP headers if not provided)'
             },
             altType: {
               type: 'string',
-              description: 'Alt Type (type of identifier)'
+              description: 'Type of identifier (defaults to "location")',
+              default: 'location'
             },
             status: {
               type: 'string',
@@ -179,7 +192,7 @@ export class PaymentsTools {
               default: 0
             }
           },
-          required: ['altId', 'altType']
+          required: []
         }
       },
       {
@@ -198,14 +211,15 @@ export class PaymentsTools {
             },
             altId: {
               type: 'string',
-              description: 'Alt ID (unique identifier like location ID)'
+              description: 'Location ID (automatically populated from MCP headers if not provided)'
             },
             altType: {
               type: 'string',
-              description: 'Alt Type (type of identifier)'
+              description: 'Type of identifier (defaults to "location")',
+              default: 'location'
             }
           },
-          required: ['orderId', 'altId', 'altType']
+          required: ['orderId']
         }
       },
 
@@ -222,12 +236,13 @@ export class PaymentsTools {
             },
             altId: {
               type: 'string',
-              description: 'Location ID or Agency ID'
+              description: 'Location ID (automatically populated from MCP headers if not provided)'
             },
             altType: {
               type: 'string',
               enum: ['location'],
-              description: 'Alt Type'
+              description: 'Type of identifier (defaults to "location")',
+              default: 'location'
             },
             trackings: {
               type: 'array',
@@ -273,7 +288,7 @@ export class PaymentsTools {
               description: 'Whether to notify the customer'
             }
           },
-          required: ['orderId', 'altId', 'altType', 'trackings', 'items', 'notifyCustomer']
+          required: ['orderId', 'trackings', 'items', 'notifyCustomer']
         }
       },
       {
@@ -288,15 +303,16 @@ export class PaymentsTools {
             },
             altId: {
               type: 'string',
-              description: 'Location ID or Agency ID'
+              description: 'Location ID (automatically populated from MCP headers if not provided)'
             },
             altType: {
               type: 'string',
               enum: ['location'],
-              description: 'Alt Type'
+              description: 'Type of identifier (defaults to "location")',
+              default: 'location'
             }
           },
-          required: ['orderId', 'altId', 'altType']
+          required: ['orderId']
         }
       },
 
@@ -313,11 +329,12 @@ export class PaymentsTools {
             },
             altId: {
               type: 'string',
-              description: 'Alt ID (unique identifier like location ID)'
+              description: 'Location ID (automatically populated from MCP headers if not provided)'
             },
             altType: {
               type: 'string',
-              description: 'Alt Type (type of identifier)'
+              description: 'Type of identifier (defaults to "location")',
+              default: 'location'
             },
             paymentMode: {
               type: 'string',
@@ -366,7 +383,7 @@ export class PaymentsTools {
               default: 0
             }
           },
-          required: ['altId', 'altType']
+          required: []
         }
       },
       {
@@ -385,14 +402,15 @@ export class PaymentsTools {
             },
             altId: {
               type: 'string',
-              description: 'Alt ID (unique identifier like location ID)'
+              description: 'Location ID (automatically populated from MCP headers if not provided)'
             },
             altType: {
               type: 'string',
-              description: 'Alt Type (type of identifier)'
+              description: 'Type of identifier (defaults to "location")',
+              default: 'location'
             }
           },
-          required: ['transactionId', 'altId', 'altType']
+          required: ['transactionId']
         }
       },
 
@@ -405,12 +423,13 @@ export class PaymentsTools {
           properties: {
             altId: {
               type: 'string',
-              description: 'Alt ID (unique identifier like location ID)'
+              description: 'Location ID (automatically populated from MCP headers if not provided)'
             },
             altType: {
               type: 'string',
               enum: ['location'],
-              description: 'Alt Type'
+              description: 'Type of identifier (defaults to "location")',
+              default: 'location'
             },
             entityId: {
               type: 'string',
@@ -455,7 +474,7 @@ export class PaymentsTools {
               default: 0
             }
           },
-          required: ['altId', 'altType']
+          required: []
         }
       },
       {
@@ -470,15 +489,16 @@ export class PaymentsTools {
             },
             altId: {
               type: 'string',
-              description: 'Alt ID (unique identifier like location ID)'
+              description: 'Location ID (automatically populated from MCP headers if not provided)'
             },
             altType: {
               type: 'string',
               enum: ['location'],
-              description: 'Alt Type'
+              description: 'Type of identifier (defaults to "location")',
+              default: 'location'
             }
           },
-          required: ['subscriptionId', 'altId', 'altType']
+          required: ['subscriptionId']
         }
       },
 
@@ -491,12 +511,13 @@ export class PaymentsTools {
           properties: {
             altId: {
               type: 'string',
-              description: 'Location ID'
+              description: 'Location ID (automatically populated from MCP headers if not provided)'
             },
             altType: {
               type: 'string',
               enum: ['location'],
-              description: 'Alt Type'
+              description: 'Type of identifier (defaults to "location")',
+              default: 'location'
             },
             limit: {
               type: 'number',
@@ -518,7 +539,7 @@ export class PaymentsTools {
               description: 'Search term to filter coupons by name or code'
             }
           },
-          required: ['altId', 'altType']
+          required: []
         }
       },
       {
@@ -529,12 +550,13 @@ export class PaymentsTools {
           properties: {
             altId: {
               type: 'string',
-              description: 'Location ID'
+              description: 'Location ID (automatically populated from MCP headers if not provided)'
             },
             altType: {
               type: 'string',
               enum: ['location'],
-              description: 'Alt Type'
+              description: 'Type of identifier (defaults to "location")',
+              default: 'location'
             },
             name: {
               type: 'string',
@@ -875,87 +897,128 @@ export class PaymentsTools {
   }
 
   /**
-   * Execute a tool by name with given arguments
+   * Execute payment tool based on tool name
    */
   async executeTool(name: string, args: any): Promise<any> {
-    return this.handleToolCall(name, args);
-  }
+    try {
+      // Auto-populate altId and altType if not provided
+      const processedArgs = { ...args };
+      
+      // For any tool that uses altId/altType, default to location ID from client config
+      if ('altId' in processedArgs || 'altType' in processedArgs || 
+          ['list_orders', 'get_order_by_id', 'create_order_fulfillment', 'list_order_fulfillments',
+           'list_transactions', 'get_transaction_by_id', 'list_subscriptions', 'get_subscription_by_id',
+           'list_coupons', 'create_coupon', 'update_coupon', 'delete_coupon', 'get_coupon'].includes(name)) {
+        if (!processedArgs.altId && this.ghlClient.getConfig().locationId) {
+          processedArgs.altId = this.ghlClient.getConfig().locationId;
+        }
+        if (!processedArgs.altType) {
+          processedArgs.altType = 'location';
+        }
+      }
+      
+      let result;
+      switch (name) {
+        // Integration Provider Handlers
+        case 'create_whitelabel_integration_provider':
+          result = await this.ghlClient.createWhiteLabelIntegrationProvider(processedArgs as CreateWhiteLabelIntegrationProviderDto);
+          break;
 
-  async handleToolCall(name: string, args: any): Promise<any> {
-    switch (name) {
-      // Integration Provider Handlers
-      case 'create_whitelabel_integration_provider':
-        return this.client.createWhiteLabelIntegrationProvider(args as CreateWhiteLabelIntegrationProviderDto);
+        case 'list_whitelabel_integration_providers':
+          result = await this.ghlClient.listWhiteLabelIntegrationProviders(processedArgs);
+          break;
 
-      case 'list_whitelabel_integration_providers':
-        return this.client.listWhiteLabelIntegrationProviders(args);
+        // Order Handlers
+        case 'list_orders':
+          result = await this.ghlClient.listOrders(processedArgs);
+          break;
 
-      // Order Handlers
-      case 'list_orders':
-        return this.client.listOrders(args);
+        case 'get_order_by_id':
+          result = await this.ghlClient.getOrderById(processedArgs.orderId, processedArgs);
+          break;
 
-      case 'get_order_by_id':
-        return this.client.getOrderById(args.orderId, args);
+        // Order Fulfillment Handlers
+        case 'create_order_fulfillment':
+          const { orderId, ...fulfillmentData } = processedArgs;
+          result = await this.ghlClient.createOrderFulfillment(orderId, fulfillmentData as CreateFulfillmentDto);
+          break;
 
-      // Order Fulfillment Handlers
-      case 'create_order_fulfillment':
-        const { orderId, ...fulfillmentData } = args;
-        return this.client.createOrderFulfillment(orderId, fulfillmentData as CreateFulfillmentDto);
+        case 'list_order_fulfillments':
+          result = await this.ghlClient.listOrderFulfillments(processedArgs.orderId, processedArgs);
+          break;
 
-      case 'list_order_fulfillments':
-        return this.client.listOrderFulfillments(args.orderId, args);
+        // Transaction Handlers
+        case 'list_transactions':
+          result = await this.ghlClient.listTransactions(processedArgs);
+          break;
 
-      // Transaction Handlers
-      case 'list_transactions':
-        return this.client.listTransactions(args);
+        case 'get_transaction_by_id':
+          result = await this.ghlClient.getTransactionById(processedArgs.transactionId, processedArgs);
+          break;
 
-      case 'get_transaction_by_id':
-        return this.client.getTransactionById(args.transactionId, args);
+        // Subscription Handlers
+        case 'list_subscriptions':
+          result = await this.ghlClient.listSubscriptions(processedArgs);
+          break;
 
-      // Subscription Handlers
-      case 'list_subscriptions':
-        return this.client.listSubscriptions(args);
+        case 'get_subscription_by_id':
+          result = await this.ghlClient.getSubscriptionById(processedArgs.subscriptionId, processedArgs);
+          break;
 
-      case 'get_subscription_by_id':
-        return this.client.getSubscriptionById(args.subscriptionId, args);
+        // Coupon Handlers
+        case 'list_coupons':
+          result = await this.ghlClient.listCoupons(processedArgs);
+          break;
 
-      // Coupon Handlers
-      case 'list_coupons':
-        return this.client.listCoupons(args);
+        case 'create_coupon':
+          result = await this.ghlClient.createCoupon(processedArgs as CreateCouponParams);
+          break;
 
-      case 'create_coupon':
-        return this.client.createCoupon(args as CreateCouponParams);
+        case 'update_coupon':
+          result = await this.ghlClient.updateCoupon(processedArgs as UpdateCouponParams);
+          break;
 
-      case 'update_coupon':
-        return this.client.updateCoupon(args as UpdateCouponParams);
+        case 'delete_coupon':
+          result = await this.ghlClient.deleteCoupon(processedArgs as DeleteCouponParams);
+          break;
 
-      case 'delete_coupon':
-        return this.client.deleteCoupon(args as DeleteCouponParams);
+        case 'get_coupon':
+          result = await this.ghlClient.getCoupon(processedArgs);
+          break;
 
-      case 'get_coupon':
-        return this.client.getCoupon(args);
+        // Custom Provider Handlers
+        case 'create_custom_provider_integration':
+          const { locationId: createLocationId, ...createProviderData } = processedArgs;
+          result = await this.ghlClient.createCustomProviderIntegration(createLocationId, createProviderData as CreateCustomProviderDto);
+          break;
 
-      // Custom Provider Handlers
-      case 'create_custom_provider_integration':
-        const { locationId: createLocationId, ...createProviderData } = args;
-        return this.client.createCustomProviderIntegration(createLocationId, createProviderData as CreateCustomProviderDto);
+        case 'delete_custom_provider_integration':
+          result = await this.ghlClient.deleteCustomProviderIntegration(processedArgs.locationId);
+          break;
 
-      case 'delete_custom_provider_integration':
-        return this.client.deleteCustomProviderIntegration(args.locationId);
+        case 'get_custom_provider_config':
+          result = await this.ghlClient.getCustomProviderConfig(processedArgs.locationId);
+          break;
 
-      case 'get_custom_provider_config':
-        return this.client.getCustomProviderConfig(args.locationId);
+        case 'create_custom_provider_config':
+          const { locationId: configLocationId, ...configData } = processedArgs;
+          result = await this.ghlClient.createCustomProviderConfig(configLocationId, configData as ConnectCustomProviderConfigDto);
+          break;
 
-      case 'create_custom_provider_config':
-        const { locationId: configLocationId, ...configData } = args;
-        return this.client.createCustomProviderConfig(configLocationId, configData as ConnectCustomProviderConfigDto);
+        case 'disconnect_custom_provider_config':
+          const { locationId: disconnectLocationId, ...disconnectData } = processedArgs;
+          result = await this.ghlClient.disconnectCustomProviderConfig(disconnectLocationId, disconnectData as DeleteCustomProviderConfigDto);
+          break;
 
-      case 'disconnect_custom_provider_config':
-        const { locationId: disconnectLocationId, ...disconnectData } = args;
-        return this.client.disconnectCustomProviderConfig(disconnectLocationId, disconnectData as DeleteCustomProviderConfigDto);
-
-      default:
-        throw new Error(`Unknown tool: ${name}`);
+        default:
+          throw new Error(`Unknown payment tool: ${name}`);
+      }
+      
+      return this.formatResponse(result);
+    } catch (error) {
+      return this.formatResponse({
+        error: error instanceof Error ? error.message : 'An error occurred'
+      });
     }
   }
 } 

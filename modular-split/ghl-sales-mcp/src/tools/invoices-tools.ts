@@ -71,6 +71,18 @@ export class InvoicesTools {
   }
 
   /**
+   * Format response for MCP protocol
+   */
+  private formatResponse(data: any): any {
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(data, null, 2)
+      }]
+    };
+  }
+
+  /**
    * Get static tool definitions without requiring API client
    */
   static getStaticToolDefinitions(): Tool[] {
@@ -96,8 +108,16 @@ export class InvoicesTools {
         inputSchema: {
           type: 'object',
           properties: {
-            altId: { type: 'string', description: 'Location ID' },
-            altType: { type: 'string', enum: ['location'], default: 'location' },
+            altId: { 
+              type: 'string', 
+              description: 'Location ID (automatically populated from MCP headers if not provided)' 
+            },
+            altType: { 
+              type: 'string', 
+              enum: ['location'], 
+              default: 'location',
+              description: 'Type of identifier (defaults to "location")' 
+            },
             name: { type: 'string', description: 'Template name' },
             title: { type: 'string', description: 'Invoice title' },
             currency: { type: 'string', description: 'Currency code' },
@@ -113,7 +133,10 @@ export class InvoicesTools {
         inputSchema: {
           type: 'object',
           properties: {
-            altId: { type: 'string', description: 'Location ID' },
+            altId: { 
+              type: 'string', 
+              description: 'Location ID (automatically populated from MCP headers if not provided)' 
+            },
             limit: { type: 'string', description: 'Number of results per page', default: '10' },
             offset: { type: 'string', description: 'Offset for pagination', default: '0' },
             status: { type: 'string', description: 'Filter by status' },
@@ -130,7 +153,10 @@ export class InvoicesTools {
           type: 'object',
           properties: {
             templateId: { type: 'string', description: 'Template ID' },
-            altId: { type: 'string', description: 'Location ID' }
+            altId: { 
+              type: 'string', 
+              description: 'Location ID (automatically populated from MCP headers if not provided)' 
+            }
           },
           required: ['templateId']
         }
@@ -142,7 +168,10 @@ export class InvoicesTools {
           type: 'object',
           properties: {
             templateId: { type: 'string', description: 'Template ID' },
-            altId: { type: 'string', description: 'Location ID' },
+            altId: { 
+              type: 'string', 
+              description: 'Location ID (automatically populated from MCP headers if not provided)' 
+            },
             name: { type: 'string', description: 'Template name' },
             title: { type: 'string', description: 'Invoice title' },
             currency: { type: 'string', description: 'Currency code' }
@@ -157,7 +186,10 @@ export class InvoicesTools {
           type: 'object',
           properties: {
             templateId: { type: 'string', description: 'Template ID' },
-            altId: { type: 'string', description: 'Location ID' }
+            altId: { 
+              type: 'string', 
+              description: 'Location ID (automatically populated from MCP headers if not provided)' 
+            }
           },
           required: ['templateId']
         }
@@ -170,7 +202,10 @@ export class InvoicesTools {
         inputSchema: {
           type: 'object',
           properties: {
-            altId: { type: 'string', description: 'Location ID' },
+            altId: { 
+              type: 'string', 
+              description: 'Location ID (automatically populated from MCP headers if not provided)' 
+            },
             name: { type: 'string', description: 'Schedule name' },
             templateId: { type: 'string', description: 'Template ID' },
             contactId: { type: 'string', description: 'Contact ID' },
@@ -185,7 +220,10 @@ export class InvoicesTools {
         inputSchema: {
           type: 'object',
           properties: {
-            altId: { type: 'string', description: 'Location ID' },
+            altId: { 
+              type: 'string', 
+              description: 'Location ID (automatically populated from MCP headers if not provided)' 
+            },
             limit: { type: 'string', description: 'Number of results per page', default: '10' },
             offset: { type: 'string', description: 'Offset for pagination', default: '0' },
             status: { type: 'string', description: 'Filter by status' },
@@ -201,7 +239,10 @@ export class InvoicesTools {
           type: 'object',
           properties: {
             scheduleId: { type: 'string', description: 'Schedule ID' },
-            altId: { type: 'string', description: 'Location ID' }
+            altId: { 
+              type: 'string', 
+              description: 'Location ID (automatically populated from MCP headers if not provided)' 
+            }
           },
           required: ['scheduleId']
         }
@@ -214,7 +255,10 @@ export class InvoicesTools {
         inputSchema: {
           type: 'object',
           properties: {
-            altId: { type: 'string', description: 'Location ID' },
+            altId: { 
+              type: 'string', 
+              description: 'Location ID (automatically populated from MCP headers if not provided)' 
+            },
             contactId: { type: 'string', description: 'Contact ID' },
             title: { type: 'string', description: 'Invoice title' },
             currency: { type: 'string', description: 'Currency code' },
@@ -231,7 +275,10 @@ export class InvoicesTools {
         inputSchema: {
           type: 'object',
           properties: {
-            altId: { type: 'string', description: 'Location ID' },
+            altId: { 
+              type: 'string', 
+              description: 'Location ID (automatically populated from MCP headers if not provided)' 
+            },
             limit: { type: 'string', description: 'Number of results per page', default: '10' },
             offset: { type: 'string', description: 'Offset for pagination', default: '0' },
             status: { type: 'string', description: 'Filter by status' },
@@ -248,7 +295,10 @@ export class InvoicesTools {
           type: 'object',
           properties: {
             invoiceId: { type: 'string', description: 'Invoice ID' },
-            altId: { type: 'string', description: 'Location ID' }
+            altId: { 
+              type: 'string', 
+              description: 'Location ID (automatically populated from MCP headers if not provided)' 
+            }
           },
           required: ['invoiceId']
         }
@@ -260,7 +310,10 @@ export class InvoicesTools {
           type: 'object',
           properties: {
             invoiceId: { type: 'string', description: 'Invoice ID' },
-            altId: { type: 'string', description: 'Location ID' },
+            altId: { 
+              type: 'string', 
+              description: 'Location ID (automatically populated from MCP headers if not provided)' 
+            },
             emailTo: { type: 'string', description: 'Email address to send to' },
             subject: { type: 'string', description: 'Email subject' },
             message: { type: 'string', description: 'Email message' }
@@ -276,7 +329,10 @@ export class InvoicesTools {
         inputSchema: {
           type: 'object',
           properties: {
-            altId: { type: 'string', description: 'Location ID' },
+            altId: { 
+              type: 'string', 
+              description: 'Location ID (automatically populated from MCP headers if not provided)' 
+            },
             contactId: { type: 'string', description: 'Contact ID' },
             title: { type: 'string', description: 'Estimate title' },
             currency: { type: 'string', description: 'Currency code' },
@@ -292,7 +348,10 @@ export class InvoicesTools {
         inputSchema: {
           type: 'object',
           properties: {
-            altId: { type: 'string', description: 'Location ID' },
+            altId: { 
+              type: 'string', 
+              description: 'Location ID (automatically populated from MCP headers if not provided)' 
+            },
             limit: { type: 'string', description: 'Number of results per page', default: '10' },
             offset: { type: 'string', description: 'Offset for pagination', default: '0' },
             status: { type: 'string', enum: ['all', 'draft', 'sent', 'accepted', 'declined', 'invoiced', 'viewed'], description: 'Filter by status' },
@@ -309,7 +368,10 @@ export class InvoicesTools {
           type: 'object',
           properties: {
             estimateId: { type: 'string', description: 'Estimate ID' },
-            altId: { type: 'string', description: 'Location ID' },
+            altId: { 
+              type: 'string', 
+              description: 'Location ID (automatically populated from MCP headers if not provided)' 
+            },
             emailTo: { type: 'string', description: 'Email address to send to' },
             subject: { type: 'string', description: 'Email subject' },
             message: { type: 'string', description: 'Email message' }
@@ -324,7 +386,10 @@ export class InvoicesTools {
           type: 'object',
           properties: {
             estimateId: { type: 'string', description: 'Estimate ID' },
-            altId: { type: 'string', description: 'Location ID' },
+            altId: { 
+              type: 'string', 
+              description: 'Location ID (automatically populated from MCP headers if not provided)' 
+            },
             issueDate: { type: 'string', description: 'Invoice issue date' },
             dueDate: { type: 'string', description: 'Invoice due date' }
           },
@@ -339,7 +404,10 @@ export class InvoicesTools {
         inputSchema: {
           type: 'object',
           properties: {
-            altId: { type: 'string', description: 'Location ID' }
+            altId: { 
+              type: 'string', 
+              description: 'Location ID (automatically populated from MCP headers if not provided)' 
+            }
           }
         }
       },
@@ -349,7 +417,10 @@ export class InvoicesTools {
         inputSchema: {
           type: 'object',
           properties: {
-            altId: { type: 'string', description: 'Location ID' }
+            altId: { 
+              type: 'string', 
+              description: 'Location ID (automatically populated from MCP headers if not provided)' 
+            }
           }
         }
       }
@@ -360,76 +431,112 @@ export class InvoicesTools {
    * Execute a tool by name with given arguments
    */
   async executeTool(name: string, args: any): Promise<any> {
-    return this.handleToolCall(name, args);
-  }
+    try {
+      // Auto-populate altId and altType if not provided
+      const processedArgs = { ...args };
+      
+      // For any tool that uses altId/altType, default to location ID from client config
+      if ('altId' in processedArgs || 'altType' in processedArgs) {
+        if (!processedArgs.altId && this.client.getConfig().locationId) {
+          processedArgs.altId = this.client.getConfig().locationId;
+        }
+        if (!processedArgs.altType) {
+          processedArgs.altType = 'location';
+        }
+      }
+      
+      let result;
+      switch (name) {
+        // Invoice Template Handlers
+        case 'create_invoice_template':
+          result = await this.client.createInvoiceTemplate(processedArgs as CreateInvoiceTemplateDto);
+          break;
 
-  async handleToolCall(name: string, args: any): Promise<any> {
-    switch (name) {
-      // Invoice Template Handlers
-      case 'create_invoice_template':
-        return this.client.createInvoiceTemplate(args as CreateInvoiceTemplateDto);
+        case 'list_invoice_templates':
+          result = await this.client.listInvoiceTemplates(processedArgs);
+          break;
 
-      case 'list_invoice_templates':
-        return this.client.listInvoiceTemplates(args);
+        case 'get_invoice_template':
+          result = await this.client.getInvoiceTemplate(processedArgs.templateId, processedArgs);
+          break;
 
-      case 'get_invoice_template':
-        return this.client.getInvoiceTemplate(args.templateId, args);
+        case 'update_invoice_template':
+          const { templateId: updateTemplateId, ...updateTemplateData } = processedArgs;
+          result = await this.client.updateInvoiceTemplate(updateTemplateId, updateTemplateData as UpdateInvoiceTemplateDto);
+          break;
 
-      case 'update_invoice_template':
-        const { templateId: updateTemplateId, ...updateTemplateData } = args;
-        return this.client.updateInvoiceTemplate(updateTemplateId, updateTemplateData as UpdateInvoiceTemplateDto);
+        case 'delete_invoice_template':
+          result = await this.client.deleteInvoiceTemplate(processedArgs.templateId, processedArgs);
+          break;
 
-      case 'delete_invoice_template':
-        return this.client.deleteInvoiceTemplate(args.templateId, args);
+        // Invoice Schedule Handlers
+        case 'create_invoice_schedule':
+          result = await this.client.createInvoiceSchedule(processedArgs as CreateInvoiceScheduleDto);
+          break;
 
-      // Invoice Schedule Handlers
-      case 'create_invoice_schedule':
-        return this.client.createInvoiceSchedule(args as CreateInvoiceScheduleDto);
+        case 'list_invoice_schedules':
+          result = await this.client.listInvoiceSchedules(processedArgs);
+          break;
 
-      case 'list_invoice_schedules':
-        return this.client.listInvoiceSchedules(args);
+        case 'get_invoice_schedule':
+          result = await this.client.getInvoiceSchedule(processedArgs.scheduleId, processedArgs);
+          break;
 
-      case 'get_invoice_schedule':
-        return this.client.getInvoiceSchedule(args.scheduleId, args);
+        // Invoice Management Handlers
+        case 'create_invoice':
+          result = await this.client.createInvoice(processedArgs as CreateInvoiceDto);
+          break;
 
-      // Invoice Management Handlers
-      case 'create_invoice':
-        return this.client.createInvoice(args as CreateInvoiceDto);
+        case 'list_invoices':
+          result = await this.client.listInvoices(processedArgs);
+          break;
 
-      case 'list_invoices':
-        return this.client.listInvoices(args);
+        case 'get_invoice':
+          result = await this.client.getInvoice(processedArgs.invoiceId, processedArgs);
+          break;
 
-      case 'get_invoice':
-        return this.client.getInvoice(args.invoiceId, args);
+        case 'send_invoice':
+          const { invoiceId: sendInvoiceId, ...sendInvoiceData } = processedArgs;
+          result = await this.client.sendInvoice(sendInvoiceId, sendInvoiceData as SendInvoiceDto);
+          break;
 
-      case 'send_invoice':
-        const { invoiceId: sendInvoiceId, ...sendInvoiceData } = args;
-        return this.client.sendInvoice(sendInvoiceId, sendInvoiceData as SendInvoiceDto);
+        // Estimate Handlers
+        case 'create_estimate':
+          result = await this.client.createEstimate(processedArgs as CreateEstimatesDto);
+          break;
 
-      // Estimate Handlers
-      case 'create_estimate':
-        return this.client.createEstimate(args as CreateEstimatesDto);
+        case 'list_estimates':
+          result = await this.client.listEstimates(processedArgs);
+          break;
 
-      case 'list_estimates':
-        return this.client.listEstimates(args);
+        case 'send_estimate':
+          const { estimateId: sendEstimateId, ...sendEstimateData } = processedArgs;
+          result = await this.client.sendEstimate(sendEstimateId, sendEstimateData as SendEstimateDto);
+          break;
 
-      case 'send_estimate':
-        const { estimateId: sendEstimateId, ...sendEstimateData } = args;
-        return this.client.sendEstimate(sendEstimateId, sendEstimateData as SendEstimateDto);
+        case 'create_invoice_from_estimate':
+          const { estimateId: invoiceFromEstimateId, ...invoiceFromEstimateData } = processedArgs;
+          result = await this.client.createInvoiceFromEstimate(invoiceFromEstimateId, invoiceFromEstimateData as CreateInvoiceFromEstimateDto);
+          break;
 
-      case 'create_invoice_from_estimate':
-        const { estimateId: invoiceFromEstimateId, ...invoiceFromEstimateData } = args;
-        return this.client.createInvoiceFromEstimate(invoiceFromEstimateId, invoiceFromEstimateData as CreateInvoiceFromEstimateDto);
+        // Utility Handlers
+        case 'generate_invoice_number':
+          result = await this.client.generateInvoiceNumber(processedArgs);
+          break;
 
-      // Utility Handlers
-      case 'generate_invoice_number':
-        return this.client.generateInvoiceNumber(args);
+        case 'generate_estimate_number':
+          result = await this.client.generateEstimateNumber(processedArgs);
+          break;
 
-      case 'generate_estimate_number':
-        return this.client.generateEstimateNumber(args);
-
-      default:
-        throw new Error(`Unknown invoices tool: ${name}`);
+        default:
+          throw new Error(`Unknown invoices tool: ${name}`);
+      }
+      
+      return this.formatResponse(result);
+    } catch (error) {
+      return this.formatResponse({
+        error: error instanceof Error ? error.message : 'An error occurred'
+      });
     }
   }
 } 

@@ -1,65 +1,107 @@
 {
   "mcpServers": {
     "ghl-core": {
-      "command": "node",
-      "args": ["/path/to/modular-split/ghl-core-mcp/dist/server.js"],
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://ghl-core-mcp.fly.dev/sse",
+        "--header",
+        "X-GHL-API-Key: ${GHL_API_KEY}",
+        "--header",
+        "X-GHL-Location-ID: ${GHL_LOCATION_ID}"
+      ],
       "env": {
         "GHL_API_KEY": "your_private_integrations_api_key",
-        "GHL_BASE_URL": "https://services.leadconnectorhq.com",
         "GHL_LOCATION_ID": "your_location_id"
       }
     },
     "ghl-communications": {
-      "command": "node",
-      "args": ["/path/to/modular-split/ghl-communications-mcp/dist/server.js"],
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://ghl-communications-mcp.fly.dev/sse",
+        "--header",
+        "X-GHL-API-Key: ${GHL_API_KEY}",
+        "--header",
+        "X-GHL-Location-ID: ${GHL_LOCATION_ID}"
+      ],
       "env": {
         "GHL_API_KEY": "your_private_integrations_api_key",
-        "GHL_BASE_URL": "https://services.leadconnectorhq.com",
         "GHL_LOCATION_ID": "your_location_id"
       }
     },
     "ghl-sales": {
-      "command": "node",
-      "args": ["/path/to/modular-split/ghl-sales-mcp/dist/server.js"],
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://ghl-sales-mcp.fly.dev/sse",
+        "--header",
+        "X-GHL-API-Key: ${GHL_API_KEY}",
+        "--header",
+        "X-GHL-Location-ID: ${GHL_LOCATION_ID}"
+      ],
       "env": {
         "GHL_API_KEY": "your_private_integrations_api_key",
-        "GHL_BASE_URL": "https://services.leadconnectorhq.com",
         "GHL_LOCATION_ID": "your_location_id"
       }
     },
     "ghl-marketing": {
-      "command": "node",
-      "args": ["/path/to/modular-split/ghl-marketing-mcp/dist/server.js"],
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://ghl-marketing-mcp.fly.dev/sse",
+        "--header",
+        "X-GHL-API-Key: ${GHL_API_KEY}",
+        "--header",
+        "X-GHL-Location-ID: ${GHL_LOCATION_ID}"
+      ],
       "env": {
         "GHL_API_KEY": "your_private_integrations_api_key",
-        "GHL_BASE_URL": "https://services.leadconnectorhq.com",
         "GHL_LOCATION_ID": "your_location_id"
       }
     },
     "ghl-operations": {
-      "command": "node",
-      "args": ["/path/to/modular-split/ghl-operations-mcp/dist/server.js"],
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://ghl-operations-mcp.fly.dev/sse",
+        "--header",
+        "X-GHL-API-Key: ${GHL_API_KEY}",
+        "--header",
+        "X-GHL-Location-ID: ${GHL_LOCATION_ID}"
+      ],
       "env": {
         "GHL_API_KEY": "your_private_integrations_api_key",
-        "GHL_BASE_URL": "https://services.leadconnectorhq.com",
         "GHL_LOCATION_ID": "your_location_id"
       }
     },
     "ghl-ecommerce": {
-      "command": "node",
-      "args": ["/path/to/modular-split/ghl-ecommerce-mcp/dist/server.js"],
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://ghl-ecommerce-mcp.fly.dev/sse",
+        "--header",
+        "X-GHL-API-Key: ${GHL_API_KEY}",
+        "--header",
+        "X-GHL-Location-ID: ${GHL_LOCATION_ID}"
+      ],
       "env": {
         "GHL_API_KEY": "your_private_integrations_api_key",
-        "GHL_BASE_URL": "https://services.leadconnectorhq.com",
         "GHL_LOCATION_ID": "your_location_id"
       }
     },
     "ghl-data": {
-      "command": "node",
-      "args": ["/path/to/modular-split/ghl-data-mcp/dist/server.js"],
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://ghl-data-mcp.fly.dev/sse",
+        "--header",
+        "X-GHL-API-Key: ${GHL_API_KEY}",
+        "--header",
+        "X-GHL-Location-ID: ${GHL_LOCATION_ID}"
+      ],
       "env": {
         "GHL_API_KEY": "your_private_integrations_api_key",
-        "GHL_BASE_URL": "https://services.leadconnectorhq.com",
         "GHL_LOCATION_ID": "your_location_id"
       }
     }

@@ -88,19 +88,14 @@ class GhlSalesServer {
     });
   }
 
-  async start(): Promise<void> {
+  async run(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    process.stderr.write('ghl-sales-mcp MCP Server running on stdio\n');
+    console.log('Dynamic GoHighLevel Sales MCP server running on stdio');
   }
 }
 
-async function main(): Promise<void> {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const server = new GhlSalesServer();
-  await server.start();
-}
-
-main().catch((error) => {
-  console.error('Server failed to start:', error);
-  process.exit(1);
-}); 
+  server.run().catch(console.error);
+} 

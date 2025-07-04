@@ -26,6 +26,18 @@ export class OpportunityTools {
   constructor(private ghlClient: GHLApiClient) {}
 
   /**
+   * Format response for MCP protocol
+   */
+  private formatResponse(data: any): any {
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(data, null, 2)
+      }]
+    };
+  }
+
+  /**
    * Get static tool definitions without requiring API client
    */
   static getStaticToolDefinitions(): Tool[] {
@@ -339,7 +351,7 @@ export class OpportunityTools {
   /**
    * SEARCH OPPORTUNITIES
    */
-  private async searchOpportunities(params: MCPSearchOpportunitiesParams): Promise<{ success: boolean; opportunities: GHLOpportunity[]; meta: any; message: string }> {
+  private async searchOpportunities(params: MCPSearchOpportunitiesParams): Promise<any> {
     try {
       // Build search parameters with correct API naming (underscores)
       const searchParams: any = {
@@ -384,22 +396,24 @@ export class OpportunityTools {
       const data = response.data as GHLSearchOpportunitiesResponse;
       const opportunities = Array.isArray(data.opportunities) ? data.opportunities : [];
       
-      return {
+      return this.formatResponse({
         success: true,
         opportunities,
         meta: data.meta,
         message: `Found ${opportunities.length} opportunities (${data.meta?.total || opportunities.length} total)`
-      };
+      });
     } catch (error) {
       process.stderr.write(`[GHL MCP] Search opportunities error: ${JSON.stringify(error, null, 2)}\n`);
-      throw new Error(`Failed to search opportunities: ${error instanceof Error ? error.message : String(error)}`);
+      return this.formatResponse({
+        error: `Failed to search opportunities: ${error instanceof Error ? error.message : String(error)}`
+      });
     }
   }
 
   /**
    * GET PIPELINES
    */
-  private async getPipelines(): Promise<{ success: boolean; pipelines: any[]; message: string }> {
+  private async getPipelines(): Promise<any> {
     try {
       const response = await this.ghlClient.getPipelines();
       
@@ -411,20 +425,22 @@ export class OpportunityTools {
       const data = response.data as GHLGetPipelinesResponse;
       const pipelines = Array.isArray(data.pipelines) ? data.pipelines : [];
       
-      return {
+      return this.formatResponse({
         success: true,
         pipelines,
         message: `Retrieved ${pipelines.length} pipelines`
-      };
+      });
     } catch (error) {
-      throw new Error(`Failed to get pipelines: ${error instanceof Error ? error.message : String(error)}`);
+      return this.formatResponse({
+        error: `Failed to get pipelines: ${error instanceof Error ? error.message : String(error)}`
+      });
     }
   }
 
   /**
    * GET OPPORTUNITY BY ID
    */
-  private async getOpportunity(opportunityId: string): Promise<{ success: boolean; opportunity: GHLOpportunity; message: string }> {
+  private async getOpportunity(opportunityId: string): Promise<any> {
     try {
       const response = await this.ghlClient.getOpportunity(opportunityId);
       
@@ -433,20 +449,22 @@ export class OpportunityTools {
         throw new Error(`API request failed: ${errorMsg}`);
       }
       
-      return {
+      return this.formatResponse({
         success: true,
         opportunity: response.data,
         message: 'Opportunity retrieved successfully'
-      };
+      });
     } catch (error) {
-      throw new Error(`Failed to get opportunity: ${error instanceof Error ? error.message : String(error)}`);
+      return this.formatResponse({
+        error: `Failed to get opportunity: ${error instanceof Error ? error.message : String(error)}`
+      });
     }
   }
 
   /**
    * CREATE OPPORTUNITY
    */
-  private async createOpportunity(params: MCPCreateOpportunityParams): Promise<{ success: boolean; opportunity: GHLOpportunity; message: string }> {
+  private async createOpportunity(params: MCPCreateOpportunityParams): Promise<any> {
     try {
       const opportunityData = {
         locationId: this.ghlClient.getConfig().locationId,
@@ -467,20 +485,22 @@ export class OpportunityTools {
         throw new Error(`API request failed: ${errorMsg}`);
       }
       
-      return {
+      return this.formatResponse({
         success: true,
         opportunity: response.data,
         message: `Opportunity created successfully with ID: ${response.data.id}`
-      };
+      });
     } catch (error) {
-      throw new Error(`Failed to create opportunity: ${error instanceof Error ? error.message : String(error)}`);
+      return this.formatResponse({
+        error: `Failed to create opportunity: ${error instanceof Error ? error.message : String(error)}`
+      });
     }
   }
 
   /**
    * UPDATE OPPORTUNITY STATUS
    */
-  private async updateOpportunityStatus(opportunityId: string, status: string): Promise<{ success: boolean; message: string }> {
+  private async updateOpportunityStatus(opportunityId: string, status: string): Promise<any> {
     try {
       const response = await this.ghlClient.updateOpportunityStatus(opportunityId, status as any);
       
@@ -489,19 +509,21 @@ export class OpportunityTools {
         throw new Error(`API request failed: ${errorMsg}`);
       }
       
-      return {
+      return this.formatResponse({
         success: true,
         message: `Opportunity status updated to ${status}`
-      };
+      });
     } catch (error) {
-      throw new Error(`Failed to update opportunity status: ${error instanceof Error ? error.message : String(error)}`);
+      return this.formatResponse({
+        error: `Failed to update opportunity status: ${error instanceof Error ? error.message : String(error)}`
+      });
     }
   }
 
   /**
    * DELETE OPPORTUNITY
    */
-  private async deleteOpportunity(opportunityId: string): Promise<{ success: boolean; message: string }> {
+  private async deleteOpportunity(opportunityId: string): Promise<any> {
     try {
       const response = await this.ghlClient.deleteOpportunity(opportunityId);
       
@@ -510,19 +532,21 @@ export class OpportunityTools {
         throw new Error(`API request failed: ${errorMsg}`);
       }
       
-      return {
+      return this.formatResponse({
         success: true,
         message: 'Opportunity deleted successfully'
-      };
+      });
     } catch (error) {
-      throw new Error(`Failed to delete opportunity: ${error instanceof Error ? error.message : String(error)}`);
+      return this.formatResponse({
+        error: `Failed to delete opportunity: ${error instanceof Error ? error.message : String(error)}`
+      });
     }
   }
 
   /**
    * UPDATE OPPORTUNITY (FULL UPDATE)
    */
-  private async updateOpportunity(params: MCPUpdateOpportunityParams): Promise<{ success: boolean; opportunity: GHLOpportunity; message: string }> {
+  private async updateOpportunity(params: MCPUpdateOpportunityParams): Promise<any> {
     try {
       const updateData: any = {};
       
@@ -541,20 +565,22 @@ export class OpportunityTools {
         throw new Error(`API request failed: ${errorMsg}`);
       }
       
-      return {
+      return this.formatResponse({
         success: true,
         opportunity: response.data,
         message: `Opportunity updated successfully`
-      };
+      });
     } catch (error) {
-      throw new Error(`Failed to update opportunity: ${error instanceof Error ? error.message : String(error)}`);
+      return this.formatResponse({
+        error: `Failed to update opportunity: ${error instanceof Error ? error.message : String(error)}`
+      });
     }
   }
 
   /**
    * UPSERT OPPORTUNITY
    */
-  private async upsertOpportunity(params: MCPUpsertOpportunityParams): Promise<{ success: boolean; opportunity: GHLOpportunity; isNew: boolean; message: string }> {
+  private async upsertOpportunity(params: MCPUpsertOpportunityParams): Promise<any> {
     try {
       const upsertData = {
         locationId: this.ghlClient.getConfig().locationId,
@@ -576,21 +602,23 @@ export class OpportunityTools {
 
       const data = response.data as GHLUpsertOpportunityResponse;
       
-      return {
+      return this.formatResponse({
         success: true,
         opportunity: data.opportunity,
         isNew: data.new,
         message: `Opportunity ${data.new ? 'created' : 'updated'} successfully`
-      };
+      });
     } catch (error) {
-      throw new Error(`Failed to upsert opportunity: ${error instanceof Error ? error.message : String(error)}`);
+      return this.formatResponse({
+        error: `Failed to upsert opportunity: ${error instanceof Error ? error.message : String(error)}`
+      });
     }
   }
 
   /**
    * ADD OPPORTUNITY FOLLOWERS
    */
-  private async addOpportunityFollowers(params: MCPAddOpportunityFollowersParams): Promise<{ success: boolean; followers: string[]; followersAdded: string[]; message: string }> {
+  private async addOpportunityFollowers(params: MCPAddOpportunityFollowersParams): Promise<any> {
     try {
       const response = await this.ghlClient.addOpportunityFollowers(params.opportunityId, params.followers);
       
@@ -599,21 +627,23 @@ export class OpportunityTools {
         throw new Error(`API request failed: ${errorMsg}`);
       }
       
-      return {
+      return this.formatResponse({
         success: true,
         followers: response.data.followers || [],
         followersAdded: response.data.followersAdded || [],
         message: `Added ${response.data.followersAdded?.length || 0} followers to opportunity`
-      };
+      });
     } catch (error) {
-      throw new Error(`Failed to add opportunity followers: ${error instanceof Error ? error.message : String(error)}`);
+      return this.formatResponse({
+        error: `Failed to add opportunity followers: ${error instanceof Error ? error.message : String(error)}`
+      });
     }
   }
 
   /**
    * REMOVE OPPORTUNITY FOLLOWERS
    */
-  private async removeOpportunityFollowers(params: MCPRemoveOpportunityFollowersParams): Promise<{ success: boolean; followers: string[]; followersRemoved: string[]; message: string }> {
+  private async removeOpportunityFollowers(params: MCPRemoveOpportunityFollowersParams): Promise<any> {
     try {
       const response = await this.ghlClient.removeOpportunityFollowers(params.opportunityId, params.followers);
       
@@ -622,14 +652,16 @@ export class OpportunityTools {
         throw new Error(`API request failed: ${errorMsg}`);
       }
       
-      return {
+      return this.formatResponse({
         success: true,
         followers: response.data.followers || [],
         followersRemoved: response.data.followersRemoved || [],
         message: `Removed ${response.data.followersRemoved?.length || 0} followers from opportunity`
-      };
+      });
     } catch (error) {
-      throw new Error(`Failed to remove opportunity followers: ${error instanceof Error ? error.message : String(error)}`);
+      return this.formatResponse({
+        error: `Failed to remove opportunity followers: ${error instanceof Error ? error.message : String(error)}`
+      });
     }
   }
 } 
