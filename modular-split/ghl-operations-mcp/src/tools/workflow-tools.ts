@@ -8,6 +8,18 @@ export class WorkflowTools {
   constructor(private apiClient: GHLApiClient) {}
 
   /**
+   * Format response for MCP protocol
+   */
+  private formatResponse(data: any): any {
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(data, null, 2)
+      }]
+    };
+  }
+
+  /**
    * Get static tool definitions without requiring API client
    */
   static getStaticToolDefinitions(): Tool[] {
@@ -45,16 +57,22 @@ export class WorkflowTools {
 
   async executeTool(name: string, params: any): Promise<any> {
     try {
+      let result;
       switch (name) {
         case 'ghl_get_workflows':
-          return await this.getWorkflows(params as MCPGetWorkflowsParams);
+          result = await this.getWorkflows(params as MCPGetWorkflowsParams);
+          break;
         
         default:
           throw new Error(`Unknown workflow tool: ${name}`);
       }
+      
+      return this.formatResponse(result);
     } catch (error) {
       console.error(`Error executing workflow tool ${name}:`, error);
-      throw error;
+      return this.formatResponse({
+        error: error instanceof Error ? error.message : 'An error occurred'
+      });
     }
   }
 

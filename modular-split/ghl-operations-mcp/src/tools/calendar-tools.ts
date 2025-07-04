@@ -52,6 +52,18 @@ export class CalendarTools {
   constructor(private ghlClient: GHLApiClient) {}
 
   /**
+   * Format response for MCP protocol
+   */
+  private formatResponse(data: any): any {
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(data, null, 2)
+      }]
+    };
+  }
+
+  /**
    * Get static tool definitions without requiring API client
    */
   static getStaticToolDefinitions(): Tool[] {
@@ -839,126 +851,174 @@ export class CalendarTools {
    * Execute calendar tool based on tool name and arguments
    */
   async executeTool(name: string, args: any): Promise<any> {
-    switch (name) {
-      case 'get_calendar_groups':
-        return this.getCalendarGroups();
+    try {
+      let result;
+      switch (name) {
+        case 'get_calendar_groups':
+          result = await this.getCalendarGroups();
+          break;
+        
+        case 'get_calendars':
+          result = await this.getCalendars(args as MCPGetCalendarsParams);
+          break;
+        
+        case 'create_calendar':
+          result = await this.createCalendar(args as MCPCreateCalendarParams);
+          break;
+        
+        case 'get_calendar':
+          result = await this.getCalendar(args.calendarId);
+          break;
+        
+        case 'update_calendar':
+          result = await this.updateCalendar(args as MCPUpdateCalendarParams);
+          break;
+        
+        case 'delete_calendar':
+          result = await this.deleteCalendar(args.calendarId);
+          break;
+        
+        case 'get_calendar_events':
+          result = await this.getCalendarEvents(args as MCPGetCalendarEventsParams);
+          break;
+        
+        case 'get_free_slots':
+          result = await this.getFreeSlots(args as MCPGetFreeSlotsParams);
+          break;
+        
+        case 'create_appointment':
+          result = await this.createAppointment(args as MCPCreateAppointmentParams);
+          break;
+        
+        case 'get_appointment':
+          result = await this.getAppointment(args.appointmentId);
+          break;
+        
+        case 'update_appointment':
+          result = await this.updateAppointment(args as MCPUpdateAppointmentParams);
+          break;
+        
+        case 'delete_appointment':
+          result = await this.deleteAppointment(args.appointmentId);
+          break;
+        
+        case 'create_block_slot':
+          result = await this.createBlockSlot(args as MCPCreateBlockSlotParams);
+          break;
+        
+        case 'update_block_slot':
+          result = await this.updateBlockSlot(args as MCPUpdateBlockSlotParams);
+          break;
+        
+        case 'create_calendar_group':
+          result = await this.createCalendarGroup(args as MCPCreateCalendarGroupParams);
+          break;
+        
+        case 'validate_group_slug':
+          result = await this.validateGroupSlug(args as MCPValidateGroupSlugParams);
+          break;
+        
+        case 'update_calendar_group':
+          result = await this.updateCalendarGroup(args as MCPUpdateCalendarGroupParams);
+          break;
+        
+        case 'delete_calendar_group':
+          result = await this.deleteCalendarGroup(args as MCPDeleteCalendarGroupParams);
+          break;
+        
+        case 'disable_calendar_group':
+          result = await this.disableCalendarGroup(args as MCPDisableCalendarGroupParams);
+          break;
+        
+        case 'get_appointment_notes':
+          result = await this.getAppointmentNotes(args as MCPGetAppointmentNotesParams);
+          break;
+        
+        case 'create_appointment_note':
+          result = await this.createAppointmentNote(args as MCPCreateAppointmentNoteParams);
+          break;
+        
+        case 'update_appointment_note':
+          result = await this.updateAppointmentNote(args as MCPUpdateAppointmentNoteParams);
+          break;
+        
+        case 'delete_appointment_note':
+          result = await this.deleteAppointmentNote(args as MCPDeleteAppointmentNoteParams);
+          break;
+        
+        case 'get_calendar_resources_equipments':
+          result = await this.getCalendarResourcesEquipments(args as MCPGetCalendarResourcesParams);
+          break;
+        
+        case 'create_calendar_resource_equipment':
+          result = await this.createCalendarResourceEquipment(args as MCPCreateCalendarResourceParams);
+          break;
+        
+        case 'get_calendar_resource_equipment':
+          result = await this.getCalendarResourceEquipment(args as MCPGetCalendarResourceParams);
+          break;
+        
+        case 'update_calendar_resource_equipment':
+          result = await this.updateCalendarResourceEquipment(args as MCPUpdateCalendarResourceParams);
+          break;
+        
+        case 'delete_calendar_resource_equipment':
+          result = await this.deleteCalendarResourceEquipment(args as MCPDeleteCalendarResourceParams);
+          break;
+        
+        case 'get_calendar_resources_rooms':
+          result = await this.getCalendarResourcesRooms(args as MCPGetCalendarResourcesParams);
+          break;
+        
+        case 'create_calendar_resource_room':
+          result = await this.createCalendarResourceRoom(args as MCPCreateCalendarResourceParams);
+          break;
+        
+        case 'get_calendar_resource_room':
+          result = await this.getCalendarResourceRoom(args as MCPGetCalendarResourceParams);
+          break;
+        
+        case 'update_calendar_resource_room':
+          result = await this.updateCalendarResourceRoom(args as MCPUpdateCalendarResourceParams);
+          break;
+        
+        case 'delete_calendar_resource_room':
+          result = await this.deleteCalendarResourceRoom(args as MCPDeleteCalendarResourceParams);
+          break;
+        
+        case 'get_calendar_notifications':
+          result = await this.getCalendarNotifications(args as MCPGetCalendarNotificationsParams);
+          break;
+        
+        case 'create_calendar_notifications':
+          result = await this.createCalendarNotifications(args as MCPCreateCalendarNotificationParams);
+          break;
+        
+        case 'get_calendar_notification':
+          result = await this.getCalendarNotification(args as MCPGetCalendarNotificationParams);
+          break;
+        
+        case 'update_calendar_notification':
+          result = await this.updateCalendarNotification(args as MCPUpdateCalendarNotificationParams);
+          break;
+        
+        case 'delete_calendar_notification':
+          result = await this.deleteCalendarNotification(args as MCPDeleteCalendarNotificationParams);
+          break;
+        
+        case 'get_blocked_slots':
+          result = await this.getBlockedSlots(args as MCPGetBlockedSlotsParams);
+          break;
+        
+        default:
+          throw new Error(`Unknown calendar tool: ${name}`);
+      }
       
-      case 'get_calendars':
-        return this.getCalendars(args as MCPGetCalendarsParams);
-      
-      case 'create_calendar':
-        return this.createCalendar(args as MCPCreateCalendarParams);
-      
-      case 'get_calendar':
-        return this.getCalendar(args.calendarId);
-      
-      case 'update_calendar':
-        return this.updateCalendar(args as MCPUpdateCalendarParams);
-      
-      case 'delete_calendar':
-        return this.deleteCalendar(args.calendarId);
-      
-      case 'get_calendar_events':
-        return this.getCalendarEvents(args as MCPGetCalendarEventsParams);
-      
-      case 'get_free_slots':
-        return this.getFreeSlots(args as MCPGetFreeSlotsParams);
-      
-      case 'create_appointment':
-        return this.createAppointment(args as MCPCreateAppointmentParams);
-      
-      case 'get_appointment':
-        return this.getAppointment(args.appointmentId);
-      
-      case 'update_appointment':
-        return this.updateAppointment(args as MCPUpdateAppointmentParams);
-      
-      case 'delete_appointment':
-        return this.deleteAppointment(args.appointmentId);
-      
-      case 'create_block_slot':
-        return this.createBlockSlot(args as MCPCreateBlockSlotParams);
-      
-      case 'update_block_slot':
-        return this.updateBlockSlot(args as MCPUpdateBlockSlotParams);
-      
-      case 'create_calendar_group':
-        return this.createCalendarGroup(args as MCPCreateCalendarGroupParams);
-      
-      case 'validate_group_slug':
-        return this.validateGroupSlug(args as MCPValidateGroupSlugParams);
-      
-      case 'update_calendar_group':
-        return this.updateCalendarGroup(args as MCPUpdateCalendarGroupParams);
-      
-      case 'delete_calendar_group':
-        return this.deleteCalendarGroup(args as MCPDeleteCalendarGroupParams);
-      
-      case 'disable_calendar_group':
-        return this.disableCalendarGroup(args as MCPDisableCalendarGroupParams);
-      
-      case 'get_appointment_notes':
-        return this.getAppointmentNotes(args as MCPGetAppointmentNotesParams);
-      
-      case 'create_appointment_note':
-        return this.createAppointmentNote(args as MCPCreateAppointmentNoteParams);
-      
-      case 'update_appointment_note':
-        return this.updateAppointmentNote(args as MCPUpdateAppointmentNoteParams);
-      
-      case 'delete_appointment_note':
-        return this.deleteAppointmentNote(args as MCPDeleteAppointmentNoteParams);
-      
-      case 'get_calendar_resources_equipments':
-        return this.getCalendarResourcesEquipments(args as MCPGetCalendarResourcesParams);
-      
-      case 'create_calendar_resource_equipment':
-        return this.createCalendarResourceEquipment(args as MCPCreateCalendarResourceParams);
-      
-      case 'get_calendar_resource_equipment':
-        return this.getCalendarResourceEquipment(args as MCPGetCalendarResourceParams);
-      
-      case 'update_calendar_resource_equipment':
-        return this.updateCalendarResourceEquipment(args as MCPUpdateCalendarResourceParams);
-      
-      case 'delete_calendar_resource_equipment':
-        return this.deleteCalendarResourceEquipment(args as MCPDeleteCalendarResourceParams);
-      
-      case 'get_calendar_resources_rooms':
-        return this.getCalendarResourcesRooms(args as MCPGetCalendarResourcesParams);
-      
-      case 'create_calendar_resource_room':
-        return this.createCalendarResourceRoom(args as MCPCreateCalendarResourceParams);
-      
-      case 'get_calendar_resource_room':
-        return this.getCalendarResourceRoom(args as MCPGetCalendarResourceParams);
-      
-      case 'update_calendar_resource_room':
-        return this.updateCalendarResourceRoom(args as MCPUpdateCalendarResourceParams);
-      
-      case 'delete_calendar_resource_room':
-        return this.deleteCalendarResourceRoom(args as MCPDeleteCalendarResourceParams);
-      
-      case 'get_calendar_notifications':
-        return this.getCalendarNotifications(args as MCPGetCalendarNotificationsParams);
-      
-      case 'create_calendar_notifications':
-        return this.createCalendarNotifications(args as MCPCreateCalendarNotificationParams);
-      
-      case 'get_calendar_notification':
-        return this.getCalendarNotification(args as MCPGetCalendarNotificationParams);
-      
-      case 'update_calendar_notification':
-        return this.updateCalendarNotification(args as MCPUpdateCalendarNotificationParams);
-      
-      case 'delete_calendar_notification':
-        return this.deleteCalendarNotification(args as MCPDeleteCalendarNotificationParams);
-      
-      case 'get_blocked_slots':
-        return this.getBlockedSlots(args as MCPGetBlockedSlotsParams);
-      
-      default:
-        throw new Error(`Unknown calendar tool: ${name}`);
+      return this.formatResponse(result);
+    } catch (error) {
+      return this.formatResponse({
+        error: error instanceof Error ? error.message : 'An error occurred'
+      });
     }
   }
 

@@ -28,6 +28,18 @@ export class BlogTools {
   constructor(private ghlClient: GHLApiClient) {}
 
   /**
+   * Format response to MCP format
+   */
+  private formatResponse(data: any): any {
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(data, null, 2)
+      }]
+    };
+  }
+
+  /**
    * Get static tool definitions without requiring API client
    */
   static getStaticToolDefinitions(): Tool[] {
@@ -346,7 +358,7 @@ export class BlogTools {
   /**
    * CREATE BLOG POST
    */
-  private async createBlogPost(params: MCPCreateBlogPostParams): Promise<{ success: boolean; blogPost: GHLBlogPost; message: string }> {
+  private async createBlogPost(params: MCPCreateBlogPostParams): Promise<any> {
     try {
       // Set default publishedAt if status is PUBLISHED and no date provided
       let publishedAt = params.publishedAt;
@@ -376,23 +388,25 @@ export class BlogTools {
       const result = await this.ghlClient.createBlogPost(blogPostData);
       
       if (result.success && result.data) {
-        return {
+        return this.formatResponse({
           success: true,
           blogPost: result.data.data,
           message: `Blog post "${params.title}" created successfully with ID: ${result.data.data._id}`
-        };
+        });
       } else {
         throw new Error('Failed to create blog post - no data returned');
       }
     } catch (error) {
-      throw new Error(`Failed to create blog post: ${error}`);
+      return this.formatResponse({
+        error: `Failed to create blog post: ${error}`
+      });
     }
   }
 
   /**
    * UPDATE BLOG POST
    */
-  private async updateBlogPost(params: MCPUpdateBlogPostParams): Promise<{ success: boolean; blogPost: GHLBlogPost; message: string }> {
+  private async updateBlogPost(params: MCPUpdateBlogPostParams): Promise<any> {
     try {
       const updateData: any = {
         locationId: this.ghlClient.getConfig().locationId,
@@ -416,23 +430,25 @@ export class BlogTools {
       const result = await this.ghlClient.updateBlogPost(params.postId, updateData);
       
       if (result.success && result.data) {
-        return {
+        return this.formatResponse({
           success: true,
           blogPost: result.data.updatedBlogPost,
           message: `Blog post updated successfully`
-        };
+        });
       } else {
         throw new Error('Failed to update blog post - no data returned');
       }
     } catch (error) {
-      throw new Error(`Failed to update blog post: ${error}`);
+      return this.formatResponse({
+        error: `Failed to update blog post: ${error}`
+      });
     }
   }
 
   /**
    * GET BLOG POSTS
    */
-  private async getBlogPosts(params: MCPGetBlogPostsParams): Promise<{ success: boolean; posts: GHLBlogPost[]; count: number; message: string }> {
+  private async getBlogPosts(params: MCPGetBlogPostsParams): Promise<any> {
     try {
       const searchParams = {
         locationId: this.ghlClient.getConfig().locationId,
@@ -447,24 +463,26 @@ export class BlogTools {
       
       if (result.success && result.data) {
         const posts = result.data.blogs || [];
-        return {
+        return this.formatResponse({
           success: true,
           posts: posts,
           count: posts.length,
           message: `Retrieved ${posts.length} blog posts from blog ${params.blogId}`
-        };
+        });
       } else {
         throw new Error('Failed to get blog posts - no data returned');
       }
     } catch (error) {
-      throw new Error(`Failed to get blog posts: ${error}`);
+      return this.formatResponse({
+        error: `Failed to get blog posts: ${error}`
+      });
     }
   }
 
   /**
    * GET BLOG SITES
    */
-  private async getBlogSites(params: MCPGetBlogSitesParams): Promise<{ success: boolean; sites: GHLBlogSite[]; count: number; message: string }> {
+  private async getBlogSites(params: MCPGetBlogSitesParams): Promise<any> {
     try {
       const searchParams = {
         locationId: this.ghlClient.getConfig().locationId,
@@ -477,24 +495,26 @@ export class BlogTools {
       
       if (result.success && result.data) {
         const sites = result.data.data || [];
-        return {
+        return this.formatResponse({
           success: true,
           sites: sites,
           count: sites.length,
           message: `Retrieved ${sites.length} blog sites`
-        };
+        });
       } else {
         throw new Error('Failed to get blog sites - no data returned');
       }
     } catch (error) {
-      throw new Error(`Failed to get blog sites: ${error}`);
+      return this.formatResponse({
+        error: `Failed to get blog sites: ${error}`
+      });
     }
   }
 
   /**
    * GET BLOG AUTHORS
    */
-  private async getBlogAuthors(params: MCPGetBlogAuthorsParams): Promise<{ success: boolean; authors: GHLBlogAuthor[]; count: number; message: string }> {
+  private async getBlogAuthors(params: MCPGetBlogAuthorsParams): Promise<any> {
     try {
       const searchParams = {
         locationId: this.ghlClient.getConfig().locationId,
@@ -506,24 +526,26 @@ export class BlogTools {
       
       if (result.success && result.data) {
         const authors = result.data.authors || [];
-        return {
+        return this.formatResponse({
           success: true,
           authors: authors,
           count: authors.length,
           message: `Retrieved ${authors.length} blog authors`
-        };
+        });
       } else {
         throw new Error('Failed to get blog authors - no data returned');
       }
     } catch (error) {
-      throw new Error(`Failed to get blog authors: ${error}`);
+      return this.formatResponse({
+        error: `Failed to get blog authors: ${error}`
+      });
     }
   }
 
   /**
    * GET BLOG CATEGORIES
    */
-  private async getBlogCategories(params: MCPGetBlogCategoriesParams): Promise<{ success: boolean; categories: GHLBlogCategory[]; count: number; message: string }> {
+  private async getBlogCategories(params: MCPGetBlogCategoriesParams): Promise<any> {
     try {
       const searchParams = {
         locationId: this.ghlClient.getConfig().locationId,
@@ -535,24 +557,26 @@ export class BlogTools {
       
       if (result.success && result.data) {
         const categories = result.data.categories || [];
-        return {
+        return this.formatResponse({
           success: true,
           categories: categories,
           count: categories.length,
           message: `Retrieved ${categories.length} blog categories`
-        };
+        });
       } else {
         throw new Error('Failed to get blog categories - no data returned');
       }
     } catch (error) {
-      throw new Error(`Failed to get blog categories: ${error}`);
+      return this.formatResponse({
+        error: `Failed to get blog categories: ${error}`
+      });
     }
   }
 
   /**
    * CHECK URL SLUG
    */
-  private async checkUrlSlug(params: MCPCheckUrlSlugParams): Promise<{ success: boolean; urlSlug: string; exists: boolean; available: boolean; message: string }> {
+  private async checkUrlSlug(params: MCPCheckUrlSlugParams): Promise<any> {
     try {
       const checkParams = {
         locationId: this.ghlClient.getConfig().locationId,
@@ -564,7 +588,7 @@ export class BlogTools {
       
       if (result.success && result.data !== undefined) {
         const exists = result.data.exists;
-        return {
+        return this.formatResponse({
           success: true,
           urlSlug: params.urlSlug,
           exists: exists,
@@ -572,12 +596,14 @@ export class BlogTools {
           message: exists 
             ? `URL slug "${params.urlSlug}" is already in use` 
             : `URL slug "${params.urlSlug}" is available`
-        };
+        });
       } else {
         throw new Error('Failed to check URL slug - no data returned');
       }
     } catch (error) {
-      throw new Error(`Failed to check URL slug: ${error}`);
+      return this.formatResponse({
+        error: `Failed to check URL slug: ${error}`
+      });
     }
   }
 } 

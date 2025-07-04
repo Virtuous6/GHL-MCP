@@ -46,6 +46,23 @@ class GhlMarketingHttpServer {
       console.log(`[HTTP] ${req.method} ${req.path} - ${new Date().toISOString()}`);
       next();
     });
+    
+    // Extract GHL credentials from headers if present
+    this.app.use((req, res, next) => {
+      const apiKeyHeader = req.headers['x-ghl-api-key'] as string;
+      const locationIdHeader = req.headers['x-ghl-location-id'] as string;
+      
+      // Set environment variables for this request context
+      if (apiKeyHeader) {
+        process.env.GHL_API_KEY = apiKeyHeader;
+      }
+      if (locationIdHeader) {
+        process.env.GHL_LOCATION_ID = locationIdHeader;
+      }
+      
+      console.log(`[HTTP] Credentials available - API Key: ${!!apiKeyHeader}, Location ID: ${!!locationIdHeader}`);
+      next();
+    });
   }
 
   private setupServer(): void {
@@ -179,9 +196,29 @@ class GhlMarketingHttpServer {
       });
     });
 
+
+
+    // SSE endpoint for mcp-remote
     this.app.get('/sse', async (req, res) => {
+      console.log('[SSE] Client connected');
+      
+      // Set SSE headers
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*'
+      });
+      
+      // Create SSE transport
       const transport = new SSEServerTransport('/sse', res);
       await this.server.connect(transport);
+      
+      // Handle client disconnect
+      req.on('close', () => {
+        console.log('[SSE] Client disconnected');
+        transport.close();
+      });
     });
 
     // Handle POST requests to SSE endpoint for JSON-RPC messages
@@ -204,12 +241,48 @@ class GhlMarketingHttpServer {
             },
             id: jsonrpcRequest.id
           });
+        } else if (jsonrpcRequest.method === 'notifications/initialized') {
+          console.log('[HTTP] MCP initialized notification received');
+          res.status(200).end();
+          return;
+        } else if (jsonrpcRequest.method === 'notifications/cancelled') {
+          console.log('[HTTP] MCP cancelled notification received');
+          res.status(200).end();
+          return;
         } else if (jsonrpcRequest.method === 'tools/list') {
-          const response = await this.server.request(jsonrpcRequest, ListToolsRequestSchema);
-          res.json(response);
+          const tools = this.getToolsDirectly();
+          res.json({
+            jsonrpc: '2.0',
+            result: { tools },
+            id: jsonrpcRequest.id
+          });
         } else if (jsonrpcRequest.method === 'tools/call') {
-          const response = await this.server.request(jsonrpcRequest, CallToolRequestSchema);
-          res.json(response);
+          const toolName = jsonrpcRequest.params.name;
+          const toolParams = jsonrpcRequest.params.arguments || {};
+          
+          // Add headers from request
+          if (req.headers['x-ghl-api-key']) {
+            toolParams.apiKey = req.headers['x-ghl-api-key'];
+          }
+          if (req.headers['x-ghl-location-id']) {
+            toolParams.locationId = req.headers['x-ghl-location-id'];
+          }
+          
+          const result = await this.executeToolDirectly(toolName, toolParams);
+          
+          // Ensure response is wrapped in MCP format
+          const formattedResult = result.content ? result : {
+            content: [{
+              type: 'text',
+              text: JSON.stringify(result, null, 2)
+            }]
+          };
+          
+          res.json({
+            jsonrpc: '2.0',
+            result: formattedResult,
+            id: jsonrpcRequest.id
+          });
         } else {
           res.status(404).json({
             jsonrpc: '2.0',
@@ -240,12 +313,115 @@ class GhlMarketingHttpServer {
     });
   }
 
-  start(port: number = parseInt(process.env.PORT || '3000')): void {
+  start(port: number = parseInt(process.env.PORT || '8080')): void {
     this.app.listen(port, () => {
       console.log(`ghl-marketing-mcp HTTP Server running on port ${port}`);
       console.log(`Health check: http://localhost:${port}/health`);
       console.log(`SSE endpoint: http://localhost:${port}/sse`);
     });
+  }
+
+  // Helper methods for direct tool access
+  private getToolsDirectly(): any[] {
+    const allTools = [
+      ...BlogTools.getStaticToolDefinitions(),
+      ...SocialMediaTools.getStaticToolDefinitions(),
+      ...MediaTools.getStaticToolDefinitions(),
+    ] as Tool[];
+
+    // Add dynamic credentials support
+    const toolsWithCredentials = allTools.map(tool => ({
+      ...tool,
+      inputSchema: {
+        ...tool.inputSchema,
+        properties: {
+          apiKey: {
+            type: 'string',
+            description: 'GoHighLevel API key (optional if using headers)'
+          },
+          locationId: {
+            type: 'string', 
+            description: 'GoHighLevel location ID (optional if using headers)'
+          },
+          userId: {
+            type: 'string',
+            description: 'User identifier for tracking/logging (optional)'
+          },
+          ...tool.inputSchema.properties
+        },
+        required: Array.isArray(tool.inputSchema.required) ? tool.inputSchema.required : []
+      }
+    }));
+    
+    return toolsWithCredentials;
+  }
+
+  private async executeToolDirectly(name: string, args: any): Promise<any> {
+    try {
+      // Try to get credentials from args first, then fallback to env vars
+      let apiKey = args?.apiKey as string;
+      let locationId = args?.locationId as string;
+      const userId = (args?.userId as string) || 'anonymous';
+      
+      // If not in args, try environment variables
+      if (!apiKey) {
+        apiKey = process.env.GHL_API_KEY || '';
+      }
+      if (!locationId) {
+        locationId = process.env.GHL_LOCATION_ID || '';
+      }
+      
+      if (!apiKey) {
+        throw new McpError(ErrorCode.InvalidParams, 'API key is required (either in apiKey parameter or GHL_API_KEY header)');
+      }
+
+      // Create dynamic client with provided credentials
+      const config: GHLConfig = {
+        accessToken: apiKey,
+        baseUrl: 'https://services.leadconnectorhq.com',
+        version: '2021-07-28',
+        locationId: locationId
+      };
+
+      const ghlClient = new GHLApiClient(config);
+      
+      // Log the request
+      console.log(`[${new Date().toISOString()}] User: ${userId} | Tool: ${name}`);
+      
+      // Create tool instances with dynamic client
+      const blogTools = new BlogTools(ghlClient);
+      const socialMediaTools = new SocialMediaTools(ghlClient);
+      const mediaTools = new MediaTools(ghlClient);
+      
+      const blogToolNames = BlogTools.getStaticToolDefinitions().map(tool => tool.name);
+      const socialMediaToolNames = SocialMediaTools.getStaticToolDefinitions().map(tool => tool.name);
+      const mediaToolNames = MediaTools.getStaticToolDefinitions().map(tool => tool.name);
+      
+      if (blogToolNames.includes(name)) {
+        return await blogTools.executeTool(name, args || {});
+      } else if (socialMediaToolNames.includes(name)) {
+        return await socialMediaTools.executeTool(name, args || {});
+      } else if (mediaToolNames.includes(name)) {
+        return await mediaTools.executeTool(name, args || {});
+      } else {
+        throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
+      }
+    } catch (error) {
+      console.error(`Error executing tool ${name}:`, error);
+      if (error instanceof McpError) {
+        throw error;
+      }
+      if (error instanceof Error && error.message.includes('401')) {
+        throw new McpError(
+          ErrorCode.InvalidParams,
+          'Invalid API key or insufficient permissions. Please check your GoHighLevel API key.'
+        );
+      }
+      throw new McpError(
+        ErrorCode.InternalError,
+        `Failed to execute tool: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
   }
 }
 

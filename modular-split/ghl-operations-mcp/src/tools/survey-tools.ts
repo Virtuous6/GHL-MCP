@@ -9,6 +9,18 @@ export class SurveyTools {
   constructor(private apiClient: GHLApiClient) {}
 
   /**
+   * Format response for MCP protocol
+   */
+  private formatResponse(data: any): any {
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(data, null, 2)
+      }]
+    };
+  }
+
+  /**
    * Get static tool definitions without requiring API client
    */
   static getStaticToolDefinitions(): Tool[] {
@@ -96,19 +108,26 @@ export class SurveyTools {
 
   async executeTool(name: string, params: any): Promise<any> {
     try {
+      let result;
       switch (name) {
         case 'ghl_get_surveys':
-          return await this.getSurveys(params as MCPGetSurveysParams);
+          result = await this.getSurveys(params as MCPGetSurveysParams);
+          break;
         
         case 'ghl_get_survey_submissions':
-          return await this.getSurveySubmissions(params as MCPGetSurveySubmissionsParams);
+          result = await this.getSurveySubmissions(params as MCPGetSurveySubmissionsParams);
+          break;
         
         default:
           throw new Error(`Unknown survey tool: ${name}`);
       }
+      
+      return this.formatResponse(result);
     } catch (error) {
       console.error(`Error executing survey tool ${name}:`, error);
-      throw error;
+      return this.formatResponse({
+        error: error instanceof Error ? error.message : 'An error occurred'
+      });
     }
   }
 

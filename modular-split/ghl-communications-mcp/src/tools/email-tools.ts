@@ -148,23 +148,44 @@ export class EmailTools {
   }
 
   /**
+   * Format response for MCP
+   */
+  private formatResponse(data: any): any {
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(data, null, 2)
+      }]
+    };
+  }
+
+  /**
    * Execute email tool based on tool name and arguments
    */
   async executeTool(name: string, args: any): Promise<any> {
+    let result: any;
+    
     switch (name) {
       case 'get_email_campaigns':
-        return this.getEmailCampaigns(args as MCPGetEmailCampaignsParams);
+        result = await this.getEmailCampaigns(args as MCPGetEmailCampaignsParams);
+        break;
       case 'create_email_template':
-        return this.createEmailTemplate(args as MCPCreateEmailTemplateParams);
+        result = await this.createEmailTemplate(args as MCPCreateEmailTemplateParams);
+        break;
       case 'get_email_templates':
-        return this.getEmailTemplates(args as MCPGetEmailTemplatesParams);
+        result = await this.getEmailTemplates(args as MCPGetEmailTemplatesParams);
+        break;
       case 'update_email_template':
-        return this.updateEmailTemplate(args as MCPUpdateEmailTemplateParams);
+        result = await this.updateEmailTemplate(args as MCPUpdateEmailTemplateParams);
+        break;
       case 'delete_email_template':
-        return this.deleteEmailTemplate(args as MCPDeleteEmailTemplateParams);
+        result = await this.deleteEmailTemplate(args as MCPDeleteEmailTemplateParams);
+        break;
       default:
         throw new Error(`Unknown email tool: ${name}`);
     }
+    
+    return this.formatResponse(result);
   }
 
   private async getEmailCampaigns(params: MCPGetEmailCampaignsParams): Promise<{ success: boolean; campaigns: GHLEmailCampaign[]; total: number; message: string }> {

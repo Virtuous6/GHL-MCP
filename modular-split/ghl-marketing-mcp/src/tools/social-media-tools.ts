@@ -29,6 +29,18 @@ export class SocialMediaTools {
   constructor(private ghlClient: GHLApiClient) {}
 
   /**
+   * Format response to MCP format
+   */
+  private formatResponse(data: any): any {
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(data, null, 2)
+      }]
+    };
+  }
+
+  /**
    * Get static tool definitions without requiring API client
    */
   static getStaticToolDefinitions(): Tool[] {
@@ -394,208 +406,292 @@ export class SocialMediaTools {
 
   // Implementation methods
   private async searchSocialPosts(params: MCPSearchPostsParams) {
-    const response = await this.ghlClient.searchSocialPosts({
-      type: params.type,
-      accounts: params.accounts,
-      skip: params.skip?.toString(),
-      limit: params.limit?.toString(),
-      fromDate: params.fromDate,
-      toDate: params.toDate,
-      includeUsers: params.includeUsers?.toString() || 'true',
-      postType: params.postType
-    });
+    try {
+      const response = await this.ghlClient.searchSocialPosts({
+        type: params.type,
+        accounts: params.accounts,
+        skip: params.skip?.toString(),
+        limit: params.limit?.toString(),
+        fromDate: params.fromDate,
+        toDate: params.toDate,
+        includeUsers: params.includeUsers?.toString() || 'true',
+        postType: params.postType
+      });
 
-    return {
-      success: true,
-      posts: response.data?.posts || [],
-      count: response.data?.count || 0,
-      message: `Found ${response.data?.count || 0} social media posts`
-    };
+      return this.formatResponse({
+        success: true,
+        posts: response.data?.posts || [],
+        count: response.data?.count || 0,
+        message: `Found ${response.data?.count || 0} social media posts`
+      });
+    } catch (error) {
+      return this.formatResponse({
+        error: `Failed to search social posts: ${error}`
+      });
+    }
   }
 
   private async createSocialPost(params: MCPCreatePostParams) {
-    const response = await this.ghlClient.createSocialPost({
-      accountIds: params.accountIds,
-      summary: params.summary,
-      media: params.media,
-      status: params.status,
-      scheduleDate: params.scheduleDate,
-      followUpComment: params.followUpComment,
-      type: params.type,
-      tags: params.tags,
-      categoryId: params.categoryId,
-      userId: params.userId
-    });
+    try {
+      const response = await this.ghlClient.createSocialPost({
+        accountIds: params.accountIds,
+        summary: params.summary,
+        media: params.media,
+        status: params.status,
+        scheduleDate: params.scheduleDate,
+        followUpComment: params.followUpComment,
+        type: params.type,
+        tags: params.tags,
+        categoryId: params.categoryId,
+        userId: params.userId
+      });
 
-    return {
-      success: true,
-      post: response.data?.post,
-      message: `Social media post created successfully`
-    };
+      return this.formatResponse({
+        success: true,
+        post: response.data?.post,
+        message: `Social media post created successfully`
+      });
+    } catch (error) {
+      return this.formatResponse({
+        error: `Failed to create social post: ${error}`
+      });
+    }
   }
 
   private async getSocialPost(params: MCPGetPostParams) {
-    const response = await this.ghlClient.getSocialPost(params.postId);
-    
-    return {
-      success: true,
-      post: response.data?.post,
-      message: `Retrieved social media post ${params.postId}`
-    };
+    try {
+      const response = await this.ghlClient.getSocialPost(params.postId);
+      
+      return this.formatResponse({
+        success: true,
+        post: response.data?.post,
+        message: `Retrieved social media post ${params.postId}`
+      });
+    } catch (error) {
+      return this.formatResponse({
+        error: `Failed to get social post: ${error}`
+      });
+    }
   }
 
   private async updateSocialPost(params: MCPUpdatePostParams) {
-    const { postId, ...updateData } = params;
-    const response = await this.ghlClient.updateSocialPost(postId, updateData);
-    
-    return {
-      success: true,
-      message: `Social media post ${postId} updated successfully`
-    };
+    try {
+      const { postId, ...updateData } = params;
+      const response = await this.ghlClient.updateSocialPost(postId, updateData);
+      
+      return this.formatResponse({
+        success: true,
+        message: `Social media post ${postId} updated successfully`
+      });
+    } catch (error) {
+      return this.formatResponse({
+        error: `Failed to update social post: ${error}`
+      });
+    }
   }
 
   private async deleteSocialPost(params: MCPDeletePostParams) {
-    const response = await this.ghlClient.deleteSocialPost(params.postId);
-    
-    return {
-      success: true,
-      message: `Social media post ${params.postId} deleted successfully`
-    };
+    try {
+      const response = await this.ghlClient.deleteSocialPost(params.postId);
+      
+      return this.formatResponse({
+        success: true,
+        message: `Social media post ${params.postId} deleted successfully`
+      });
+    } catch (error) {
+      return this.formatResponse({
+        error: `Failed to delete social post: ${error}`
+      });
+    }
   }
 
   private async bulkDeleteSocialPosts(params: MCPBulkDeletePostsParams) {
-    const response = await this.ghlClient.bulkDeleteSocialPosts({ postIds: params.postIds });
-    
-    return {
-      success: true,
-      deletedCount: response.data?.deletedCount || 0,
-      message: `${response.data?.deletedCount || 0} social media posts deleted successfully`
-    };
+    try {
+      const response = await this.ghlClient.bulkDeleteSocialPosts({ postIds: params.postIds });
+      
+      return this.formatResponse({
+        success: true,
+        deletedCount: response.data?.deletedCount || 0,
+        message: `${response.data?.deletedCount || 0} social media posts deleted successfully`
+      });
+    } catch (error) {
+      return this.formatResponse({
+        error: `Failed to bulk delete social posts: ${error}`
+      });
+    }
   }
 
   private async getSocialAccounts(params: MCPGetAccountsParams) {
-    const response = await this.ghlClient.getSocialAccounts();
-    
-    return {
-      success: true,
-      accounts: response.data?.accounts || [],
-      groups: response.data?.groups || [],
-      message: `Retrieved ${response.data?.accounts?.length || 0} social media accounts and ${response.data?.groups?.length || 0} groups`
-    };
+    try {
+      const response = await this.ghlClient.getSocialAccounts();
+      
+      return this.formatResponse({
+        success: true,
+        accounts: response.data?.accounts || [],
+        groups: response.data?.groups || [],
+        message: `Retrieved ${response.data?.accounts?.length || 0} social media accounts and ${response.data?.groups?.length || 0} groups`
+      });
+    } catch (error) {
+      return this.formatResponse({
+        error: `Failed to get social accounts: ${error}`
+      });
+    }
   }
 
   private async deleteSocialAccount(params: MCPDeleteAccountParams) {
-    const response = await this.ghlClient.deleteSocialAccount(
-      params.accountId,
-      params.companyId,
-      params.userId
-    );
-    
-    return {
-      success: true,
-      message: `Social media account ${params.accountId} deleted successfully`
-    };
+    try {
+      const response = await this.ghlClient.deleteSocialAccount(
+        params.accountId,
+        params.companyId,
+        params.userId
+      );
+      
+      return this.formatResponse({
+        success: true,
+        message: `Social media account ${params.accountId} deleted successfully`
+      });
+    } catch (error) {
+      return this.formatResponse({
+        error: `Failed to delete social account: ${error}`
+      });
+    }
   }
 
   private async getSocialCategories(params: MCPGetCategoriesParams) {
-    const response = await this.ghlClient.getSocialCategories(
-      params.searchText,
-      params.limit,
-      params.skip
-    );
-    
-    return {
-      success: true,
-      categories: response.data?.categories || [],
-      count: response.data?.count || 0,
-      message: `Retrieved ${response.data?.count || 0} social media categories`
-    };
+    try {
+      const response = await this.ghlClient.getSocialCategories(
+        params.searchText,
+        params.limit,
+        params.skip
+      );
+      
+      return this.formatResponse({
+        success: true,
+        categories: response.data?.categories || [],
+        count: response.data?.count || 0,
+        message: `Retrieved ${response.data?.count || 0} social media categories`
+      });
+    } catch (error) {
+      return this.formatResponse({
+        error: `Failed to get social categories: ${error}`
+      });
+    }
   }
 
   private async getSocialCategory(params: MCPGetCategoryParams) {
-    const response = await this.ghlClient.getSocialCategory(params.categoryId);
-    
-    return {
-      success: true,
-      category: response.data?.category,
-      message: `Retrieved social media category ${params.categoryId}`
-    };
+    try {
+      const response = await this.ghlClient.getSocialCategory(params.categoryId);
+      
+      return this.formatResponse({
+        success: true,
+        category: response.data?.category,
+        message: `Retrieved social media category ${params.categoryId}`
+      });
+    } catch (error) {
+      return this.formatResponse({
+        error: `Failed to get social category: ${error}`
+      });
+    }
   }
 
   private async getSocialTags(params: MCPGetTagsParams) {
-    const response = await this.ghlClient.getSocialTags(
-      params.searchText,
-      params.limit,
-      params.skip
-    );
-    
-    return {
-      success: true,
-      tags: response.data?.tags || [],
-      count: response.data?.count || 0,
-      message: `Retrieved ${response.data?.count || 0} social media tags`
-    };
+    try {
+      const response = await this.ghlClient.getSocialTags(
+        params.searchText,
+        params.limit,
+        params.skip
+      );
+      
+      return this.formatResponse({
+        success: true,
+        tags: response.data?.tags || [],
+        count: response.data?.count || 0,
+        message: `Retrieved ${response.data?.count || 0} social media tags`
+      });
+    } catch (error) {
+      return this.formatResponse({
+        error: `Failed to get social tags: ${error}`
+      });
+    }
   }
 
   private async getSocialTagsByIds(params: MCPGetTagsByIdsParams) {
-    const response = await this.ghlClient.getSocialTagsByIds({ tagIds: params.tagIds });
-    
-    return {
-      success: true,
-      tags: response.data?.tags || [],
-      count: response.data?.count || 0,
-      message: `Retrieved ${response.data?.count || 0} social media tags by IDs`
-    };
+    try {
+      const response = await this.ghlClient.getSocialTagsByIds({ tagIds: params.tagIds });
+      
+      return this.formatResponse({
+        success: true,
+        tags: response.data?.tags || [],
+        count: response.data?.count || 0,
+        message: `Retrieved ${response.data?.count || 0} social media tags by IDs`
+      });
+    } catch (error) {
+      return this.formatResponse({
+        error: `Failed to get social tags by IDs: ${error}`
+      });
+    }
   }
 
   private async startSocialOAuth(params: MCPStartOAuthParams) {
-    const response = await this.ghlClient.startSocialOAuth(
-      params.platform,
-      params.userId,
-      params.page,
-      params.reconnect
-    );
-    
-    return {
-      success: true,
-      oauthData: response.data,
-      message: `OAuth process started for ${params.platform}`
-    };
+    try {
+      const response = await this.ghlClient.startSocialOAuth(
+        params.platform,
+        params.userId,
+        params.page,
+        params.reconnect
+      );
+      
+      return this.formatResponse({
+        success: true,
+        oauthData: response.data,
+        message: `OAuth process started for ${params.platform}`
+      });
+    } catch (error) {
+      return this.formatResponse({
+        error: `Failed to start social OAuth: ${error}`
+      });
+    }
   }
 
   private async getPlatformAccounts(params: MCPGetOAuthAccountsParams) {
-    let response;
-    
-    switch (params.platform) {
-      case 'google':
-        response = await this.ghlClient.getGoogleBusinessLocations(params.accountId);
-        break;
-      case 'facebook':
-        response = await this.ghlClient.getFacebookPages(params.accountId);
-        break;
-      case 'instagram':
-        response = await this.ghlClient.getInstagramAccounts(params.accountId);
-        break;
-      case 'linkedin':
-        response = await this.ghlClient.getLinkedInAccounts(params.accountId);
-        break;
-      case 'twitter':
-        response = await this.ghlClient.getTwitterProfile(params.accountId);
-        break;
-      case 'tiktok':
-        response = await this.ghlClient.getTikTokProfile(params.accountId);
-        break;
-      case 'tiktok-business':
-        response = await this.ghlClient.getTikTokBusinessProfile(params.accountId);
-        break;
-      default:
-        throw new Error(`Unsupported platform: ${params.platform}`);
+    try {
+      let response;
+      
+      switch (params.platform) {
+        case 'google':
+          response = await this.ghlClient.getGoogleBusinessLocations(params.accountId);
+          break;
+        case 'facebook':
+          response = await this.ghlClient.getFacebookPages(params.accountId);
+          break;
+        case 'instagram':
+          response = await this.ghlClient.getInstagramAccounts(params.accountId);
+          break;
+        case 'linkedin':
+          response = await this.ghlClient.getLinkedInAccounts(params.accountId);
+          break;
+        case 'twitter':
+          response = await this.ghlClient.getTwitterProfile(params.accountId);
+          break;
+        case 'tiktok':
+          response = await this.ghlClient.getTikTokProfile(params.accountId);
+          break;
+        case 'tiktok-business':
+          response = await this.ghlClient.getTikTokBusinessProfile(params.accountId);
+          break;
+        default:
+          throw new Error(`Unsupported platform: ${params.platform}`);
+      }
+      
+      return this.formatResponse({
+        success: true,
+        platformAccounts: response.data,
+        message: `Retrieved ${params.platform} accounts for OAuth ID ${params.accountId}`
+      });
+    } catch (error) {
+      return this.formatResponse({
+        error: `Failed to get platform accounts: ${error}`
+      });
     }
-    
-    return {
-      success: true,
-      platformAccounts: response.data,
-      message: `Retrieved ${params.platform} accounts for OAuth ID ${params.accountId}`
-    };
   }
 } 

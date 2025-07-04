@@ -156,19 +156,14 @@ class GhlOperationsDynamicServer {
     });
   }
 
-  async start(): Promise<void> {
+  async run(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
     process.stderr.write('ghl-operations-dynamic MCP Server running on stdio\n');
   }
 }
 
-async function main(): Promise<void> {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const server = new GhlOperationsDynamicServer();
-  await server.start();
-}
-
-main().catch((error) => {
-  console.error('Server failed to start:', error);
-  process.exit(1);
-}); 
+  server.run().catch(console.error);
+} 

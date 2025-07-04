@@ -590,73 +590,109 @@ export class ConversationTools {
   }
 
   /**
+   * Format response for MCP
+   */
+  private formatResponse(data: any): any {
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(data, null, 2)
+      }]
+    };
+  }
+
+  /**
    * Execute conversation tool based on tool name and arguments
    */
   async executeTool(name: string, args: any): Promise<any> {
+    let result: any;
+    
     switch (name) {
       case 'send_sms':
-        return this.sendSMS(args as MCPSendSMSParams);
+        result = await this.sendSMS(args as MCPSendSMSParams);
+        break;
       
       case 'send_email':
-        return this.sendEmail(args as MCPSendEmailParams);
+        result = await this.sendEmail(args as MCPSendEmailParams);
+        break;
       
       case 'search_conversations':
-        return this.searchConversations(args as MCPSearchConversationsParams);
+        result = await this.searchConversations(args as MCPSearchConversationsParams);
+        break;
       
       case 'get_conversation':
-        return this.getConversation(args as MCPGetConversationParams);
+        result = await this.getConversation(args as MCPGetConversationParams);
+        break;
       
       case 'create_conversation':
-        return this.createConversation(args as MCPCreateConversationParams);
+        result = await this.createConversation(args as MCPCreateConversationParams);
+        break;
       
       case 'update_conversation':
-        return this.updateConversation(args as MCPUpdateConversationParams);
+        result = await this.updateConversation(args as MCPUpdateConversationParams);
+        break;
       
       case 'get_recent_messages':
-        return this.getRecentMessages(args);
+        result = await this.getRecentMessages(args);
+        break;
       
       case 'delete_conversation':
-        return this.deleteConversation(args as MCPDeleteConversationParams);
+        result = await this.deleteConversation(args as MCPDeleteConversationParams);
+        break;
       
       case 'get_email_message':
-        return this.getEmailMessage(args as MCPGetEmailMessageParams);
+        result = await this.getEmailMessage(args as MCPGetEmailMessageParams);
+        break;
       
       case 'get_message':
-        return this.getMessage(args as MCPGetMessageParams);
+        result = await this.getMessage(args as MCPGetMessageParams);
+        break;
       
       case 'upload_message_attachments':
-        return this.uploadMessageAttachments(args as MCPUploadMessageAttachmentsParams);
+        result = await this.uploadMessageAttachments(args as MCPUploadMessageAttachmentsParams);
+        break;
       
       case 'update_message_status':
-        return this.updateMessageStatus(args as MCPUpdateMessageStatusParams);
+        result = await this.updateMessageStatus(args as MCPUpdateMessageStatusParams);
+        break;
       
       case 'add_inbound_message':
-        return this.addInboundMessage(args as MCPAddInboundMessageParams);
+        result = await this.addInboundMessage(args as MCPAddInboundMessageParams);
+        break;
       
       case 'add_outbound_call':
-        return this.addOutboundCall(args as MCPAddOutboundCallParams);
+        result = await this.addOutboundCall(args as MCPAddOutboundCallParams);
+        break;
       
       case 'get_message_recording':
-        return this.getMessageRecording(args as MCPGetMessageRecordingParams);
+        result = await this.getMessageRecording(args as MCPGetMessageRecordingParams);
+        break;
       
       case 'get_message_transcription':
-        return this.getMessageTranscription(args as MCPGetMessageTranscriptionParams);
+        result = await this.getMessageTranscription(args as MCPGetMessageTranscriptionParams);
+        break;
       
       case 'download_transcription':
-        return this.downloadTranscription(args as MCPDownloadTranscriptionParams);
+        result = await this.downloadTranscription(args as MCPDownloadTranscriptionParams);
+        break;
       
       case 'cancel_scheduled_message':
-        return this.cancelScheduledMessage(args as MCPCancelScheduledMessageParams);
+        result = await this.cancelScheduledMessage(args as MCPCancelScheduledMessageParams);
+        break;
       
       case 'cancel_scheduled_email':
-        return this.cancelScheduledEmail(args as MCPCancelScheduledEmailParams);
+        result = await this.cancelScheduledEmail(args as MCPCancelScheduledEmailParams);
+        break;
       
       case 'live_chat_typing':
-        return this.liveChatTyping(args as MCPLiveChatTypingParams);
+        result = await this.liveChatTyping(args as MCPLiveChatTypingParams);
+        break;
       
       default:
         throw new Error(`Unknown tool: ${name}`);
     }
+    
+    return this.formatResponse(result);
   }
 
   /**

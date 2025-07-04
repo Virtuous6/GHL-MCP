@@ -88,19 +88,14 @@ class GhlMarketingServer {
     });
   }
 
-  async start(): Promise<void> {
+  async run(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    process.stderr.write('ghl-marketing MCP Server running on stdio\n');
+    console.log('ghl-marketing MCP server running on stdio');
   }
 }
 
-async function main(): Promise<void> {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const server = new GhlMarketingServer();
-  await server.start();
-}
-
-main().catch((error) => {
-  console.error('Server failed to start:', error);
-  process.exit(1);
-}); 
+  server.run().catch(console.error);
+} 

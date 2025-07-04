@@ -151,7 +151,7 @@ class DynamicMultiTenantCommunicationsServer {
     return emailToolNames.includes(toolName);
   }
 
-  async start(): Promise<void> {
+  async run(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
     process.stderr.write(
@@ -163,7 +163,7 @@ class DynamicMultiTenantCommunicationsServer {
 // Start server
 async function main(): Promise<void> {
   const server = new DynamicMultiTenantCommunicationsServer();
-  await server.start();
+  await server.run();
 }
 
 main().catch((error) => {

@@ -45,6 +45,18 @@ export class LocationTools {
   constructor(private ghlClient: GHLApiClient) {}
 
   /**
+   * Format response for MCP protocol
+   */
+  private formatResponse(data: any): any {
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(data, null, 2)
+      }]
+    };
+  }
+
+  /**
    * Get static tool definitions without requiring API client
    */
   static getStaticToolDefinitions(): Tool[] {
@@ -693,71 +705,104 @@ export class LocationTools {
    * Execute location tool based on tool name and arguments
    */
   async executeTool(name: string, args: any): Promise<any> {
-    switch (name) {
-      // Location Management
-      case 'search_locations':
-        return this.searchLocations(args as MCPSearchLocationsParams);
-      case 'get_location':
-        return this.getLocation(args as MCPGetLocationParams);
-      case 'create_location':
-        return this.createLocation(args as MCPCreateLocationParams);
-      case 'update_location':
-        return this.updateLocation(args as MCPUpdateLocationParams);
-      case 'delete_location':
-        return this.deleteLocation(args as MCPDeleteLocationParams);
+    try {
+      let result;
+      switch (name) {
+        // Location Management
+        case 'search_locations':
+          result = await this.searchLocations(args as MCPSearchLocationsParams);
+          break;
+        case 'get_location':
+          result = await this.getLocation(args as MCPGetLocationParams);
+          break;
+        case 'create_location':
+          result = await this.createLocation(args as MCPCreateLocationParams);
+          break;
+        case 'update_location':
+          result = await this.updateLocation(args as MCPUpdateLocationParams);
+          break;
+        case 'delete_location':
+          result = await this.deleteLocation(args as MCPDeleteLocationParams);
+          break;
 
-      // Location Tags
-      case 'get_location_tags':
-        return this.getLocationTags(args as MCPGetLocationTagsParams);
-      case 'create_location_tag':
-        return this.createLocationTag(args as MCPCreateLocationTagParams);
-      case 'get_location_tag':
-        return this.getLocationTag(args as MCPGetLocationTagParams);
-      case 'update_location_tag':
-        return this.updateLocationTag(args as MCPUpdateLocationTagParams);
-      case 'delete_location_tag':
-        return this.deleteLocationTag(args as MCPDeleteLocationTagParams);
+        // Location Tags
+        case 'get_location_tags':
+          result = await this.getLocationTags(args as MCPGetLocationTagsParams);
+          break;
+        case 'create_location_tag':
+          result = await this.createLocationTag(args as MCPCreateLocationTagParams);
+          break;
+        case 'get_location_tag':
+          result = await this.getLocationTag(args as MCPGetLocationTagParams);
+          break;
+        case 'update_location_tag':
+          result = await this.updateLocationTag(args as MCPUpdateLocationTagParams);
+          break;
+        case 'delete_location_tag':
+          result = await this.deleteLocationTag(args as MCPDeleteLocationTagParams);
+          break;
 
-      // Location Tasks
-      case 'search_location_tasks':
-        return this.searchLocationTasks(args as MCPSearchLocationTasksParams);
+        // Location Tasks
+        case 'search_location_tasks':
+          result = await this.searchLocationTasks(args as MCPSearchLocationTasksParams);
+          break;
 
-      // Custom Fields
-      case 'get_location_custom_fields':
-        return this.getLocationCustomFields(args as MCPGetCustomFieldsParams);
-      case 'create_location_custom_field':
-        return this.createLocationCustomField(args as MCPCreateCustomFieldParams);
-      case 'get_location_custom_field':
-        return this.getLocationCustomField(args as MCPGetCustomFieldParams);
-      case 'update_location_custom_field':
-        return this.updateLocationCustomField(args as MCPUpdateCustomFieldParams);
-      case 'delete_location_custom_field':
-        return this.deleteLocationCustomField(args as MCPDeleteCustomFieldParams);
+        // Custom Fields
+        case 'get_location_custom_fields':
+          result = await this.getLocationCustomFields(args as MCPGetCustomFieldsParams);
+          break;
+        case 'create_location_custom_field':
+          result = await this.createLocationCustomField(args as MCPCreateCustomFieldParams);
+          break;
+        case 'get_location_custom_field':
+          result = await this.getLocationCustomField(args as MCPGetCustomFieldParams);
+          break;
+        case 'update_location_custom_field':
+          result = await this.updateLocationCustomField(args as MCPUpdateCustomFieldParams);
+          break;
+        case 'delete_location_custom_field':
+          result = await this.deleteLocationCustomField(args as MCPDeleteCustomFieldParams);
+          break;
 
-      // Custom Values
-      case 'get_location_custom_values':
-        return this.getLocationCustomValues(args as MCPGetCustomValuesParams);
-      case 'create_location_custom_value':
-        return this.createLocationCustomValue(args as MCPCreateCustomValueParams);
-      case 'get_location_custom_value':
-        return this.getLocationCustomValue(args as MCPGetCustomValueParams);
-      case 'update_location_custom_value':
-        return this.updateLocationCustomValue(args as MCPUpdateCustomValueParams);
-      case 'delete_location_custom_value':
-        return this.deleteLocationCustomValue(args as MCPDeleteCustomValueParams);
+        // Custom Values
+        case 'get_location_custom_values':
+          result = await this.getLocationCustomValues(args as MCPGetCustomValuesParams);
+          break;
+        case 'create_location_custom_value':
+          result = await this.createLocationCustomValue(args as MCPCreateCustomValueParams);
+          break;
+        case 'get_location_custom_value':
+          result = await this.getLocationCustomValue(args as MCPGetCustomValueParams);
+          break;
+        case 'update_location_custom_value':
+          result = await this.updateLocationCustomValue(args as MCPUpdateCustomValueParams);
+          break;
+        case 'delete_location_custom_value':
+          result = await this.deleteLocationCustomValue(args as MCPDeleteCustomValueParams);
+          break;
 
-      // Templates
-      case 'get_location_templates':
-        return this.getLocationTemplates(args as MCPGetLocationTemplatesParams);
-      case 'delete_location_template':
-        return this.deleteLocationTemplate(args as MCPDeleteLocationTemplateParams);
+        // Templates
+        case 'get_location_templates':
+          result = await this.getLocationTemplates(args as MCPGetLocationTemplatesParams);
+          break;
+        case 'delete_location_template':
+          result = await this.deleteLocationTemplate(args as MCPDeleteLocationTemplateParams);
+          break;
 
-      // Timezones
-      case 'get_timezones':
-        return this.getTimezones(args as MCPGetTimezonesParams);
+        // Timezones
+        case 'get_timezones':
+          result = await this.getTimezones(args as MCPGetTimezonesParams);
+          break;
 
-      default:
-        throw new Error(`Unknown location tool: ${name}`);
+        default:
+          throw new Error(`Unknown location tool: ${name}`);
+      }
+      
+      return this.formatResponse(result);
+    } catch (error) {
+      return this.formatResponse({
+        error: error instanceof Error ? error.message : 'An error occurred'
+      });
     }
   }
 

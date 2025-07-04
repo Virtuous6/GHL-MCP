@@ -26,6 +26,18 @@ export class MediaTools {
   constructor(private ghlClient: GHLApiClient) {}
 
   /**
+   * Format response to MCP format
+   */
+  private formatResponse(data: any): any {
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(data, null, 2)
+      }]
+    };
+  }
+
+  /**
    * Get static tool definitions without requiring API client
    */
   static getStaticToolDefinitions(): Tool[] {
@@ -189,7 +201,7 @@ export class MediaTools {
   /**
    * GET MEDIA FILES
    */
-  private async getMediaFiles(params: MCPGetMediaFilesParams = {}): Promise<{ success: boolean; files: any[]; total?: number; message: string }> {
+  private async getMediaFiles(params: MCPGetMediaFilesParams = {}): Promise<any> {
     try {
       const requestParams: GHLGetMediaFilesRequest = {
         sortBy: params.sortBy || 'createdAt',
@@ -212,21 +224,23 @@ export class MediaTools {
 
       const files = Array.isArray(response.data.files) ? response.data.files : [];
       
-      return {
+      return this.formatResponse({
         success: true,
         files,
         total: response.data.total,
         message: `Retrieved ${files.length} media files/folders`
-      };
+      });
     } catch (error) {
-      throw new Error(`Failed to get media files: ${error instanceof Error ? error.message : String(error)}`);
+      return this.formatResponse({
+        error: `Failed to get media files: ${error instanceof Error ? error.message : String(error)}`
+      });
     }
   }
 
   /**
    * UPLOAD MEDIA FILE
    */
-  private async uploadMediaFile(params: MCPUploadMediaFileParams): Promise<{ success: boolean; fileId: string; url?: string; message: string }> {
+  private async uploadMediaFile(params: MCPUploadMediaFileParams): Promise<any> {
     try {
       // Validate upload parameters
       if (params.hosted && !params.fileUrl) {
@@ -253,21 +267,23 @@ export class MediaTools {
         throw new Error(`API request failed: ${errorMsg}`);
       }
       
-      return {
+      return this.formatResponse({
         success: true,
         fileId: response.data.fileId,
         url: response.data.url,
         message: `File uploaded successfully with ID: ${response.data.fileId}`
-      };
+      });
     } catch (error) {
-      throw new Error(`Failed to upload media file: ${error instanceof Error ? error.message : String(error)}`);
+      return this.formatResponse({
+        error: `Failed to upload media file: ${error instanceof Error ? error.message : String(error)}`
+      });
     }
   }
 
   /**
    * DELETE MEDIA FILE
    */
-  private async deleteMediaFile(params: MCPDeleteMediaParams): Promise<{ success: boolean; message: string }> {
+  private async deleteMediaFile(params: MCPDeleteMediaParams): Promise<any> {
     try {
       const deleteParams: GHLDeleteMediaRequest = {
         id: params.id,
@@ -282,12 +298,14 @@ export class MediaTools {
         throw new Error(`API request failed: ${errorMsg}`);
       }
       
-      return {
+      return this.formatResponse({
         success: true,
         message: `Media file/folder deleted successfully`
-      };
+      });
     } catch (error) {
-      throw new Error(`Failed to delete media file: ${error instanceof Error ? error.message : String(error)}`);
+      return this.formatResponse({
+        error: `Failed to delete media file: ${error instanceof Error ? error.message : String(error)}`
+      });
     }
   }
 } 

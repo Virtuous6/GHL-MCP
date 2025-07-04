@@ -22,5 +22,8 @@ EXPOSE 8080
 # Set environment to production
 ENV NODE_ENV=production
 
+# Set PORT for the application
+ENV PORT=8080
+
 # Start the HTTP server
 CMD ["npm", "run", "start:http"] 
