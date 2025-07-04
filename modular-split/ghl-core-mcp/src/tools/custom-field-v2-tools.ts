@@ -14,6 +14,18 @@ import {
 export class CustomFieldV2Tools {
   constructor(private apiClient: GHLApiClient) {}
 
+  /**
+   * Format response for MCP protocol
+   */
+  private formatResponse(data: any): any {
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(data, null, 2)
+      }]
+    };
+  }
+
   getTools(): Tool[] {
     return [
       // Custom Field Management Tools
@@ -279,20 +291,23 @@ export class CustomFieldV2Tools {
 
   async executeCustomFieldV2Tool(name: string, args: any): Promise<any> {
     try {
+      let result: any;
+      
       switch (name) {
         case 'ghl_get_custom_field_by_id': {
           const params: MCPV2GetCustomFieldByIdParams = args;
-          const result = await this.apiClient.getCustomFieldV2ById(params.id);
-          return {
+          const apiResult = await this.apiClient.getCustomFieldV2ById(params.id);
+          result = {
             success: true,
-            data: result.data,
+            data: apiResult.data,
             message: `Custom field/folder retrieved successfully`
           };
+          break;
         }
 
         case 'ghl_create_custom_field': {
           const params: MCPV2CreateCustomFieldParams = args;
-          const result = await this.apiClient.createCustomFieldV2({
+          const apiResult = await this.apiClient.createCustomFieldV2({
             locationId: params.locationId || '',
             name: params.name,
             description: params.description,
@@ -307,16 +322,17 @@ export class CustomFieldV2Tools {
             allowCustomOption: params.allowCustomOption,
             parentId: params.parentId
           });
-          return {
+          result = {
             success: true,
-            data: result.data,
+            data: apiResult.data,
             message: `Custom field '${params.fieldKey}' created successfully`
           };
+          break;
         }
 
         case 'ghl_update_custom_field': {
           const params: MCPV2UpdateCustomFieldParams = args;
-          const result = await this.apiClient.updateCustomFieldV2(params.id, {
+          const apiResult = await this.apiClient.updateCustomFieldV2(params.id, {
             locationId: params.locationId || '',
             name: params.name,
             description: params.description,
@@ -326,85 +342,94 @@ export class CustomFieldV2Tools {
             acceptedFormats: params.acceptedFormats,
             maxFileLimit: params.maxFileLimit
           });
-          return {
+          result = {
             success: true,
-            data: result.data,
+            data: apiResult.data,
             message: `Custom field updated successfully`
           };
+          break;
         }
 
         case 'ghl_delete_custom_field': {
           const params: MCPV2DeleteCustomFieldParams = args;
-          const result = await this.apiClient.deleteCustomFieldV2(params.id);
-          return {
+          const apiResult = await this.apiClient.deleteCustomFieldV2(params.id);
+          result = {
             success: true,
-            data: result.data,
+            data: apiResult.data,
             message: `Custom field deleted successfully`
           };
+          break;
         }
 
         case 'ghl_get_custom_fields_by_object_key': {
           const params: MCPV2GetCustomFieldsByObjectKeyParams = args;
-          const result = await this.apiClient.getCustomFieldsV2ByObjectKey({
+          const apiResult = await this.apiClient.getCustomFieldsV2ByObjectKey({
             objectKey: params.objectKey,
             locationId: params.locationId || ''
           });
-          return {
+          result = {
             success: true,
-            data: result.data,
-            message: `Retrieved ${result.data?.fields?.length || 0} fields and ${result.data?.folders?.length || 0} folders for object '${params.objectKey}'`
+            data: apiResult.data,
+            message: `Retrieved ${apiResult.data?.fields?.length || 0} fields and ${apiResult.data?.folders?.length || 0} folders for object '${params.objectKey}'`
           };
+          break;
         }
 
         case 'ghl_create_custom_field_folder': {
           const params: MCPV2CreateCustomFieldFolderParams = args;
-          const result = await this.apiClient.createCustomFieldV2Folder({
+          const apiResult = await this.apiClient.createCustomFieldV2Folder({
             objectKey: params.objectKey,
             name: params.name,
             locationId: params.locationId || ''
           });
-          return {
+          result = {
             success: true,
-            data: result.data,
+            data: apiResult.data,
             message: `Custom field folder '${params.name}' created successfully`
           };
+          break;
         }
 
         case 'ghl_update_custom_field_folder': {
           const params: MCPV2UpdateCustomFieldFolderParams = args;
-          const result = await this.apiClient.updateCustomFieldV2Folder(params.id, {
+          const apiResult = await this.apiClient.updateCustomFieldV2Folder(params.id, {
             name: params.name,
             locationId: params.locationId || ''
           });
-          return {
+          result = {
             success: true,
-            data: result.data,
+            data: apiResult.data,
             message: `Custom field folder updated to '${params.name}'`
           };
+          break;
         }
 
         case 'ghl_delete_custom_field_folder': {
           const params: MCPV2DeleteCustomFieldFolderParams = args;
-          const result = await this.apiClient.deleteCustomFieldV2Folder({
+          const apiResult = await this.apiClient.deleteCustomFieldV2Folder({
             id: params.id,
             locationId: params.locationId || ''
           });
-          return {
+          result = {
             success: true,
-            data: result.data,
+            data: apiResult.data,
             message: `Custom field folder deleted successfully`
           };
+          break;
         }
 
         default:
           throw new Error(`Unknown custom field V2 tool: ${name}`);
       }
+      
+      return this.formatResponse(result);
     } catch (error) {
-      return {
+      const errorResult = {
         success: false,
         error: error instanceof Error ? error.message : String(error),
         message: `Failed to execute ${name}`
       };
+      return this.formatResponse(errorResult);
     }
   }
 } 

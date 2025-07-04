@@ -141,8 +141,6 @@ class DynamicMultiTenantDataServer {
     });
   }
 
-
-
   async run(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);

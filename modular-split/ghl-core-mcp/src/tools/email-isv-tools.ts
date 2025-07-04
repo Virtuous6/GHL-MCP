@@ -18,6 +18,18 @@ export class EmailISVTools {
   constructor(private ghlClient: GHLApiClient) {}
 
   /**
+   * Format response for MCP protocol
+   */
+  private formatResponse(data: any): any {
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(data, null, 2)
+      }]
+    };
+  }
+
+  /**
    * Get tool definitions for all Email ISV operations
    */
   getToolDefinitions(): Tool[] {
@@ -52,12 +64,22 @@ export class EmailISVTools {
    * Execute email ISV tools
    */
   async executeTool(name: string, args: any): Promise<any> {
-    switch (name) {
-      case 'verify_email':
-        return await this.verifyEmail(args as MCPVerifyEmailParams);
+    try {
+      let result: any;
+      
+      switch (name) {
+        case 'verify_email':
+          result = await this.verifyEmail(args as MCPVerifyEmailParams);
+          break;
 
-      default:
-        throw new Error(`Unknown email ISV tool: ${name}`);
+        default:
+          throw new Error(`Unknown email ISV tool: ${name}`);
+      }
+      
+      return this.formatResponse(result);
+    } catch (error) {
+      console.error(`Error executing email ISV tool ${name}:`, error);
+      throw error;
     }
   }
 

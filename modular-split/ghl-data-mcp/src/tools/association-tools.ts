@@ -265,24 +265,27 @@ export class AssociationTools {
 
   async executeAssociationTool(name: string, args: any): Promise<any> {
     try {
+      let result: any;
+      
       switch (name) {
         case 'ghl_get_all_associations': {
           const params: MCPGetAllAssociationsParams = args;
-          const result = await this.apiClient.getAssociations({
+          const apiResult = await this.apiClient.getAssociations({
             locationId: params.locationId || '',
             skip: params.skip || 0,
             limit: params.limit || 20
           });
-          return {
+          result = {
             success: true,
-            data: result.data,
-            message: `Retrieved ${result.data?.associations?.length || 0} associations`
+            data: apiResult.data,
+            message: `Retrieved ${apiResult.data?.associations?.length || 0} associations`
           };
+          break;
         }
 
         case 'ghl_create_association': {
           const params: MCPCreateAssociationParams = args;
-          const result = await this.apiClient.createAssociation({
+          const apiResult = await this.apiClient.createAssociation({
             locationId: params.locationId || '',
             key: params.key,
             firstObjectLabel: params.firstObjectLabel,
@@ -290,125 +293,137 @@ export class AssociationTools {
             secondObjectLabel: params.secondObjectLabel,
             secondObjectKey: params.secondObjectKey
           });
-          return {
+          result = {
             success: true,
-            data: result.data,
+            data: apiResult.data,
             message: `Association '${params.key}' created successfully`
           };
+          break;
         }
 
         case 'ghl_get_association_by_id': {
           const params: MCPGetAssociationByIdParams = args;
-          const result = await this.apiClient.getAssociationById(params.associationId);
-          return {
+          const apiResult = await this.apiClient.getAssociationById(params.associationId);
+          result = {
             success: true,
-            data: result.data,
+            data: apiResult.data,
             message: `Association retrieved successfully`
           };
+          break;
         }
 
         case 'ghl_update_association': {
           const params: MCPUpdateAssociationParams = args;
-          const result = await this.apiClient.updateAssociation(params.associationId, {
+          const apiResult = await this.apiClient.updateAssociation(params.associationId, {
             firstObjectLabel: params.firstObjectLabel,
             secondObjectLabel: params.secondObjectLabel
           });
-          return {
+          result = {
             success: true,
-            data: result.data,
+            data: apiResult.data,
             message: `Association updated successfully`
           };
+          break;
         }
 
         case 'ghl_delete_association': {
           const params: MCPDeleteAssociationParams = args;
-          const result = await this.apiClient.deleteAssociation(params.associationId);
-          return {
+          const apiResult = await this.apiClient.deleteAssociation(params.associationId);
+          result = {
             success: true,
-            data: result.data,
+            data: apiResult.data,
             message: `Association deleted successfully`
           };
+          break;
         }
 
         case 'ghl_get_association_by_key': {
           const params: MCPGetAssociationByKeyParams = args;
-          const result = await this.apiClient.getAssociationByKey({
+          const apiResult = await this.apiClient.getAssociationByKey({
             keyName: params.keyName,
             locationId: params.locationId || ''
           });
-          return {
+          result = {
             success: true,
-            data: result.data,
+            data: apiResult.data,
             message: `Association with key '${params.keyName}' retrieved successfully`
           };
+          break;
         }
 
         case 'ghl_get_association_by_object_key': {
           const params: MCPGetAssociationByObjectKeyParams = args;
-          const result = await this.apiClient.getAssociationByObjectKey({
+          const apiResult = await this.apiClient.getAssociationByObjectKey({
             objectKey: params.objectKey,
             locationId: params.locationId
           });
-          return {
+          result = {
             success: true,
-            data: result.data,
+            data: apiResult.data,
             message: `Association with object key '${params.objectKey}' retrieved successfully`
           };
+          break;
         }
 
         case 'ghl_create_relation': {
           const params: MCPCreateRelationParams = args;
-          const result = await this.apiClient.createRelation({
+          const apiResult = await this.apiClient.createRelation({
             locationId: params.locationId || '',
             associationId: params.associationId,
             firstRecordId: params.firstRecordId,
             secondRecordId: params.secondRecordId
           });
-          return {
+          result = {
             success: true,
-            data: result.data,
+            data: apiResult.data,
             message: `Relation created successfully between records`
           };
+          break;
         }
 
         case 'ghl_get_relations_by_record': {
           const params: MCPGetRelationsByRecordParams = args;
-          const result = await this.apiClient.getRelationsByRecord({
+          const apiResult = await this.apiClient.getRelationsByRecord({
             recordId: params.recordId,
             locationId: params.locationId || '',
             skip: params.skip || 0,
             limit: params.limit || 20,
             associationIds: params.associationIds
           });
-          return {
+          result = {
             success: true,
-            data: result.data,
-            message: `Retrieved ${result.data?.relations?.length || 0} relations for record`
+            data: apiResult.data,
+            message: `Retrieved ${apiResult.data?.relations?.length || 0} relations for record`
           };
+          break;
         }
 
         case 'ghl_delete_relation': {
           const params: MCPDeleteRelationParams = args;
-          const result = await this.apiClient.deleteRelation({
+          const apiResult = await this.apiClient.deleteRelation({
             relationId: params.relationId,
             locationId: params.locationId || ''
           });
-          return {
+          result = {
             success: true,
-            data: result.data,
+            data: apiResult.data,
             message: `Relation deleted successfully`
           };
+          break;
         }
 
         default:
           throw new Error(`Unknown association tool: ${name}`);
       }
+      
+      return result;
     } catch (error) {
-      return {
+      const errorResult = {
         success: false,
         error: error instanceof Error ? error.message : String(error),
         message: `Failed to execute ${name}`
       };
+      return errorResult;
     }
   }
 } 

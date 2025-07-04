@@ -62,6 +62,19 @@ export class ContactTools {
   constructor(private ghlClient: GHLApiClient) {}
 
   /**
+   * Format response for MCP protocol
+   */
+  private formatResponse(data: any): any {
+    // For MCP protocol, we need to return the data wrapped in content array
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(data, null, 2)
+      }]
+    };
+  }
+
+  /**
    * Get tool definitions for all contact operations
    */
   getToolDefinitions(): Tool[] {
@@ -486,88 +499,124 @@ export class ContactTools {
    */
   async executeTool(toolName: string, params: any): Promise<any> {
     try {
+      let result: any;
+      
       switch (toolName) {
         // Basic Contact Management
       case 'create_contact':
-          return await this.createContact(params as MCPCreateContactParams);
+          result = await this.createContact(params as MCPCreateContactParams);
+          break;
         case 'search_contacts':
-          return await this.searchContacts(params as MCPSearchContactsParams);
+          result = await this.searchContacts(params as MCPSearchContactsParams);
+          break;
         case 'get_contact':
-          return await this.getContact(params.contactId);
+          result = await this.getContact(params.contactId);
+          break;
         case 'update_contact':
-          return await this.updateContact(params as MCPUpdateContactParams);
+          result = await this.updateContact(params as MCPUpdateContactParams);
+          break;
         case 'delete_contact':
-          return await this.deleteContact(params.contactId);
+          result = await this.deleteContact(params.contactId);
+          break;
         case 'add_contact_tags':
-          return await this.addContactTags(params as MCPAddContactTagsParams);
+          result = await this.addContactTags(params as MCPAddContactTagsParams);
+          break;
         case 'remove_contact_tags':
-          return await this.removeContactTags(params as MCPRemoveContactTagsParams);
+          result = await this.removeContactTags(params as MCPRemoveContactTagsParams);
+          break;
 
         // Task Management
         case 'get_contact_tasks':
-          return await this.getContactTasks(params as MCPGetContactTasksParams);
+          result = await this.getContactTasks(params as MCPGetContactTasksParams);
+          break;
         case 'create_contact_task':
-          return await this.createContactTask(params as MCPCreateContactTaskParams);
+          result = await this.createContactTask(params as MCPCreateContactTaskParams);
+          break;
         case 'get_contact_task':
-          return await this.getContactTask(params as MCPGetContactTaskParams);
+          result = await this.getContactTask(params as MCPGetContactTaskParams);
+          break;
         case 'update_contact_task':
-          return await this.updateContactTask(params as MCPUpdateContactTaskParams);
+          result = await this.updateContactTask(params as MCPUpdateContactTaskParams);
+          break;
         case 'delete_contact_task':
-          return await this.deleteContactTask(params as MCPDeleteContactTaskParams);
+          result = await this.deleteContactTask(params as MCPDeleteContactTaskParams);
+          break;
         case 'update_task_completion':
-          return await this.updateTaskCompletion(params as MCPUpdateTaskCompletionParams);
+          result = await this.updateTaskCompletion(params as MCPUpdateTaskCompletionParams);
+          break;
 
         // Note Management
         case 'get_contact_notes':
-          return await this.getContactNotes(params as MCPGetContactNotesParams);
+          result = await this.getContactNotes(params as MCPGetContactNotesParams);
+          break;
         case 'create_contact_note':
-          return await this.createContactNote(params as MCPCreateContactNoteParams);
+          result = await this.createContactNote(params as MCPCreateContactNoteParams);
+          break;
         case 'get_contact_note':
-          return await this.getContactNote(params as MCPGetContactNoteParams);
+          result = await this.getContactNote(params as MCPGetContactNoteParams);
+          break;
         case 'update_contact_note':
-          return await this.updateContactNote(params as MCPUpdateContactNoteParams);
+          result = await this.updateContactNote(params as MCPUpdateContactNoteParams);
+          break;
         case 'delete_contact_note':
-          return await this.deleteContactNote(params as MCPDeleteContactNoteParams);
+          result = await this.deleteContactNote(params as MCPDeleteContactNoteParams);
+          break;
 
         // Advanced Operations
         case 'upsert_contact':
-          return await this.upsertContact(params as MCPUpsertContactParams);
+          result = await this.upsertContact(params as MCPUpsertContactParams);
+          break;
         case 'get_duplicate_contact':
-          return await this.getDuplicateContact(params as MCPGetDuplicateContactParams);
+          result = await this.getDuplicateContact(params as MCPGetDuplicateContactParams);
+          break;
         case 'get_contacts_by_business':
-          return await this.getContactsByBusiness(params as MCPGetContactsByBusinessParams);
+          result = await this.getContactsByBusiness(params as MCPGetContactsByBusinessParams);
+          break;
         case 'get_contact_appointments':
-          return await this.getContactAppointments(params as MCPGetContactAppointmentsParams);
+          result = await this.getContactAppointments(params as MCPGetContactAppointmentsParams);
+          break;
 
         // Bulk Operations
         case 'bulk_update_contact_tags':
-          return await this.bulkUpdateContactTags(params as MCPBulkUpdateContactTagsParams);
+          result = await this.bulkUpdateContactTags(params as MCPBulkUpdateContactTagsParams);
+          break;
         case 'bulk_update_contact_business':
-          return await this.bulkUpdateContactBusiness(params as MCPBulkUpdateContactBusinessParams);
+          result = await this.bulkUpdateContactBusiness(params as MCPBulkUpdateContactBusinessParams);
+          break;
 
         // Followers Management
         case 'add_contact_followers':
-          return await this.addContactFollowers(params as MCPAddContactFollowersParams);
+          result = await this.addContactFollowers(params as MCPAddContactFollowersParams);
+          break;
         case 'remove_contact_followers':
-          return await this.removeContactFollowers(params as MCPRemoveContactFollowersParams);
+          result = await this.removeContactFollowers(params as MCPRemoveContactFollowersParams);
+          break;
 
         // Campaign Management
         case 'add_contact_to_campaign':
-          return await this.addContactToCampaign(params as MCPAddContactToCampaignParams);
+          result = await this.addContactToCampaign(params as MCPAddContactToCampaignParams);
+          break;
         case 'remove_contact_from_campaign':
-          return await this.removeContactFromCampaign(params as MCPRemoveContactFromCampaignParams);
+          result = await this.removeContactFromCampaign(params as MCPRemoveContactFromCampaignParams);
+          break;
         case 'remove_contact_from_all_campaigns':
-          return await this.removeContactFromAllCampaigns(params as MCPRemoveContactFromAllCampaignsParams);
+          result = await this.removeContactFromAllCampaigns(params as MCPRemoveContactFromAllCampaignsParams);
+          break;
 
         // Workflow Management
         case 'add_contact_to_workflow':
-          return await this.addContactToWorkflow(params as MCPAddContactToWorkflowParams);
+          result = await this.addContactToWorkflow(params as MCPAddContactToWorkflowParams);
+          break;
         case 'remove_contact_from_workflow':
-          return await this.removeContactFromWorkflow(params as MCPRemoveContactFromWorkflowParams);
+          result = await this.removeContactFromWorkflow(params as MCPRemoveContactFromWorkflowParams);
+          break;
       
       default:
           throw new Error(`Unknown tool: ${toolName}`);
       }
+      
+      // Return the result wrapped in MCP format
+      return this.formatResponse(result);
     } catch (error) {
       console.error(`Error executing contact tool ${toolName}:`, error);
       throw error;

@@ -26,7 +26,7 @@ export class ObjectTools {
   constructor(private ghlClient: GHLApiClient) {}
 
   /**
-   * Get static tool definitions without requiring API client
+   * Get static tool definitions for the MCP server
    */
   static getStaticToolDefinitions(): Tool[] {
     return ObjectTools.getToolDefinitionsStatic();
@@ -312,36 +312,57 @@ export class ObjectTools {
    * Execute an object tool by name with given arguments
    */
   async executeTool(name: string, args: any): Promise<any> {
-    switch (name) {
-      case 'get_all_objects':
-        return this.getAllObjects(args as MCPGetAllObjectsParams);
+    try {
+      let result: any;
       
-      case 'create_object_schema':
-        return this.createObjectSchema(args as MCPCreateObjectSchemaParams);
+      switch (name) {
+        case 'get_all_objects':
+          result = await this.getAllObjects(args as MCPGetAllObjectsParams);
+          break;
+        
+        case 'create_object_schema':
+          result = await this.createObjectSchema(args as MCPCreateObjectSchemaParams);
+          break;
+        
+        case 'get_object_schema':
+          result = await this.getObjectSchema(args as MCPGetObjectSchemaParams);
+          break;
+        
+        case 'update_object_schema':
+          result = await this.updateObjectSchema(args as MCPUpdateObjectSchemaParams);
+          break;
+        
+        case 'create_object_record':
+          result = await this.createObjectRecord(args as MCPCreateObjectRecordParams);
+          break;
+        
+        case 'get_object_record':
+          result = await this.getObjectRecord(args as MCPGetObjectRecordParams);
+          break;
+        
+        case 'update_object_record':
+          result = await this.updateObjectRecord(args as MCPUpdateObjectRecordParams);
+          break;
+        
+        case 'delete_object_record':
+          result = await this.deleteObjectRecord(args as MCPDeleteObjectRecordParams);
+          break;
+        
+        case 'search_object_records':
+          result = await this.searchObjectRecords(args as MCPSearchObjectRecordsParams);
+          break;
+        
+        default:
+          throw new Error(`Unknown object tool: ${name}`);
+      }
       
-      case 'get_object_schema':
-        return this.getObjectSchema(args as MCPGetObjectSchemaParams);
-      
-      case 'update_object_schema':
-        return this.updateObjectSchema(args as MCPUpdateObjectSchemaParams);
-      
-      case 'create_object_record':
-        return this.createObjectRecord(args as MCPCreateObjectRecordParams);
-      
-      case 'get_object_record':
-        return this.getObjectRecord(args as MCPGetObjectRecordParams);
-      
-      case 'update_object_record':
-        return this.updateObjectRecord(args as MCPUpdateObjectRecordParams);
-      
-      case 'delete_object_record':
-        return this.deleteObjectRecord(args as MCPDeleteObjectRecordParams);
-      
-      case 'search_object_records':
-        return this.searchObjectRecords(args as MCPSearchObjectRecordsParams);
-      
-      default:
-        throw new Error(`Unknown object tool: ${name}`);
+      return result;
+    } catch (error) {
+      const errorResult = {
+        success: false,
+        error: error instanceof Error ? error.message : String(error)
+      };
+      return errorResult;
     }
   }
 
