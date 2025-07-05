@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "ghl-dynamic": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch", "https://ghl-dynamic-mcp.fly.dev"]
+    }
+  }
+} 

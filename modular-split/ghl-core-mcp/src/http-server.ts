@@ -206,6 +206,8 @@ class DynamicMultiTenantHttpServer {
           case 'remove_contact_follower':
           case 'add_contact_tags':
           case 'remove_contact_tags':
+          case 'bulk_update_contact_tags':
+          case 'bulk_update_contact_business':
           case 'create_contact_task':
           case 'update_contact_task':
           case 'delete_contact_task':
@@ -388,11 +390,8 @@ class DynamicMultiTenantHttpServer {
     // Tools info endpoint
     this.app.get('/tools', async (req, res) => {
       try {
-        const toolsResponse = await this.server.request(
-          { method: 'tools/list', params: {} },
-          ListToolsRequestSchema
-        );
-        const tools = (toolsResponse as any).tools || [];
+        // Use direct method instead of MCP server request
+        const tools = this.getToolsDirectly();
         res.json({
           service: 'ghl-core-mcp-dynamic',
           toolCount: tools.length,
@@ -491,6 +490,8 @@ class DynamicMultiTenantHttpServer {
         case 'remove_contact_follower':
         case 'add_contact_tags':
         case 'remove_contact_tags':
+        case 'bulk_update_contact_tags':
+        case 'bulk_update_contact_business':
         case 'create_contact_task':
         case 'update_contact_task':
         case 'delete_contact_task':

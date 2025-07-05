@@ -200,6 +200,38 @@ class DynamicMultiTenantServer {
             }
           },
           {
+            name: 'bulk_update_contact_tags',
+            description: 'Bulk add or remove tags from multiple contacts',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                apiKey: { type: 'string', description: 'GoHighLevel Private Integration API key' },
+                locationId: { type: 'string', description: 'GoHighLevel Location ID' },
+                userId: { type: 'string', description: 'User identifier (optional)' },
+                contactIds: { type: 'array', items: { type: 'string' }, description: 'Array of contact IDs' },
+                tags: { type: 'array', items: { type: 'string' }, description: 'Tags to add or remove' },
+                operation: { type: 'string', enum: ['add', 'remove'], description: 'Operation to perform' },
+                removeAllTags: { type: 'boolean', description: 'Remove all existing tags before adding new ones' }
+              },
+              required: ['apiKey', 'locationId', 'contactIds', 'tags', 'operation']
+            }
+          },
+          {
+            name: 'bulk_update_contact_business',
+            description: 'Bulk update business association for multiple contacts',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                apiKey: { type: 'string', description: 'GoHighLevel Private Integration API key' },
+                locationId: { type: 'string', description: 'GoHighLevel Location ID' },
+                userId: { type: 'string', description: 'User identifier (optional)' },
+                contactIds: { type: 'array', items: { type: 'string' }, description: 'Array of contact IDs' },
+                businessId: { type: 'string', description: 'Business ID (null to remove from business)' }
+              },
+              required: ['apiKey', 'locationId', 'contactIds']
+            }
+          },
+          {
             name: 'list_custom_fields',
             description: 'List all custom fields',
             inputSchema: {
@@ -288,6 +320,8 @@ class DynamicMultiTenantServer {
           case 'remove_contact_follower':
           case 'add_contact_tags':
           case 'remove_contact_tags':
+          case 'bulk_update_contact_tags':
+          case 'bulk_update_contact_business':
           case 'create_contact_task':
           case 'update_contact_task':
           case 'delete_contact_task':
