@@ -4368,27 +4368,33 @@ export class GHLApiClient {
 
   /**
    * Get survey submissions with filtering and pagination
-   * GET /surveys/submissions
+   * GET /forms/submissions (Note: Surveys are handled as forms in GHL API)
    */
   async getSurveySubmissions(request: GHLGetSurveySubmissionsRequest): Promise<GHLApiResponse<GHLGetSurveySubmissionsResponse>> {
     try {
       const locationId = request.locationId || this.config.locationId;
       
-      const params = new URLSearchParams();
-      if (request.page) params.append('page', request.page.toString());
-      if (request.limit) params.append('limit', request.limit.toString());
-      if (request.surveyId) params.append('surveyId', request.surveyId);
-      if (request.q) params.append('q', request.q);
-      if (request.startAt) params.append('startAt', request.startAt);
-      if (request.endAt) params.append('endAt', request.endAt);
+      const queryParams: any = {
+        locationId: locationId
+      };
+      
+      // Add pagination parameters
+      if (request.page) queryParams.page = request.page;
+      if (request.limit) queryParams.limit = request.limit;
+      if (request.surveyId) queryParams.formId = request.surveyId; // Forms/surveys use formId
+      if (request.q) queryParams.q = request.q;
+      if (request.startAt) queryParams.startAt = request.startAt;
+      if (request.endAt) queryParams.endAt = request.endAt;
 
+      // Use the correct forms submissions endpoint
       const response: AxiosResponse<GHLGetSurveySubmissionsResponse> = await this.axiosInstance.get(
-        `/locations/${locationId}/surveys/submissions?${params.toString()}`
+        `/forms/submissions`,
+        { params: queryParams }
       );
 
       return this.wrapResponse(response.data);
     } catch (error) {
-      throw error;
+      throw this.handleApiError(error as AxiosError<GHLErrorResponse>);
     }
   }
 

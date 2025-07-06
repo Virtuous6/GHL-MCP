@@ -325,19 +325,13 @@ class DynamicMultiTenantHttpServer {
           res.status(200).end();
           return;
         } else if (jsonrpcRequest.method === 'tools/list') {
-          try {
-            const response = await this.server.request(jsonrpcRequest, ListToolsRequestSchema);
-            res.json(response);
-          } catch (error) {
-            console.error('[HTTP] Error calling server.request for tools/list:', error);
-            // Fallback to direct handler call
-            const tools = this.getToolsDirectly();
-            res.json({
-              jsonrpc: '2.0',
-              result: { tools },
-              id: jsonrpcRequest.id
-            });
-          }
+          // Always use direct method instead of server.request in HTTP mode
+          const tools = this.getToolsDirectly();
+          res.json({
+            jsonrpc: '2.0',
+            result: { tools },
+            id: jsonrpcRequest.id
+          });
         } else if (jsonrpcRequest.method === 'tools/call') {
           try {
             const result = await this.executeToolDirectly(jsonrpcRequest.params);

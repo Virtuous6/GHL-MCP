@@ -92,7 +92,10 @@ export class EmailISVTools {
     message: string;
   }> {
     try {
-      const result = await this.ghlClient.verifyEmail(params.locationId, {
+      // Use locationId from params if provided, otherwise use from client config
+      const locationId = params.locationId || this.ghlClient.locationId;
+      
+      const result = await this.ghlClient.verifyEmail(locationId, {
         type: params.type,
         verify: params.verify
       });

@@ -436,6 +436,13 @@ export class GHLApiClient {
   }
 
   /**
+   * Get the configured location ID
+   */
+  get locationId(): string {
+    return this.config.locationId;
+  }
+
+  /**
    * Handle API errors and convert to standardized format
    */
   private handleApiError(error: AxiosError<GHLErrorResponse>): Error {

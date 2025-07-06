@@ -277,7 +277,7 @@ export class ObjectTools {
             },
             query: { 
               type: 'string', 
-              description: 'Search query using searchable properties (e.g., "name:Buddy" to search for records with name Buddy)'
+              description: 'Search query string. Use simple text search (e.g., "Buddy" to search across searchable fields) or specific field format (e.g., "custom_objects.pet.name:Buddy"). Avoid using "contact.name" format - use actual field keys instead.'
             },
             locationId: { 
               type: 'string', 
@@ -587,11 +587,34 @@ export class ObjectTools {
    */
   private async searchObjectRecords(params: MCPSearchObjectRecordsParams): Promise<{ success: boolean; records: any[]; total: number; message: string }> {
     try {
+      // Transform query to fix common issues
+      let transformedQuery = params.query;
+      
+      // Fix common query format issues
+      if (transformedQuery.includes('contact.name')) {
+        // For contact object, use the correct field format
+        if (params.schemaKey === 'contact') {
+          transformedQuery = transformedQuery.replace(/contact\.name/g, 'name');
+        } else {
+          // For custom objects, suggest using the proper schema key
+          console.warn(`Warning: "contact.name" format detected. For schema "${params.schemaKey}", consider using the proper field key format.`);
+        }
+      }
+      
+      // For contact searches, simplify common field references
+      if (params.schemaKey === 'contact') {
+        transformedQuery = transformedQuery
+          .replace(/contact\./g, '')  // Remove contact. prefix
+          .replace(/^name:/, '')      // Remove name: prefix for simple search
+          .replace(/^email:/, '')     // Remove email: prefix for simple search
+          .replace(/^phone:/, '');    // Remove phone: prefix for simple search
+      }
+
       const searchData: GHLSearchObjectRecordsRequest = {
         locationId: params.locationId || this.ghlClient.getConfig().locationId,
         page: params.page || 1,
         pageLimit: params.pageLimit || 10,
-        query: params.query,
+        query: transformedQuery,
         searchAfter: params.searchAfter || []
       };
 
@@ -608,7 +631,7 @@ export class ObjectTools {
         success: true,
         records,
         total: response.data.total,
-        message: `Found ${records.length} records in ${params.schemaKey} (${response.data.total} total)`
+        message: `Found ${records.length} records in ${params.schemaKey} (${response.data.total} total)${transformedQuery !== params.query ? ` (query transformed from "${params.query}" to "${transformedQuery}")` : ''}`
       };
     } catch (error) {
       throw new Error(`Failed to search object records: ${error instanceof Error ? error.message : String(error)}`);
