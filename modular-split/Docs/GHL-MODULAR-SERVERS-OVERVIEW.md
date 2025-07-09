@@ -560,12 +560,325 @@ To use these modular servers with Claude Desktop, use the following configuratio
 ### **📋 Deployment Status**
 
 - **✅ ghl-core-mcp**: DEPLOYED & WORKING (https://ghl-dynamic-mcp.fly.dev)
-- **⏳ ghl-communications-mcp**: Ready to deploy
-- **⏳ ghl-sales-mcp**: Ready to deploy  
-- **⏳ ghl-marketing-mcp**: Ready to deploy
-- **⏳ ghl-operations-mcp**: Ready to deploy
-- **⏳ ghl-ecommerce-mcp**: Ready to deploy
-- **⏳ ghl-data-mcp**: Ready to deploy
+- **✅ ghl-communications-mcp**: DEPLOYED & WORKING (https://ghl-communications-mcp.fly.dev)
+- **✅ ghl-sales-mcp**: DEPLOYED & WORKING (https://ghl-sales-mcp.fly.dev)
+- **✅ ghl-marketing-mcp**: DEPLOYED & WORKING (https://ghl-marketing-mcp.fly.dev)
+- **✅ ghl-operations-mcp**: DEPLOYED & WORKING (https://ghl-operations-mcp.fly.dev)
+- **✅ ghl-ecommerce-mcp**: DEPLOYED & WORKING (https://ghl-ecommerce-mcp.fly.dev)
+- **✅ ghl-data-mcp**: DEPLOYED & WORKING (https://ghl-data-mcp.fly.dev)
+
+---
+
+## 🌐 **Supabase Edge Functions Integration**
+
+### **Using MCP Servers from Supabase Edge Functions**
+
+You can call the GoHighLevel MCP servers directly from Supabase Edge Functions using HTTP requests. Here's how to integrate them:
+
+#### **1. Basic Edge Function Setup**
+
+```typescript
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+
+// MCP Server URLs
+const MCP_SERVERS = {
+  core: "https://ghl-dynamic-mcp.fly.dev/sse",
+  communications: "https://ghl-communications-mcp.fly.dev/sse",
+  sales: "https://ghl-sales-mcp.fly.dev/sse",
+  marketing: "https://ghl-marketing-mcp.fly.dev/sse",
+  operations: "https://ghl-operations-mcp.fly.dev/sse",
+  ecommerce: "https://ghl-ecommerce-mcp.fly.dev/sse",
+  data: "https://ghl-data-mcp.fly.dev/sse"
+};
+
+// GoHighLevel credentials (store in Supabase secrets)
+const GHL_CONFIG = {
+  apiKey: Deno.env.get("GHL_API_KEY"),
+  locationId: Deno.env.get("GHL_LOCATION_ID")
+};
+```
+
+#### **2. MCP Tool Calling Function**
+
+```typescript
+async function callMCPTool(
+  serverUrl: string,
+  toolName: string,
+  toolArgs: Record<string, any>
+) {
+  const mcpRequest = {
+    jsonrpc: "2.0",
+    id: crypto.randomUUID(),
+    method: "tools/call",
+    params: {
+      name: toolName,
+      arguments: {
+        ...toolArgs,
+        // Include GHL credentials with every call
+        accessToken: GHL_CONFIG.apiKey,
+        locationId: GHL_CONFIG.locationId
+      }
+    }
+  };
+
+  try {
+    const response = await fetch(serverUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(mcpRequest)
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    
+    if (result.error) {
+      throw new Error(`MCP Error: ${result.error.message}`);
+    }
+
+    return result.result;
+  } catch (error) {
+    console.error(`Error calling MCP tool ${toolName}:`, error);
+    throw error;
+  }
+}
+```
+
+#### **3. Example Usage: Contact Management**
+
+```typescript
+Deno.serve(async (req: Request) => {
+  try {
+    const { action, data } = await req.json();
+
+    switch (action) {
+      case "create_contact":
+        const contact = await callMCPTool(
+          MCP_SERVERS.core,
+          "create_contact",
+          {
+            firstName: data.firstName,
+            lastName: data.lastName,
+            email: data.email,
+            phone: data.phone,
+            tags: data.tags || []
+          }
+        );
+        return new Response(JSON.stringify({ success: true, contact }));
+
+      case "search_contacts":
+        const contacts = await callMCPTool(
+          MCP_SERVERS.core,
+          "search_contacts",
+          {
+            query: data.query,
+            limit: data.limit || 10
+          }
+        );
+        return new Response(JSON.stringify({ success: true, contacts }));
+
+      case "send_sms":
+        const smsResult = await callMCPTool(
+          MCP_SERVERS.communications,
+          "send_sms",
+          {
+            contactId: data.contactId,
+            message: data.message
+          }
+        );
+        return new Response(JSON.stringify({ success: true, smsResult }));
+
+      default:
+        return new Response(JSON.stringify({ error: "Unknown action" }), {
+          status: 400
+        });
+    }
+  } catch (error) {
+    return new Response(JSON.stringify({ 
+      error: error.message 
+    }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+});
+```
+
+#### **4. Advanced Example: E-commerce Integration**
+
+```typescript
+// Create product and set up payment processing
+async function setupEcommerceProduct(productData: any) {
+  // Create product
+  const product = await callMCPTool(
+    MCP_SERVERS.ecommerce,
+    "ghl_create_product",
+    {
+      name: productData.name,
+      description: productData.description,
+      type: "PHYSICAL",
+      isActive: true
+    }
+  );
+
+  // Create pricing
+  const price = await callMCPTool(
+    MCP_SERVERS.ecommerce,
+    "ghl_create_price",
+    {
+      productId: product.content[0].id,
+      name: `${productData.name} - Standard Price`,
+      currency: "USD",
+      amount: productData.price * 100, // Convert to cents
+      type: "ONE_TIME"
+    }
+  );
+
+  // Create store settings if needed
+  const storeSettings = await callMCPTool(
+    MCP_SERVERS.ecommerce,
+    "ghl_create_store_setting",
+    {
+      name: "payment_config",
+      value: {
+        enabledPaymentMethods: ["card", "bank_transfer"],
+        currency: "USD"
+      }
+    }
+  );
+
+  return { product, price, storeSettings };
+}
+```
+
+#### **5. Opportunity & Sales Pipeline**
+
+```typescript
+// Complete sales workflow
+async function processSalesLead(leadData: any) {
+  // Create contact first
+  const contact = await callMCPTool(
+    MCP_SERVERS.core,
+    "create_contact",
+    leadData.contact
+  );
+
+  // Create opportunity
+  const opportunity = await callMCPTool(
+    MCP_SERVERS.sales,
+    "create_opportunity",
+    {
+      contactId: contact.content[0].id,
+      pipelineId: leadData.pipelineId,
+      name: leadData.opportunityName,
+      monetaryValue: leadData.value,
+      status: "open"
+    }
+  );
+
+  // Send welcome SMS
+  const welcomeSMS = await callMCPTool(
+    MCP_SERVERS.communications,
+    "send_sms",
+    {
+      contactId: contact.content[0].id,
+      message: leadData.welcomeMessage
+    }
+  );
+
+  // Create follow-up task
+  const task = await callMCPTool(
+    MCP_SERVERS.core,
+    "create_contact_task",
+    {
+      contactId: contact.content[0].id,
+      title: "Follow up with new lead",
+      description: `Follow up regarding: ${leadData.opportunityName}`,
+      dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+    }
+  );
+
+  return { contact, opportunity, welcomeSMS, task };
+}
+```
+
+#### **6. Error Handling & Logging**
+
+```typescript
+async function robustMCPCall(
+  serverUrl: string,
+  toolName: string,
+  toolArgs: Record<string, any>,
+  retries = 3
+) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const result = await callMCPTool(serverUrl, toolName, toolArgs);
+      console.log(`✅ ${toolName} succeeded on attempt ${attempt}`);
+      return result;
+    } catch (error) {
+      console.error(`❌ ${toolName} failed on attempt ${attempt}:`, error);
+      
+      if (attempt === retries) {
+        throw new Error(`Failed after ${retries} attempts: ${error.message}`);
+      }
+      
+      // Wait before retry (exponential backoff)
+      await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+    }
+  }
+}
+```
+
+#### **7. Environment Variables Setup**
+
+In your Supabase project, set these environment variables:
+
+```bash
+# In Supabase Dashboard -> Settings -> Environment Variables
+GHL_API_KEY=pk_live_your_actual_api_key_here
+GHL_LOCATION_ID=your_location_id_here
+```
+
+#### **8. CORS Configuration**
+
+If calling from web applications, ensure CORS is properly configured:
+
+```typescript
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
+// Handle CORS preflight
+if (req.method === 'OPTIONS') {
+  return new Response('ok', { headers: corsHeaders });
+}
+
+// Add CORS headers to all responses
+return new Response(JSON.stringify(result), {
+  headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+});
+```
+
+### **Available Tools by Server**
+
+- **Core Server** (40 tools): Contact management, custom fields, email verification
+- **Communications** (25 tools): SMS, email, conversations, campaigns
+- **Sales** (55 tools): Opportunities, invoices, payments, estimates
+- **Marketing** (30 tools): Blog posts, media library, social media
+- **Operations** (58 tools): Calendar, appointments, locations, surveys
+- **E-commerce** (47 tools): Products, inventory, store management
+- **Data** (19 tools): Custom objects, associations, relations
+
+**Total: 274+ tools available via HTTP API**
+
+---
 
 ### **🛠️ Troubleshooting**
 

@@ -322,12 +322,25 @@ export class ProductsTools {
 • **Location:** ${response.data.locationId}
 • **Available in Store:** ${response.data.availableInStore ? '✅ Yes' : '❌ No'}
 • **Created:** ${new Date(response.data.createdAt).toLocaleString()}
+• **Updated:** ${new Date(response.data.updatedAt).toLocaleString()}
+${response.data.userId ? `• **User ID:** ${response.data.userId}` : ''}
 
 ${response.data.description ? `📝 **Description:** ${response.data.description}` : ''}
 ${response.data.image ? `🖼️ **Image:** ${response.data.image}` : ''}
-${response.data.collectionIds?.length ? `📂 **Collections:** ${response.data.collectionIds.length} assigned` : ''}
-${response.data.variants?.length ? `🔧 **Variants:** ${response.data.variants.length} configured` : ''}
-${response.data.medias?.length ? `📸 **Media Files:** ${response.data.medias.length} attached` : ''}
+${response.data.slug ? `🔗 **Slug:** ${response.data.slug}` : ''}
+${response.data.statementDescriptor ? `📄 **Statement Descriptor:** ${response.data.statementDescriptor}` : ''}
+
+${response.data.collectionIds?.length ? `📂 **Collections (${response.data.collectionIds.length}):**\n${response.data.collectionIds.map(id => `  • ${id}`).join('\n')}` : ''}
+
+${response.data.variants?.length ? `🔧 **Variants (${response.data.variants.length}):**\n${response.data.variants.map(variant => `  • **${variant.name}** (ID: ${variant.id})\n    Options: ${variant.options.map(opt => `${opt.name} (${opt.id})`).join(', ')}`).join('\n')}` : ''}
+
+${response.data.medias?.length ? `📸 **Media Files (${response.data.medias.length}):**\n${response.data.medias.map(media => `  • **${media.title || 'Untitled'}** (ID: ${media.id})\n    Type: ${media.type}, URL: ${media.url}${media.isFeatured ? ' ⭐ Featured' : ''}${media.priceIds?.length ? `\n    Price IDs: ${media.priceIds.join(', ')}` : ''}`).join('\n')}` : ''}
+
+${response.data.isTaxesEnabled ? `💰 **Taxes:** Enabled${response.data.taxes?.length ? ` (${response.data.taxes.join(', ')})` : ''}${response.data.automaticTaxCategoryId ? `\n  • Auto Tax Category: ${response.data.automaticTaxCategoryId}` : ''}` : ''}
+
+${response.data.isLabelEnabled ? `🏷️ **Labels:** Enabled${response.data.label ? `\n  • Title: ${response.data.label.title}${response.data.label.startDate ? `\n  • Start Date: ${response.data.label.startDate}` : ''}${response.data.label.endDate ? `\n  • End Date: ${response.data.label.endDate}` : ''}` : ''}` : ''}
+
+${response.data.seo ? `🔍 **SEO:**\n  • Title: ${response.data.seo.title}\n  • Description: ${response.data.seo.description}` : ''}
 
 ✨ **Status:** Product successfully created and ready for configuration!`
         }]
@@ -366,10 +379,20 @@ ${response.data.medias?.length ? `📸 **Media Files:** ${response.data.medias.l
 ${products.length === 0 ? '📭 **No products found**' : products.map((product, index) => `
 **${index + 1}. ${product.name}** (${product.productType})
 • **ID:** ${product._id}
+• **Location:** ${product.locationId}
 • **Store Status:** ${product.availableInStore ? '✅ Available' : '❌ Not Available'}
 • **Created:** ${new Date(product.createdAt).toLocaleString()}
-${product.description ? `• **Description:** ${product.description.substring(0, 100)}${product.description.length > 100 ? '...' : ''}` : ''}
-${product.collectionIds?.length ? `• **Collections:** ${product.collectionIds.length}` : ''}
+• **Updated:** ${new Date(product.updatedAt).toLocaleString()}
+${product.userId ? `• **User ID:** ${product.userId}` : ''}
+${product.description ? `• **Description:** ${product.description.substring(0, 150)}${product.description.length > 150 ? '...' : ''}` : ''}
+${product.image ? `• **Image:** ${product.image}` : ''}
+${product.slug ? `• **Slug:** ${product.slug}` : ''}
+${product.statementDescriptor ? `• **Statement Descriptor:** ${product.statementDescriptor}` : ''}
+${product.collectionIds?.length ? `• **Collections:** ${product.collectionIds.join(', ')}` : ''}
+${product.variants?.length ? `• **Variants:** ${product.variants.map(v => `${v.name} (${v.id})`).join(', ')}` : ''}
+${product.medias?.length ? `• **Media:** ${product.medias.length} files` : ''}
+${product.isTaxesEnabled ? `• **Taxes:** Enabled${product.taxes?.length ? ` (${product.taxes.join(', ')})` : ''}` : ''}
+${product.isLabelEnabled ? `• **Label:** ${product.label?.title || 'Enabled'}` : ''}
 `).join('\n')}
 
 📊 **Summary:**
@@ -624,15 +647,24 @@ ${params.includedInStore !== undefined ? `• **Store Status:** ${params.include
 • **Available in Store:** ${response.data.availableInStore ? '✅ Yes' : '❌ No'}
 • **Created:** ${new Date(response.data.createdAt).toLocaleString()}
 • **Updated:** ${new Date(response.data.updatedAt).toLocaleString()}
+${response.data.userId ? `• **User ID:** ${response.data.userId}` : ''}
 
 ${response.data.description ? `📝 **Description:** ${response.data.description}` : ''}
 ${response.data.image ? `🖼️ **Image:** ${response.data.image}` : ''}
 ${response.data.slug ? `🔗 **Slug:** ${response.data.slug}` : ''}
-${response.data.collectionIds?.length ? `📂 **Collections:** ${response.data.collectionIds.length} assigned` : ''}
-${response.data.variants?.length ? `🔧 **Variants:** ${response.data.variants.length} configured` : ''}
-${response.data.medias?.length ? `📸 **Media Files:** ${response.data.medias.length} attached` : ''}
-${response.data.isTaxesEnabled ? `💰 **Taxes:** Enabled` : ''}
-${response.data.isLabelEnabled ? `🏷️ **Labels:** Enabled` : ''}`
+${response.data.statementDescriptor ? `📄 **Statement Descriptor:** ${response.data.statementDescriptor}` : ''}
+
+${response.data.collectionIds?.length ? `📂 **Collections (${response.data.collectionIds.length}):**\n${response.data.collectionIds.map(id => `  • ${id}`).join('\n')}` : ''}
+
+${response.data.variants?.length ? `🔧 **Variants (${response.data.variants.length}):**\n${response.data.variants.map(variant => `  • **${variant.name}** (ID: ${variant.id})\n    Options: ${variant.options.map(opt => `${opt.name} (${opt.id})`).join(', ')}`).join('\n')}` : ''}
+
+${response.data.medias?.length ? `📸 **Media Files (${response.data.medias.length}):**\n${response.data.medias.map(media => `  • **${media.title || 'Untitled'}** (ID: ${media.id})\n    Type: ${media.type}, URL: ${media.url}${media.isFeatured ? ' ⭐ Featured' : ''}${media.priceIds?.length ? `\n    Price IDs: ${media.priceIds.join(', ')}` : ''}`).join('\n')}` : ''}
+
+${response.data.isTaxesEnabled ? `💰 **Taxes:** Enabled${response.data.taxes?.length ? ` (${response.data.taxes.join(', ')})` : ''}${response.data.automaticTaxCategoryId ? `\n  • Auto Tax Category: ${response.data.automaticTaxCategoryId}` : ''}` : ''}
+
+${response.data.isLabelEnabled ? `🏷️ **Labels:** Enabled${response.data.label ? `\n  • Title: ${response.data.label.title}${response.data.label.startDate ? `\n  • Start Date: ${response.data.label.startDate}` : ''}${response.data.label.endDate ? `\n  • End Date: ${response.data.label.endDate}` : ''}` : ''}` : ''}
+
+${response.data.seo ? `🔍 **SEO:**\n  • Title: ${response.data.seo.title}\n  • Description: ${response.data.seo.description}` : ''}`
         }]
       };
     } catch (error) {
@@ -667,8 +699,22 @@ ${response.data.isLabelEnabled ? `🏷️ **Labels:** Enabled` : ''}`
 • **ID:** ${response.data._id}
 • **Name:** ${response.data.name}
 • **Type:** ${response.data.productType}
+• **Location:** ${response.data.locationId}
 • **Available in Store:** ${response.data.availableInStore ? '✅ Yes' : '❌ No'}
+• **Created:** ${new Date(response.data.createdAt).toLocaleString()}
 • **Last Updated:** ${new Date(response.data.updatedAt).toLocaleString()}
+${response.data.userId ? `• **User ID:** ${response.data.userId}` : ''}
+
+${response.data.description ? `📝 **Description:** ${response.data.description}` : ''}
+${response.data.image ? `🖼️ **Image:** ${response.data.image}` : ''}
+${response.data.slug ? `🔗 **Slug:** ${response.data.slug}` : ''}
+${response.data.statementDescriptor ? `📄 **Statement Descriptor:** ${response.data.statementDescriptor}` : ''}
+
+${response.data.collectionIds?.length ? `📂 **Collections:** ${response.data.collectionIds.join(', ')}` : ''}
+${response.data.variants?.length ? `🔧 **Variants:** ${response.data.variants.map(v => `${v.name} (${v.id})`).join(', ')}` : ''}
+${response.data.medias?.length ? `📸 **Media:** ${response.data.medias.length} files` : ''}
+${response.data.isTaxesEnabled ? `💰 **Taxes:** Enabled${response.data.taxes?.length ? ` (${response.data.taxes.join(', ')})` : ''}` : ''}
+${response.data.isLabelEnabled ? `🏷️ **Label:** ${response.data.label?.title || 'Enabled'}` : ''}
 
 🔄 **Product has been successfully updated with the new information!**`
         }]
@@ -739,11 +785,26 @@ ${response.data.isLabelEnabled ? `🏷️ **Labels:** Enabled` : ''}`
 • **Type:** ${response.data.type}
 • **Amount:** ${response.data.amount / 100} ${response.data.currency}
 • **Product ID:** ${response.data.product}
+• **Location ID:** ${response.data.locationId}
 • **Created:** ${new Date(response.data.createdAt).toLocaleString()}
+• **Updated:** ${new Date(response.data.updatedAt).toLocaleString()}
+${response.data.userId ? `• **User ID:** ${response.data.userId}` : ''}
 
+${response.data.description ? `📝 **Description:** ${response.data.description}` : ''}
 ${response.data.compareAtPrice ? `💸 **Compare At:** ${response.data.compareAtPrice / 100} ${response.data.currency}` : ''}
 ${response.data.recurring ? `🔄 **Recurring:** ${response.data.recurring.intervalCount} ${response.data.recurring.interval}(s)` : ''}
 ${response.data.sku ? `📦 **SKU:** ${response.data.sku}` : ''}
+${response.data.trialPeriod ? `🎯 **Trial Period:** ${response.data.trialPeriod} days` : ''}
+${response.data.totalCycles ? `🔢 **Total Cycles:** ${response.data.totalCycles}` : ''}
+${response.data.setupFee ? `🏁 **Setup Fee:** ${response.data.setupFee / 100} ${response.data.currency}` : ''}
+${response.data.trackInventory ? `📊 **Track Inventory:** Yes${response.data.availableQuantity !== undefined ? ` (${response.data.availableQuantity} available)` : ''}` : ''}
+${response.data.allowOutOfStockPurchases ? `🛒 **Out of Stock Purchases:** Allowed` : ''}
+${response.data.isDigitalProduct ? `💻 **Digital Product:** Yes` : ''}
+${response.data.digitalDelivery?.length ? `📧 **Digital Delivery:** ${response.data.digitalDelivery.join(', ')}` : ''}
+${response.data.membershipOffers?.length ? `🎫 **Membership Offers:** ${response.data.membershipOffers.map(offer => `${offer.label} (${offer.value})`).join(', ')}` : ''}
+${response.data.variantOptionIds?.length ? `🎨 **Variant Options:** ${response.data.variantOptionIds.join(', ')}` : ''}
+${response.data.shippingOptions ? `📦 **Shipping:** ${response.data.shippingOptions.weight ? `Weight: ${response.data.shippingOptions.weight.value} ${response.data.shippingOptions.weight.unit}` : ''}${response.data.shippingOptions.dimensions ? ` | Dimensions: ${response.data.shippingOptions.dimensions.length}x${response.data.shippingOptions.dimensions.width}x${response.data.shippingOptions.dimensions.height} ${response.data.shippingOptions.dimensions.unit}` : ''}` : ''}
+${response.data.meta ? `🔗 **Source:** ${response.data.meta.source}${response.data.meta.sourceId ? ` (${response.data.meta.sourceId})` : ''}` : ''}
 
 ✨ **Price is ready for use in your product catalog!**`
         }]
@@ -782,10 +843,24 @@ ${prices.length === 0 ? '📭 **No prices found**' : prices.map((price, index) =
 **${index + 1}. ${price.name}** (${price.type})
 • **ID:** ${price._id}
 • **Amount:** ${price.amount / 100} ${price.currency}
+• **Location:** ${price.locationId}
+• **Created:** ${new Date(price.createdAt).toLocaleString()}
+• **Updated:** ${new Date(price.updatedAt).toLocaleString()}
+${price.userId ? `• **User ID:** ${price.userId}` : ''}
+${price.description ? `• **Description:** ${price.description}` : ''}
 ${price.compareAtPrice ? `• **Compare At:** ${price.compareAtPrice / 100} ${price.currency}` : ''}
 ${price.recurring ? `• **Recurring:** ${price.recurring.intervalCount} ${price.recurring.interval}(s)` : ''}
 ${price.sku ? `• **SKU:** ${price.sku}` : ''}
-• **Created:** ${new Date(price.createdAt).toLocaleString()}
+${price.trialPeriod ? `• **Trial Period:** ${price.trialPeriod} days` : ''}
+${price.totalCycles ? `• **Total Cycles:** ${price.totalCycles}` : ''}
+${price.setupFee ? `• **Setup Fee:** ${price.setupFee / 100} ${price.currency}` : ''}
+${price.trackInventory ? `• **Track Inventory:** Yes${price.availableQuantity !== undefined ? ` (${price.availableQuantity} available)` : ''}` : ''}
+${price.allowOutOfStockPurchases ? `• **Out of Stock Purchases:** Allowed` : ''}
+${price.isDigitalProduct ? `• **Digital Product:** Yes` : ''}
+${price.digitalDelivery?.length ? `• **Digital Delivery:** ${price.digitalDelivery.join(', ')}` : ''}
+${price.membershipOffers?.length ? `• **Membership Offers:** ${price.membershipOffers.map(offer => `${offer.label} (${offer.value})`).join(', ')}` : ''}
+${price.variantOptionIds?.length ? `• **Variant Options:** ${price.variantOptionIds.join(', ')}` : ''}
+${price.meta ? `• **Source:** ${price.meta.source}${price.meta.sourceId ? ` (${price.meta.sourceId})` : ''}` : ''}
 `).join('\n')}
 
 📊 **Summary:**
@@ -826,12 +901,12 @@ ${price.sku ? `• **SKU:** ${price.sku}` : ''}
           text: `📦 **Inventory Items** (${inventory.length} of ${total} total)
 
 ${inventory.length === 0 ? '📭 **No inventory items found**' : inventory.map((item, index) => `
-**${index + 1}. ${item.name}** ${item.productName ? `(${item.productName})` : ''}
+**${index + 1}. ${item.name}** ${item.productName ? `(Product: ${item.productName})` : ''}
 • **ID:** ${item._id}
+• **Product ID:** ${item.product}
 • **Available Quantity:** ${item.availableQuantity}
 • **SKU:** ${item.sku || 'N/A'}
 • **Out of Stock Purchases:** ${item.allowOutOfStockPurchases ? '✅ Allowed' : '❌ Not Allowed'}
-• **Product ID:** ${item.product}
 • **Last Updated:** ${new Date(item.updatedAt).toLocaleString()}
 ${item.image ? `• **Image:** ${item.image}` : ''}
 `).join('\n')}
@@ -875,12 +950,12 @@ ${params.search ? `• **Search:** "${params.search}"` : ''}`
 • **ID:** ${response.data.data._id}
 • **Name:** ${response.data.data.name}
 • **Slug:** ${response.data.data.slug}
-• **Location:** ${response.data.data.altId}
+• **Location (Alt ID):** ${response.data.data.altId}
 • **Created:** ${new Date(response.data.data.createdAt).toLocaleString()}
 
 ${response.data.data.image ? `🖼️ **Image:** ${response.data.data.image}` : ''}
-${response.data.data.seo?.title ? `🔍 **SEO Title:** ${response.data.data.seo.title}` : ''}
-${response.data.data.seo?.description ? `📝 **SEO Description:** ${response.data.data.seo.description}` : ''}
+
+${response.data.data.seo ? `🔍 **SEO Information:**\n${response.data.data.seo.title ? `  • Title: ${response.data.data.seo.title}` : ''}\n${response.data.data.seo.description ? `  • Description: ${response.data.data.seo.description}` : ''}` : ''}
 
 ✨ **Collection is ready to organize your products!**`
         }]
@@ -920,9 +995,10 @@ ${collections.length === 0 ? '📭 **No collections found**' : collections.map((
 **${index + 1}. ${collection.name}**
 • **ID:** ${collection._id}
 • **Slug:** ${collection.slug}
-${collection.image ? `• **Image:** ${collection.image}` : ''}
-${collection.seo?.title ? `• **SEO Title:** ${collection.seo.title}` : ''}
+• **Alt ID:** ${collection.altId}
 • **Created:** ${new Date(collection.createdAt).toLocaleString()}
+${collection.image ? `• **Image:** ${collection.image}` : ''}
+${collection.seo ? `• **SEO:** ${collection.seo.title ? `Title: ${collection.seo.title}` : ''}${collection.seo.description ? `${collection.seo.title ? ' | ' : ''}Description: ${collection.seo.description}` : ''}` : ''}
 `).join('\n')}
 
 📊 **Summary:**
