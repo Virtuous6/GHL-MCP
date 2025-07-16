@@ -190,7 +190,16 @@ export class ProductsTools {
             currency: { type: 'string', description: 'Currency code (e.g., USD)' },
             amount: { type: 'number', description: 'Price amount in cents' },
             locationId: { type: 'string', description: 'GHL Location ID (optional, uses default if not provided)' },
-            compareAtPrice: { type: 'number', description: 'Compare at price (for discounts)' }
+            compareAtPrice: { type: 'number', description: 'Compare at price (for discounts)' },
+            description: { type: 'string', description: 'Price description' },
+            sku: { type: 'string', description: 'Stock Keeping Unit (SKU) for inventory tracking' },
+            trackInventory: { type: 'boolean', description: 'Whether to track inventory for this price' },
+            availableQuantity: { type: 'number', description: 'Initial available quantity for inventory' },
+            allowOutOfStockPurchases: { type: 'boolean', description: 'Allow purchases when out of stock' },
+            trialPeriod: { type: 'number', description: 'Trial period in days (for recurring prices)' },
+            totalCycles: { type: 'number', description: 'Total billing cycles (for recurring prices)' },
+            setupFee: { type: 'number', description: 'One-time setup fee in cents' },
+            isDigitalProduct: { type: 'boolean', description: 'Whether this is a digital product' }
           },
           required: ['productId', 'name', 'type', 'currency', 'amount']
         }
@@ -210,6 +219,19 @@ export class ProductsTools {
         }
       },
       {
+        name: 'ghl_delete_price',
+        description: 'Delete a price by ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            productId: { type: 'string', description: 'Product ID that owns the price' },
+            priceId: { type: 'string', description: 'Price ID to delete' },
+            locationId: { type: 'string', description: 'GHL Location ID (optional, uses default if not provided)' }
+          },
+          required: ['productId', 'priceId']
+        }
+      },
+      {
         name: 'ghl_list_inventory',
         description: 'List inventory items with stock levels',
         inputSchema: {
@@ -221,6 +243,30 @@ export class ProductsTools {
             search: { type: 'string', description: 'Search term for inventory items' }
           },
           required: []
+        }
+      },
+      {
+        name: 'ghl_update_inventory',
+        description: 'Update inventory quantities and stock settings for multiple items',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            locationId: { type: 'string', description: 'GHL Location ID (optional, uses default if not provided)' },
+            items: {
+              type: 'array',
+              description: 'Array of inventory items to update',
+              items: {
+                type: 'object',
+                properties: {
+                  priceId: { type: 'string', description: 'Price ID of the inventory item to update' },
+                  availableQuantity: { type: 'number', description: 'New available quantity' },
+                  allowOutOfStockPurchases: { type: 'boolean', description: 'Whether to allow purchases when out of stock' }
+                },
+                required: ['priceId']
+              }
+            }
+          },
+          required: ['items']
         }
       },
       {
@@ -242,6 +288,40 @@ export class ProductsTools {
             }
           },
           required: ['name', 'slug']
+        }
+      },
+      {
+        name: 'ghl_update_product_collection',
+        description: 'Update an existing product collection',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            collectionId: { type: 'string', description: 'Collection ID to update' },
+            locationId: { type: 'string', description: 'GHL Location ID (optional, uses default if not provided)' },
+            name: { type: 'string', description: 'Collection name' },
+            slug: { type: 'string', description: 'Collection URL slug' },
+            image: { type: 'string', description: 'Collection image URL' },
+            seo: {
+              type: 'object',
+              properties: {
+                title: { type: 'string', description: 'SEO title' },
+                description: { type: 'string', description: 'SEO description' }
+              }
+            }
+          },
+          required: ['collectionId']
+        }
+      },
+      {
+        name: 'ghl_delete_product_collection',
+        description: 'Delete a product collection by ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            collectionId: { type: 'string', description: 'Collection ID to delete' },
+            locationId: { type: 'string', description: 'GHL Location ID (optional, uses default if not provided)' }
+          },
+          required: ['collectionId']
         }
       },
       {
@@ -280,10 +360,18 @@ export class ProductsTools {
         return this.createPrice(params);
       case 'ghl_list_prices':
         return this.listPrices(params);
+      case 'ghl_delete_price':
+        return this.deletePrice(params);
       case 'ghl_list_inventory':
         return this.listInventory(params);
+      case 'ghl_update_inventory':
+        return this.updateInventory(params);
       case 'ghl_create_product_collection':
         return this.createProductCollection(params);
+      case 'ghl_update_product_collection':
+        return this.updateProductCollection(params);
+      case 'ghl_delete_product_collection':
+        return this.deleteProductCollection(params);
       case 'ghl_list_product_collections':
         return this.listProductCollections(params);
       default:
@@ -517,7 +605,16 @@ ${params.includedInStore !== undefined ? `• **Store Status:** ${params.include
             currency: { type: 'string', description: 'Currency code (e.g., USD)' },
             amount: { type: 'number', description: 'Price amount in cents' },
             locationId: { type: 'string', description: 'GHL Location ID (optional, uses default if not provided)' },
-            compareAtPrice: { type: 'number', description: 'Compare at price (for discounts)' }
+            compareAtPrice: { type: 'number', description: 'Compare at price (for discounts)' },
+            description: { type: 'string', description: 'Price description' },
+            sku: { type: 'string', description: 'Stock Keeping Unit (SKU) for inventory tracking' },
+            trackInventory: { type: 'boolean', description: 'Whether to track inventory for this price' },
+            availableQuantity: { type: 'number', description: 'Initial available quantity for inventory' },
+            allowOutOfStockPurchases: { type: 'boolean', description: 'Allow purchases when out of stock' },
+            trialPeriod: { type: 'number', description: 'Trial period in days (for recurring prices)' },
+            totalCycles: { type: 'number', description: 'Total billing cycles (for recurring prices)' },
+            setupFee: { type: 'number', description: 'One-time setup fee in cents' },
+            isDigitalProduct: { type: 'boolean', description: 'Whether this is a digital product' }
           },
           required: ['productId', 'name', 'type', 'currency', 'amount']
         }
@@ -536,6 +633,19 @@ ${params.includedInStore !== undefined ? `• **Store Status:** ${params.include
           required: ['productId']
         }
       },
+      {
+        name: 'ghl_delete_price',
+        description: 'Delete a price by ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            productId: { type: 'string', description: 'Product ID that owns the price' },
+            priceId: { type: 'string', description: 'Price ID to delete' },
+            locationId: { type: 'string', description: 'GHL Location ID (optional, uses default if not provided)' }
+          },
+          required: ['productId', 'priceId']
+        }
+      },
 
       // Inventory Tools
       {
@@ -550,6 +660,30 @@ ${params.includedInStore !== undefined ? `• **Store Status:** ${params.include
             search: { type: 'string', description: 'Search term for inventory items' }
           },
           required: []
+        }
+      },
+      {
+        name: 'ghl_update_inventory',
+        description: 'Update inventory quantities and stock settings for multiple items',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            locationId: { type: 'string', description: 'GHL Location ID (optional, uses default if not provided)' },
+            items: {
+              type: 'array',
+              description: 'Array of inventory items to update',
+              items: {
+                type: 'object',
+                properties: {
+                  priceId: { type: 'string', description: 'Price ID of the inventory item to update' },
+                  availableQuantity: { type: 'number', description: 'New available quantity' },
+                  allowOutOfStockPurchases: { type: 'boolean', description: 'Whether to allow purchases when out of stock' }
+                },
+                required: ['priceId']
+              }
+            }
+          },
+          required: ['items']
         }
       },
 
@@ -573,6 +707,40 @@ ${params.includedInStore !== undefined ? `• **Store Status:** ${params.include
             }
           },
           required: ['name', 'slug']
+        }
+      },
+      {
+        name: 'ghl_update_product_collection',
+        description: 'Update an existing product collection',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            collectionId: { type: 'string', description: 'Collection ID to update' },
+            locationId: { type: 'string', description: 'GHL Location ID (optional, uses default if not provided)' },
+            name: { type: 'string', description: 'Collection name' },
+            slug: { type: 'string', description: 'Collection URL slug' },
+            image: { type: 'string', description: 'Collection image URL' },
+            seo: {
+              type: 'object',
+              properties: {
+                title: { type: 'string', description: 'SEO title' },
+                description: { type: 'string', description: 'SEO description' }
+              }
+            }
+          },
+          required: ['collectionId']
+        }
+      },
+      {
+        name: 'ghl_delete_product_collection',
+        description: 'Delete a product collection by ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            collectionId: { type: 'string', description: 'Collection ID to delete' },
+            locationId: { type: 'string', description: 'GHL Location ID (optional, uses default if not provided)' }
+          },
+          required: ['collectionId']
         }
       },
       {
@@ -608,10 +776,18 @@ ${params.includedInStore !== undefined ? `• **Store Status:** ${params.include
         return this.createPrice(params as MCPCreatePriceParams);
       case 'ghl_list_prices':
         return this.listPrices(params as MCPListPricesParams);
+      case 'ghl_delete_price':
+        return this.deletePrice(params as MCPDeletePriceParams);
       case 'ghl_list_inventory':
         return this.listInventory(params as MCPListInventoryParams);
+      case 'ghl_update_inventory':
+        return this.updateInventory(params as MCPUpdateInventoryParams);
       case 'ghl_create_product_collection':
         return this.createProductCollection(params as MCPCreateProductCollectionParams);
+      case 'ghl_update_product_collection':
+        return this.updateProductCollection(params as MCPUpdateProductCollectionParams);
+      case 'ghl_delete_product_collection':
+        return this.deleteProductCollection(params as MCPDeleteProductCollectionParams);
       case 'ghl_list_product_collections':
         return this.listProductCollections(params as MCPListProductCollectionsParams);
       default:
@@ -878,6 +1054,43 @@ ${price.meta ? `• **Source:** ${price.meta.source}${price.meta.sourceId ? ` ($
     }
   }
 
+  async deletePrice(params: MCPDeletePriceParams): Promise<ProductsToolResult> {
+    try {
+      const response = await this.apiClient.deletePrice(
+        params.productId,
+        params.priceId,
+        params.locationId || this.apiClient.getConfig().locationId
+      );
+      
+      if (!response.data) {
+        throw new Error('No data returned from API');
+      }
+      
+      return {
+        content: [{
+          type: 'text',
+          text: `🗑️ **Price Deleted Successfully!**
+
+✅ **Status:** ${response.data.status ? 'Price successfully deleted' : 'Deletion failed'}
+📦 **Product ID:** ${params.productId}
+🏷️ **Price ID:** ${params.priceId}
+📍 **Location ID:** ${params.locationId || this.apiClient.getConfig().locationId}
+
+⚠️ **Note:** This action cannot be undone. The price and all associated data have been permanently removed.
+
+💡 **Impact:** This pricing option is no longer available for new purchases. Existing orders using this price will not be affected.`
+        }]
+      };
+    } catch (error) {
+      return {
+        content: [{
+          type: 'text', 
+          text: `❌ **Error Deleting Price**\n\n${error instanceof Error ? error.message : 'Unknown error occurred'}`
+        }]
+      };
+    }
+  }
+
   async listInventory(params: MCPListInventoryParams): Promise<ProductsToolResult> {
     try {
       const request: GHLListInventoryRequest = {
@@ -927,6 +1140,51 @@ ${params.search ? `• **Search:** "${params.search}"` : ''}`
     }
   }
 
+  async updateInventory(params: MCPUpdateInventoryParams): Promise<ProductsToolResult> {
+    try {
+      const request: GHLUpdateInventoryRequest = {
+        altId: params.locationId || this.apiClient.getConfig().locationId,
+        altType: 'location',
+        items: params.items
+      };
+
+      const response = await this.apiClient.updateInventory(request);
+      
+      if (!response.data) {
+        throw new Error('No data returned from API');
+      }
+      
+      return {
+        content: [{
+          type: 'text',
+          text: `📦 **Inventory Updated Successfully!**
+
+✅ **Update Status:** ${response.data.status ? 'Success' : 'Failed'}
+📍 **Location ID:** ${params.locationId || this.apiClient.getConfig().locationId}
+🔢 **Items Updated:** ${params.items.length}
+
+**Updated Items:**
+${params.items.map((item, index) => `
+**${index + 1}. Price ID: ${item.priceId}**
+${item.availableQuantity !== undefined ? `• **Available Quantity:** ${item.availableQuantity}` : ''}
+${item.allowOutOfStockPurchases !== undefined ? `• **Out of Stock Purchases:** ${item.allowOutOfStockPurchases ? '✅ Allowed' : '❌ Not Allowed'}` : ''}
+`).join('')}
+
+${response.data.message ? `📝 **Message:** ${response.data.message}` : ''}
+
+🔄 **Inventory levels have been successfully updated!**`
+        }]
+      };
+    } catch (error) {
+      return {
+        content: [{
+          type: 'text', 
+          text: `❌ **Error Updating Inventory**\n\n${error instanceof Error ? error.message : 'Unknown error occurred'}`
+        }]
+      };
+    }
+  }
+
   async createProductCollection(params: MCPCreateProductCollectionParams): Promise<ProductsToolResult> {
     try {
       const request: GHLCreateProductCollectionRequest = {
@@ -965,6 +1223,92 @@ ${response.data.data.seo ? `🔍 **SEO Information:**\n${response.data.data.seo.
         content: [{
           type: 'text', 
           text: `❌ **Error Creating Collection**\n\n${error instanceof Error ? error.message : 'Unknown error occurred'}`
+        }]
+      };
+    }
+  }
+
+  async updateProductCollection(params: MCPUpdateProductCollectionParams): Promise<ProductsToolResult> {
+    try {
+      const request: GHLUpdateProductCollectionRequest = {
+        altId: params.locationId || this.apiClient.getConfig().locationId,
+        altType: 'location',
+        name: params.name,
+        slug: params.slug,
+        image: params.image,
+        seo: params.seo
+      };
+
+      const response = await this.apiClient.updateProductCollection(params.collectionId, request);
+      
+      if (!response.data) {
+        throw new Error('No data returned from API');
+      }
+      
+      return {
+        content: [{
+          type: 'text',
+          text: `✅ **Product Collection Updated Successfully!**
+
+🏷️ **Update Status:** ${response.data.status ? 'Success' : 'Failed'}
+🗂️ **Collection ID:** ${params.collectionId}
+📍 **Location ID:** ${params.locationId || this.apiClient.getConfig().locationId}
+
+${response.data.message ? `📝 **Message:** ${response.data.message}` : ''}
+
+**Updated Fields:**
+${params.name ? `• **Name:** ${params.name}` : ''}
+${params.slug ? `• **Slug:** ${params.slug}` : ''}
+${params.image ? `• **Image:** ${params.image}` : ''}
+${params.seo?.title ? `• **SEO Title:** ${params.seo.title}` : ''}
+${params.seo?.description ? `• **SEO Description:** ${params.seo.description}` : ''}
+
+🔄 **Collection has been successfully updated with the new information!**`
+        }]
+      };
+    } catch (error) {
+      return {
+        content: [{
+          type: 'text', 
+          text: `❌ **Error Updating Collection**\n\n${error instanceof Error ? error.message : 'Unknown error occurred'}`
+        }]
+      };
+    }
+  }
+
+  async deleteProductCollection(params: MCPDeleteProductCollectionParams): Promise<ProductsToolResult> {
+    try {
+      const request: GHLDeleteProductCollectionRequest = {
+        collectionId: params.collectionId,
+        altId: params.locationId || this.apiClient.getConfig().locationId,
+        altType: 'location'
+      };
+
+      const response = await this.apiClient.deleteProductCollection(params.collectionId, request);
+      
+      if (!response.data) {
+        throw new Error('No data returned from API');
+      }
+      
+      return {
+        content: [{
+          type: 'text',
+          text: `🗑️ **Product Collection Deleted Successfully!**
+
+✅ **Status:** ${response.data.status ? 'Collection successfully deleted' : 'Deletion failed'}
+🗂️ **Collection ID:** ${params.collectionId}
+📍 **Location ID:** ${params.locationId || this.apiClient.getConfig().locationId}
+
+${response.data.message ? `📝 **Message:** ${response.data.message}` : ''}
+
+⚠️ **Note:** This action cannot be undone. The collection and all associated data have been permanently removed.`
+        }]
+      };
+    } catch (error) {
+      return {
+        content: [{
+          type: 'text', 
+          text: `❌ **Error Deleting Collection**\n\n${error instanceof Error ? error.message : 'Unknown error occurred'}`
         }]
       };
     }

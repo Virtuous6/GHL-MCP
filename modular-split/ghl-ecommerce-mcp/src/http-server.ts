@@ -216,11 +216,144 @@ class DynamicMultiTenantEcommerceHttpServer {
             id: jsonrpcRequest.id
           });
         } else if (jsonrpcRequest.method === 'tools/list') {
-          const response = await this.server.request(jsonrpcRequest, ListToolsRequestSchema);
-          res.json(response);
+          // Handle tools/list directly
+          const storeToolDefs = StoreTools.getStaticToolDefinitions();
+          const productsToolDefs = ProductsTools.getStaticToolDefinitions();
+          
+          // Add dynamic credentials to each tool
+          const enhancedTools = [...storeToolDefs, ...productsToolDefs].map(tool => ({
+            ...tool,
+            inputSchema: {
+              ...tool.inputSchema,
+              properties: {
+                // Required credentials
+                apiKey: {
+                  type: 'string',
+                  description: 'GoHighLevel Private Integration API key (pk_live_...)',
+                },
+                locationId: {
+                  type: 'string',
+                  description: 'GoHighLevel Location ID (optional, uses default if not provided)',
+                },
+                // Optional user identifier
+                userId: {
+                  type: 'string',
+                  description: 'User identifier for tracking/logging (optional)',
+                },
+                // Original tool properties
+                ...tool.inputSchema.properties
+              },
+              required: ['apiKey', ...((tool.inputSchema.required as string[]) || [])]
+            }
+          }));
+
+          res.json({
+            jsonrpc: '2.0',
+            result: {
+              tools: enhancedTools
+            },
+            id: jsonrpcRequest.id
+          });
         } else if (jsonrpcRequest.method === 'tools/call') {
-          const response = await this.server.request(jsonrpcRequest, CallToolRequestSchema);
-          res.json(response);
+          // Handle tools/call directly
+          const { name: toolName, arguments: args } = jsonrpcRequest.params;
+
+          if (!args) {
+            res.status(400).json({
+              jsonrpc: '2.0',
+              error: {
+                code: -32602,
+                message: 'Arguments are required'
+              },
+              id: jsonrpcRequest.id
+            });
+            return;
+          }
+
+          // Extract required credentials
+          const apiKey = args.apiKey as string;
+          const locationId = args.locationId as string;
+          const userId = (args.userId as string) || 'anonymous';
+          
+          if (!apiKey) {
+            res.status(400).json({
+              jsonrpc: '2.0',
+              error: {
+                code: -32602,
+                message: 'apiKey is required. Please provide your GoHighLevel Private Integration API key.'
+              },
+              id: jsonrpcRequest.id
+            });
+            return;
+          }
+
+          try {
+            // Create API client with provided credentials
+            const ghlClient = new GHLApiClient({
+              accessToken: apiKey,
+              baseUrl: 'https://services.leadconnectorhq.com',
+              locationId: locationId || '',
+              version: '2021-07-28'
+            });
+
+            // Log the request (optional, for debugging)
+            console.log(`[${new Date().toISOString()}] User: ${userId} | Tool: ${toolName}`);
+
+            // Initialize tool handlers with the dynamic client
+            const storeTools = new StoreTools(ghlClient);
+            const productsTools = new ProductsTools(ghlClient);
+
+            // Get tool names for routing
+            const storeToolNames = StoreTools.getStaticToolDefinitions().map(tool => tool.name);
+            const productsToolNames = ProductsTools.getStaticToolDefinitions().map(tool => tool.name);
+            
+            // Route to appropriate tool handler
+            let result;
+            if (storeToolNames.includes(toolName)) {
+              result = await storeTools.executeTool(toolName, args);
+            } else if (productsToolNames.includes(toolName)) {
+              result = await productsTools.executeTool(toolName, args);
+            } else {
+              res.status(404).json({
+                jsonrpc: '2.0',
+                error: {
+                  code: -32601,
+                  message: `Unknown tool: ${toolName}`
+                },
+                id: jsonrpcRequest.id
+              });
+              return;
+            }
+
+            res.json({
+              jsonrpc: '2.0',
+              result: result,
+              id: jsonrpcRequest.id
+            });
+          } catch (error) {
+            console.error(`Error executing tool ${toolName} for user ${userId}:`, error);
+            
+            // Handle authentication errors specifically
+            if (error instanceof Error && error.message.includes('401')) {
+              res.status(401).json({
+                jsonrpc: '2.0',
+                error: {
+                  code: -32602,
+                  message: 'Invalid API key or insufficient permissions. Please check your GoHighLevel Private Integration API key and scopes.'
+                },
+                id: jsonrpcRequest.id
+              });
+            } else {
+              res.status(500).json({
+                jsonrpc: '2.0',
+                error: {
+                  code: -32603,
+                  message: `Failed to execute tool: ${error instanceof Error ? error.message : 'Unknown error'}`
+                },
+                id: jsonrpcRequest.id
+              });
+            }
+          }
         } else {
           res.status(404).json({
             jsonrpc: '2.0',
@@ -247,11 +380,10 @@ class DynamicMultiTenantEcommerceHttpServer {
     // Tools info endpoint
     this.app.get('/tools', async (req, res) => {
       try {
-        const toolsResponse = await this.server.request(
-          { method: 'tools/list', params: {} },
-          ListToolsRequestSchema
-        );
-        const tools = (toolsResponse as any).tools || [];
+        const storeToolDefs = StoreTools.getStaticToolDefinitions();
+        const productsToolDefs = ProductsTools.getStaticToolDefinitions();
+        const tools = [...storeToolDefs, ...productsToolDefs];
+        
         res.json({
           service: 'ghl-ecommerce-mcp-dynamic',
           toolCount: tools.length,
