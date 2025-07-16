@@ -67,6 +67,23 @@ class DynamicMultiTenantEcommerceHttpServer {
       console.log(`[HTTP] ${req.method} ${req.path} - ${new Date().toISOString()}`);
       next();
     });
+
+    // Extract GHL credentials from headers if present
+    this.app.use((req, res, next) => {
+      const apiKeyHeader = req.headers['x-ghl-api-key'] as string;
+      const locationIdHeader = req.headers['x-ghl-location-id'] as string;
+      
+      // Set environment variables for this request context
+      if (apiKeyHeader) {
+        process.env.GHL_API_KEY = apiKeyHeader;
+      }
+      if (locationIdHeader) {
+        process.env.GHL_LOCATION_ID = locationIdHeader;
+      }
+      
+      console.log(`[HTTP] Credentials available - API Key: ${!!apiKeyHeader}, Location ID: ${!!locationIdHeader}`);
+      next();
+    });
   }
 
   /**

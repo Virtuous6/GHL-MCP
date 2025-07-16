@@ -57,6 +57,18 @@ export class StoreTools {
   constructor(private apiClient: GHLApiClient) {}
 
   /**
+   * Format response for MCP protocol - JSON format only
+   */
+  private formatResponse(data: any): StoreToolResult {
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(data, null, 2)
+      }]
+    };
+  }
+
+  /**
    * Get static tool definitions without requiring API client
    */
   static getStaticToolDefinitions(): Tool[] {
