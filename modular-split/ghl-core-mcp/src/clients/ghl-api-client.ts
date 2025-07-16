@@ -483,7 +483,7 @@ export class GHLApiClient {
    * Create a new contact
    * POST /contacts/
    */
-  async createContact(contactData: GHLCreateContactRequest): Promise<GHLApiResponse<GHLContact>> {
+  async createContact(contactData: GHLCreateContactRequest): Promise<GHLApiResponse<{ contact: GHLContact }>> {
     try {
       // Ensure locationId is set
       const payload = {
@@ -496,7 +496,7 @@ export class GHLApiClient {
         payload
       );
 
-      return this.wrapResponse(response.data.contact);
+      return this.wrapResponse(response.data);
     } catch (error) {
       throw error;
     }
@@ -506,13 +506,13 @@ export class GHLApiClient {
    * Get contact by ID
    * GET /contacts/{contactId}
    */
-  async getContact(contactId: string): Promise<GHLApiResponse<GHLContact>> {
+  async getContact(contactId: string): Promise<GHLApiResponse<{ contact: GHLContact }>> {
     try {
       const response: AxiosResponse<{ contact: GHLContact }> = await this.axiosInstance.get(
         `/contacts/${contactId}`
       );
 
-      return this.wrapResponse(response.data.contact);
+      return this.wrapResponse(response.data);
     } catch (error) {
       throw error;
     }
@@ -522,14 +522,14 @@ export class GHLApiClient {
    * Update existing contact
    * PUT /contacts/{contactId}
    */
-  async updateContact(contactId: string, updates: Partial<GHLCreateContactRequest>): Promise<GHLApiResponse<GHLContact>> {
+  async updateContact(contactId: string, updates: Partial<GHLCreateContactRequest>): Promise<GHLApiResponse<{ contact: GHLContact; succeded: boolean }>> {
     try {
       const response: AxiosResponse<{ contact: GHLContact; succeded: boolean }> = await this.axiosInstance.put(
         `/contacts/${contactId}`,
         updates
       );
 
-      return this.wrapResponse(response.data.contact);
+      return this.wrapResponse(response.data);
     } catch (error) {
       throw error;
     }

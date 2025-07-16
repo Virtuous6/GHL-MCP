@@ -641,7 +641,7 @@ export class ContactTools {
       throw new Error(response.error?.message || 'Failed to create contact');
     }
 
-    return response.data!;
+    return response.data!.contact;
   }
 
   private async searchContacts(params: MCPSearchContactsParams): Promise<GHLSearchContactsResponse> {
@@ -669,7 +669,7 @@ export class ContactTools {
       throw new Error(response.error?.message || 'Failed to get contact');
     }
 
-    return response.data!;
+    return response.data!.contact;
   }
 
   private async updateContact(params: MCPUpdateContactParams): Promise<GHLContact> {
@@ -685,7 +685,7 @@ export class ContactTools {
       throw new Error(response.error?.message || 'Failed to update contact');
     }
 
-    return response.data!;
+    return response.data!.contact;
   }
 
   private async deleteContact(contactId: string): Promise<{ succeded: boolean }> {

@@ -1,32 +1,39 @@
 /**
- * GoHighLevel Communications MCP HTTP Server
+ * GoHighLevel Core MCP HTTP Server
  * Dynamic multi-tenant HTTP version for web deployment
  */
 
 import express from 'express';
 import cors from 'cors';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
   McpError,
   ErrorCode,
-  Tool
 } from '@modelcontextprotocol/sdk/types.js';
 
 import { GHLApiClient } from './clients/ghl-api-client.js';
 import { ConversationTools } from './tools/conversation-tools.js';
 import { EmailTools } from './tools/email-tools.js';
 
-class DynamicMultiTenantCommunicationsHttpServer {
+class DynamicMultiTenantHttpServer {
   private app: express.Application;
   private server: Server;
   private port: number;
 
   constructor() {
-    this.port = parseInt(process.env.PORT || '8080', 10);
+    this.port = parseInt(process.env.PORT || '8080');
+    
+    // Initialize Express app
     this.app = express();
+    this.setupExpress();
+
+    // Initialize MCP server
     this.server = new Server(
       {
-        name: 'ghl-communications-mcp',
+        name: 'ghl-communications-mcp-http',
         version: '1.0.0',
       },
       {
@@ -36,20 +43,28 @@ class DynamicMultiTenantCommunicationsHttpServer {
       }
     );
 
-    this.setupExpress();
+    this.setupMCPHandlers();
+    this.setupRoutes();
   }
 
+  /**
+   * Setup Express middleware and configuration
+   */
   private setupExpress(): void {
-    this.app.use(cors());
+    // Enable CORS
+    this.app.use(cors({
+      origin: '*',
+      methods: ['GET', 'POST', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-GHL-API-Key', 'X-GHL-Location-ID'],
+      credentials: true
+    }));
+
+    // Parse JSON requests
     this.app.use(express.json());
 
-    // Health check endpoint
-    this.app.get('/health', (req, res) => {
-      res.json({ status: 'healthy', service: 'ghl-communications-mcp' });
-    });
-
-    // Extract GHL credentials from headers if present
+    // Extract MCP remote headers and set as environment variables
     this.app.use((req, res, next) => {
+      // Extract GHL credentials from headers if present
       const apiKeyHeader = req.headers['x-ghl-api-key'] as string;
       const locationIdHeader = req.headers['x-ghl-location-id'] as string;
       
@@ -61,8 +76,188 @@ class DynamicMultiTenantCommunicationsHttpServer {
         process.env.GHL_LOCATION_ID = locationIdHeader;
       }
       
-      console.log(`[HTTP] Credentials available - API Key: ${!!apiKeyHeader}, Location ID: ${!!locationIdHeader}`);
       next();
+    });
+
+    // Request logging
+    this.app.use((req, res, next) => {
+      console.log(`[HTTP] ${req.method} ${req.path} - ${new Date().toISOString()}`);
+      const hasApiKey = !!(req.headers['x-ghl-api-key'] || process.env.GHL_API_KEY);
+      const hasLocationId = !!(req.headers['x-ghl-location-id'] || process.env.GHL_LOCATION_ID);
+      console.log(`[HTTP] Credentials available - API Key: ${hasApiKey}, Location ID: ${hasLocationId}`);
+      next();
+    });
+  }
+
+  /**
+   * Setup MCP request handlers
+   */
+  private setupMCPHandlers(): void {
+    this.server.setRequestHandler(ListToolsRequestSchema, async () => {
+      // Create temporary tool instances to get their definitions
+      const tempGhlClient = new GHLApiClient({
+        accessToken: 'temp',
+        baseUrl: 'https://services.leadconnectorhq.com',
+        locationId: 'temp',
+        version: '2021-07-28'
+      });
+      
+      const conversationTools = new ConversationTools(tempGhlClient);
+      const emailTools = new EmailTools(tempGhlClient);
+
+      // Get all tool definitions from the tool classes
+      const allTools = [
+        ...conversationTools.getToolDefinitions(),
+        ...emailTools.getToolDefinitions()
+      ];
+
+      // Add dynamic credential parameters to each tool
+      const toolsWithCredentials = allTools.map(tool => ({
+        ...tool,
+        inputSchema: {
+          ...tool.inputSchema,
+          properties: {
+            apiKey: {
+              type: 'string',
+              description: 'GoHighLevel Private Integration API key (optional if using headers)',
+            },
+            locationId: {
+              type: 'string',
+              description: 'GoHighLevel Location ID (optional if using headers)',
+            },
+            userId: {
+              type: 'string',
+              description: 'User identifier for tracking/logging (optional)',
+            },
+            ...tool.inputSchema.properties
+          },
+          required: ['apiKey', 'locationId', ...(tool.inputSchema.required || [])]
+        }
+      }));
+
+      return { tools: toolsWithCredentials };
+    });
+
+    this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
+      const { name: toolName, arguments: args } = request.params;
+
+      if (!args) {
+        throw new McpError(ErrorCode.InvalidParams, 'Arguments are required');
+      }
+
+      // Try to get credentials from args first, then fallback to env vars
+      let apiKey = args.apiKey as string;
+      let locationId = args.locationId as string;
+      
+      // If not in args, try environment variables (set by mcp-remote from headers)
+      if (!apiKey) {
+        apiKey = process.env.GHL_API_KEY || '';
+      }
+      if (!locationId) {
+        locationId = process.env.GHL_LOCATION_ID || '';
+      }
+      const userId = (args.userId as string) || 'anonymous';
+      
+      if (!apiKey) {
+        throw new McpError(
+          ErrorCode.InvalidParams,
+          'apiKey is required. Please provide your GoHighLevel Private Integration API key.'
+        );
+      }
+
+      if (!locationId) {
+        throw new McpError(
+          ErrorCode.InvalidParams,
+          'locationId is required. Please provide your GoHighLevel Location ID (optional if using headers).'
+        );
+      }
+
+      try {
+        // Create API client with provided credentials
+        const ghlClient = new GHLApiClient({
+          accessToken: apiKey,
+          baseUrl: 'https://services.leadconnectorhq.com',
+          locationId: locationId,
+          version: '2021-07-28'
+        });
+
+        // Log the request (optional, for debugging)
+        console.log(`[${new Date().toISOString()}] User: ${userId} | Tool: ${toolName}`);
+
+        // Initialize tool handlers with the dynamic client
+        const conversationTools = new ConversationTools(ghlClient);
+        const emailTools = new EmailTools(ghlClient);
+
+        // Route to appropriate tool handler
+        switch (toolName) {
+          // Conversation Tools
+          case 'get_conversations':
+          case 'get_conversation':
+          case 'create_conversation':
+          case 'update_conversation':
+          case 'delete_conversation':
+          case 'get_conversation_messages':
+          case 'add_conversation_message':
+          case 'update_conversation_message':
+          case 'delete_conversation_message':
+          case 'get_conversation_participants':
+          case 'add_conversation_participant':
+          case 'remove_conversation_participant':
+            return await conversationTools.executeTool(toolName, args);
+
+          // Email Tools
+          case 'send_email':
+          case 'create_email_campaign':
+          case 'update_email_campaign':
+          case 'delete_email_campaign':
+          case 'get_email_campaigns':
+          case 'get_email_campaign':
+          case 'pause_email_campaign':
+          case 'resume_email_campaign':
+          case 'get_email_campaign_stats':
+            return await emailTools.executeTool(toolName, args);
+
+          default:
+            throw new McpError(
+              ErrorCode.MethodNotFound,
+              `Unknown tool: ${toolName}`
+            );
+        }
+      } catch (error) {
+        console.error(`Error executing tool ${toolName} for user ${userId}:`, error);
+        
+        if (error instanceof McpError) {
+          throw error;
+        }
+        
+        // Handle authentication errors specifically
+        if (error instanceof Error && error.message.includes('401')) {
+          throw new McpError(
+            ErrorCode.InvalidParams,
+            'Invalid API key or insufficient permissions. Please check your GoHighLevel Private Integration API key and scopes.'
+          );
+        }
+        
+        throw new McpError(
+          ErrorCode.InternalError,
+          `Failed to execute tool: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
+      }
+    });
+  }
+
+  /**
+   * Setup HTTP routes
+   */
+  private setupRoutes(): void {
+    // Health check endpoint
+    this.app.get('/health', (req, res) => {
+      res.json({ 
+        status: 'healthy', 
+        timestamp: new Date().toISOString(),
+        service: 'ghl-communications-mcp',
+        version: '1.0.0'
+      });
     });
 
     // MCP SSE endpoint - POST for JSON-RPC messages
@@ -70,6 +265,7 @@ class DynamicMultiTenantCommunicationsHttpServer {
       console.log('[HTTP] Received JSON-RPC message:', req.body);
       
       try {
+        // Handle JSON-RPC messages directly
         const jsonrpcRequest = req.body;
         
         if (jsonrpcRequest.method === 'initialize') {
@@ -97,6 +293,7 @@ class DynamicMultiTenantCommunicationsHttpServer {
           res.status(200).end();
           return;
         } else if (jsonrpcRequest.method === 'tools/list') {
+          // Always use direct method instead of server.request in HTTP mode
           const tools = this.getToolsDirectly();
           res.json({
             jsonrpc: '2.0',
@@ -104,10 +301,29 @@ class DynamicMultiTenantCommunicationsHttpServer {
             id: jsonrpcRequest.id
           });
         } else if (jsonrpcRequest.method === 'tools/call') {
-          const result = await this.executeToolDirectly(jsonrpcRequest.params);
+          try {
+            const result = await this.executeToolDirectly(jsonrpcRequest.params);
+            res.json({
+              jsonrpc: '2.0',
+              result,
+              id: jsonrpcRequest.id
+            });
+          } catch (error) {
+            console.error('[HTTP] Error executing tool directly:', error);
+            res.json({
+              jsonrpc: '2.0',
+              error: {
+                code: error instanceof McpError ? error.code : -32603,
+                message: error instanceof Error ? error.message : 'Internal error'
+              },
+              id: jsonrpcRequest.id
+            });
+          }
+        } else if (jsonrpcRequest.method === 'resources/list') {
+          // This server doesn't provide resources, return empty list
           res.json({
             jsonrpc: '2.0',
-            result,
+            result: { resources: [] },
             id: jsonrpcRequest.id
           });
         } else {
@@ -122,224 +338,254 @@ class DynamicMultiTenantCommunicationsHttpServer {
         }
       } catch (error) {
         console.error('[HTTP] Error processing JSON-RPC message:', error);
-        const mcpError = error instanceof McpError ? error : new McpError(
-          ErrorCode.InternalError,
-          `Request failed: ${error}`
-        );
-        
-        res.json({
+        res.status(500).json({
           jsonrpc: '2.0',
           error: {
-            code: mcpError.code,
-            message: mcpError.message
+            code: -32603,
+            message: 'Internal error'
           },
           id: req.body.id || null
         });
       }
     });
 
-    // List tools endpoint
-    this.app.post('/tools/list', (req, res) => {
+    // Tools info endpoint
+    this.app.get('/tools', async (req, res) => {
       try {
+        // Use direct method instead of MCP server request
         const tools = this.getToolsDirectly();
         res.json({
-          jsonrpc: '2.0',
-          result: { tools },
-          id: req.body.id || null
+          service: 'ghl-communications-mcp',
+          toolCount: tools.length,
+          tools: tools.map((tool: any) => ({
+            name: tool.name,
+            description: tool.description
+          }))
         });
       } catch (error) {
-        res.status(500).json({
-          jsonrpc: '2.0',
-          error: {
-            code: ErrorCode.InternalError,
-            message: `Failed to list tools: ${error}`
-          },
-          id: req.body.id || null
-        });
+        console.error('[HTTP] Error listing tools:', error);
+        res.status(500).json({ error: 'Failed to list tools' });
       }
     });
 
-    // Main MCP endpoint for JSON-RPC
-    this.app.post('/mcp', async (req, res) => {
-      try {
-        const { method, params, id } = req.body;
-
-        if (method === 'tools/list') {
-          const tools = this.getToolsDirectly();
-          res.json({
-            jsonrpc: '2.0',
-            result: { tools },
-            id
-          });
-        } else if (method === 'tools/call') {
-          const result = await this.executeToolDirectly(params);
-          res.json({
-            jsonrpc: '2.0',
-            result,
-            id
-          });
-        } else {
-          res.status(404).json({
-            jsonrpc: '2.0',
-            error: {
-              code: ErrorCode.MethodNotFound,
-              message: `Method not found: ${method}`
-            },
-            id
-          });
-        }
-      } catch (error) {
-        console.error('MCP endpoint error:', error);
-        const mcpError = error instanceof McpError ? error : new McpError(
-          ErrorCode.InternalError,
-          `Request failed: ${error}`
-        );
-        
-        res.status(500).json({
-          jsonrpc: '2.0',
-          error: {
-            code: mcpError.code,
-            message: mcpError.message
-          },
-          id: req.body.id || null
-        });
-      }
-    });
-  }
-
-  private getToolsDirectly(): Tool[] {
-    try {
-      // Get static tool definitions from all tool classes
-      const allTools = [
-        ...ConversationTools.getStaticToolDefinitions(),
-        ...EmailTools.getStaticToolDefinitions(),
-      ];
-
-      // Add apiKey and locationId as required parameters to all tools
-      const toolsWithCredentials = allTools.map((tool) => ({
-        ...tool,
-        inputSchema: {
-          ...tool.inputSchema,
-          properties: {
-            apiKey: {
-              type: 'string',
-              description: 'GoHighLevel API key (optional if using headers)',
-            },
-            locationId: {
-              type: 'string',
-              description: 'GoHighLevel location ID (optional for some operations)',
-            },
-            ...(tool.inputSchema.properties || {}),
-          },
-          required: [...((tool.inputSchema.required as string[]) || [])],
+    // Root endpoint
+    this.app.get('/', (req, res) => {
+      res.json({
+        service: 'GoHighLevel Communications MCP Server',
+        version: '1.0.0',
+        mode: 'HTTP Server',
+        endpoints: {
+          health: '/health',
+          sse: '/sse',
+          tools: '/tools'
         },
-      }));
-
-      return toolsWithCredentials;
-    } catch (error) {
-      console.error('Error getting tools:', error);
-      throw new McpError(
-        ErrorCode.InternalError,
-        `Failed to get tools: ${error}`
-      );
-    }
+        description: 'GoHighLevel Communications MCP server for conversations and email campaigns'
+      });
+    });
   }
 
-  private async executeToolDirectly(params: any): Promise<any> {
+  /**
+   * Execute a tool directly without MCP server (for HTTP mode)
+   */
+  private async executeToolDirectly(params: any) {
     const { name: toolName, arguments: args } = params;
 
+    if (!args) {
+      throw new McpError(ErrorCode.InvalidParams, 'Arguments are required');
+    }
+
+    // Try to get credentials from args first, then fallback to env vars
+    let apiKey = args.apiKey as string;
+    let locationId = args.locationId as string;
+    
+    // If not in args, try environment variables (set by mcp-remote from headers)
+    if (!apiKey) {
+      apiKey = process.env.GHL_API_KEY || '';
+    }
+    if (!locationId) {
+      locationId = process.env.GHL_LOCATION_ID || '';
+    }
+    const userId = (args.userId as string) || 'anonymous';
+    
+    if (!apiKey) {
+      throw new McpError(
+        ErrorCode.InvalidParams,
+        'apiKey is required. Please provide your GoHighLevel Private Integration API key.'
+      );
+    }
+
+    if (!locationId) {
+      throw new McpError(
+        ErrorCode.InvalidParams,
+        'locationId is required. Please provide your GoHighLevel Location ID (optional if using headers).'
+      );
+    }
+
     try {
-      console.log(`[ghl-communications-mcp-http] Executing tool: ${toolName}`);
-
-      // Try to get credentials from args first, then fallback to env vars
-      let apiKey = args?.apiKey as string;
-      let locationId = args?.locationId as string;
-      
-      // If not in args, try environment variables (set by mcp-remote from headers)
-      if (!apiKey) {
-        apiKey = process.env.GHL_API_KEY || '';
-      }
-      if (!locationId) {
-        locationId = process.env.GHL_LOCATION_ID || '';
-      }
-      
-      if (!apiKey) {
-        throw new McpError(
-          ErrorCode.InvalidParams,
-          'API key is required (either in apiKey parameter or GHL_API_KEY header)'
-        );
-      }
-
-      // Create client instance with provided credentials
-      const client = new GHLApiClient({
+      // Create API client with provided credentials
+      const ghlClient = new GHLApiClient({
         accessToken: apiKey,
         baseUrl: 'https://services.leadconnectorhq.com',
-        version: '2021-07-28',
-        locationId: locationId || '',
+        locationId: locationId,
+        version: '2021-07-28'
       });
 
-      // Create tool instances with the client
-      const conversationTools = new ConversationTools(client);
-      const emailTools = new EmailTools(client);
+      // Log the request (optional, for debugging)
+      console.log(`[${new Date().toISOString()}] User: ${userId} | Tool: ${toolName}`);
 
-      // Remove credentials from args before passing to tool
-      const toolArgs = { ...args };
-      delete toolArgs.apiKey;
-      delete toolArgs.locationId;
+      // Initialize tool handlers with the dynamic client
+      const conversationTools = new ConversationTools(ghlClient);
+      const emailTools = new EmailTools(ghlClient);
 
-      // Determine which tool to execute
-      if (this.isConversationTool(toolName)) {
-        return await conversationTools.executeTool(toolName, toolArgs);
+      // Route to appropriate tool handler
+      switch (toolName) {
+        // Conversation Tools
+        case 'get_conversations':
+        case 'get_conversation':
+        case 'create_conversation':
+        case 'update_conversation':
+        case 'delete_conversation':
+        case 'get_conversation_messages':
+        case 'add_conversation_message':
+        case 'update_conversation_message':
+        case 'delete_conversation_message':
+        case 'get_conversation_participants':
+        case 'add_conversation_participant':
+        case 'remove_conversation_participant':
+          return await conversationTools.executeTool(toolName, args);
+
+        // Email Tools
+        case 'send_email':
+        case 'create_email_campaign':
+        case 'update_email_campaign':
+        case 'delete_email_campaign':
+        case 'get_email_campaigns':
+        case 'get_email_campaign':
+        case 'pause_email_campaign':
+        case 'resume_email_campaign':
+        case 'get_email_campaign_stats':
+          return await emailTools.executeTool(toolName, args);
+
+        default:
+          throw new McpError(
+            ErrorCode.MethodNotFound,
+            `Unknown tool: ${toolName}`
+          );
       }
-
-      if (this.isEmailTool(toolName)) {
-        return await emailTools.executeTool(toolName, toolArgs);
-      }
-
-      throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${toolName}`);
     } catch (error) {
+      console.error(`Error executing tool ${toolName} for user ${userId}:`, error);
+      
       if (error instanceof McpError) {
         throw error;
       }
       
-      console.error(`[ghl-communications-mcp-http] Error executing tool ${toolName}:`, error);
+      // Handle authentication errors specifically
+      if (error instanceof Error && error.message.includes('401')) {
+        throw new McpError(
+          ErrorCode.InvalidParams,
+          'Invalid API key or insufficient permissions. Please check your GoHighLevel Private Integration API key and scopes.'
+        );
+      }
+      
       throw new McpError(
         ErrorCode.InternalError,
-        `Tool execution failed: ${error}`
+        `Failed to execute tool: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
   }
 
-  private isConversationTool(toolName: string): boolean {
-    const conversationToolNames = ConversationTools.getStaticToolDefinitions().map(
-      (tool) => tool.name
-    );
-    return conversationToolNames.includes(toolName);
+  /**
+   * Get tools directly without MCP server (fallback method)
+   */
+  private getToolsDirectly() {
+    // Create temporary tool instances to get their definitions
+    const tempGhlClient = new GHLApiClient({
+      accessToken: 'temp',
+      baseUrl: 'https://services.leadconnectorhq.com',
+      locationId: 'temp',
+      version: '2021-07-28'
+    });
+    
+    const conversationTools = new ConversationTools(tempGhlClient);
+    const emailTools = new EmailTools(tempGhlClient);
+
+    // Get all tool definitions from the tool classes
+    const allTools = [
+      ...conversationTools.getToolDefinitions(),
+      ...emailTools.getToolDefinitions()
+    ];
+
+    // Add dynamic credential parameters to each tool
+    const toolsWithCredentials = allTools.map(tool => ({
+      ...tool,
+      inputSchema: {
+        ...tool.inputSchema,
+        properties: {
+          apiKey: {
+            type: 'string',
+            description: 'GoHighLevel Private Integration API key (pk_live_...)',
+          },
+          locationId: {
+            type: 'string',
+            description: 'GoHighLevel Location ID (optional, uses default if not provided)',
+          },
+          userId: {
+            type: 'string',
+            description: 'User identifier for tracking/logging (optional)',
+          },
+          ...tool.inputSchema.properties
+        },
+        required: ['apiKey', 'locationId', ...(tool.inputSchema.required || [])]
+      }
+    }));
+
+    return toolsWithCredentials;
   }
 
-  private isEmailTool(toolName: string): boolean {
-    const emailToolNames = EmailTools.getStaticToolDefinitions().map(
-      (tool) => tool.name
-    );
-    return emailToolNames.includes(toolName);
-  }
-
-  async start(): Promise<void> {
-    this.app.listen(this.port, () => {
-      console.log(
-        `Dynamic Multi-Tenant ghl-communications-mcp MCP HTTP Server running on port ${this.port}`
-      );
+  /**
+   * Start the HTTP server
+   */
+  async run(): Promise<void> {
+    return new Promise((resolve) => {
+      this.app.listen(this.port, '0.0.0.0', () => {
+        console.log(`[HTTP] GoHighLevel Core MCP server running on port ${this.port}`);
+        console.log(`[HTTP] Health check: http://localhost:${this.port}/health`);
+        console.log(`[HTTP] SSE endpoint: http://localhost:${this.port}/sse`);
+        console.log(`[HTTP] Tools info: http://localhost:${this.port}/tools`);
+        resolve();
+      });
     });
   }
 }
 
-// Start server
-async function main(): Promise<void> {
-  const server = new DynamicMultiTenantCommunicationsHttpServer();
-  await server.start();
+// Graceful shutdown
+function setupGracefulShutdown(): void {
+  const shutdown = (signal: string) => {
+    console.log(`[HTTP] Received ${signal}, shutting down gracefully...`);
+    process.exit(0);
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
-main().catch((error) => {
-  console.error('HTTP Server failed to start:', error);
-  process.exit(1);
-}); 
+async function main(): Promise<void> {
+  try {
+    setupGracefulShutdown();
+    
+    const server = new DynamicMultiTenantHttpServer();
+    await server.run();
+    
+    console.log('[HTTP] GoHighLevel Core MCP server is ready for connections');
+  } catch (error) {
+    console.error('[HTTP] Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+// Start the server if this file is run directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch(console.error);
+}
+
+export default DynamicMultiTenantHttpServer; 
