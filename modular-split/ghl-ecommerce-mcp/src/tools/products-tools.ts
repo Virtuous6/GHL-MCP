@@ -211,7 +211,24 @@ export class ProductsTools {
             trialPeriod: { type: 'number', description: 'Trial period in days (for recurring prices)' },
             totalCycles: { type: 'number', description: 'Total billing cycles (for recurring prices)' },
             setupFee: { type: 'number', description: 'One-time setup fee in cents' },
-            isDigitalProduct: { type: 'boolean', description: 'Whether this is a digital product' }
+            isDigitalProduct: { type: 'boolean', description: 'Whether this is a digital product' },
+            variantOptionIds: { 
+              type: 'array', 
+              description: 'Array of variant option IDs this price applies to',
+              items: { type: 'string' }
+            },
+            meta: {
+              type: 'object',
+              description: 'Additional metadata for the price',
+              properties: {
+                source: { type: 'string', description: 'Source identifier' },
+                localVariantId: { type: 'string', description: 'Local variant UUID from your system' },
+                weight: { type: 'string', description: 'Weight value (e.g., "1.97 lb")' },
+                sourceId: { type: 'string', description: 'External source ID' },
+                stripePriceId: { type: 'string', description: 'Stripe price ID if applicable' },
+                internalSource: { type: 'string', description: 'Internal source identifier' }
+              }
+            }
           },
           required: ['productId', 'name', 'type', 'currency', 'amount']
         }
@@ -545,7 +562,24 @@ export class ProductsTools {
             trialPeriod: { type: 'number', description: 'Trial period in days (for recurring prices)' },
             totalCycles: { type: 'number', description: 'Total billing cycles (for recurring prices)' },
             setupFee: { type: 'number', description: 'One-time setup fee in cents' },
-            isDigitalProduct: { type: 'boolean', description: 'Whether this is a digital product' }
+            isDigitalProduct: { type: 'boolean', description: 'Whether this is a digital product' },
+            variantOptionIds: { 
+              type: 'array', 
+              description: 'Array of variant option IDs this price applies to',
+              items: { type: 'string' }
+            },
+            meta: {
+              type: 'object',
+              description: 'Additional metadata for the price',
+              properties: {
+                source: { type: 'string', description: 'Source identifier' },
+                localVariantId: { type: 'string', description: 'Local variant UUID from your system' },
+                weight: { type: 'string', description: 'Weight value (e.g., "1.97 lb")' },
+                sourceId: { type: 'string', description: 'External source ID' },
+                stripePriceId: { type: 'string', description: 'Stripe price ID if applicable' },
+                internalSource: { type: 'string', description: 'Internal source identifier' }
+              }
+            }
           },
           required: ['productId', 'name', 'type', 'currency', 'amount']
         }
